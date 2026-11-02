@@ -1,0 +1,46 @@
+# Daily live-data publisher for Europe Opportunity Finder.
+# Runs the polite academic crawler and publishes docs/eof-live.js,
+# which the single-file app loads on every open (JSONP <script> tag,
+# so it works even from file:// on iOS Safari).
+#
+# 09:30 Asia/Tehran == 06:00 UTC (IRST has no DST).
+name: daily-live-publish
+
+on:
+  schedule:
+    - cron: '0 6 * * *'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+
+      - name: Crawl + build live bundle
+        run: |
+          python -m engine.ingest
+          python -m engine.agent
+          python -m engine.export_live docs/eof-live.js
+
+      - name: Commit and push if changed
+        run: |
+          git config user.name "eof-publisher"
+          git config user.email "eof-publisher@users.noreply.github.com"
+          git add docs/eof-live.js
+          if git diff --cached --quiet; then
+            echo "no changes since last publish"
+          else
+            git commit -m "live data $(date -u +%FT%TZ)"
+            git push
+          fi
