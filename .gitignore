@@ -1,0 +1,9 @@
+# intermediates, never published
+data/postings.json
+data/postings.db
+data/digest.json
+__pycache__/
+*.pyc
+# personal — must never leave the author's machine
+profile.json
+.venv/

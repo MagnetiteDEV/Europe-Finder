@@ -1,0 +1,1 @@
+{"_note":"Manual Iranian-eligibility overrides, keyed by posting key (source::external_id). Values: status + official source note. The engine NEVER infers eligibility from scraped text; default is insufficient_information.","overrides":{}}

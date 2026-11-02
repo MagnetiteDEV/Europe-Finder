@@ -1,0 +1,19 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Europe-Finder — data feed</title>
+</head>
+<body style="font-family:system-ui;max-width:640px;margin:40px auto;padding:0 16px">
+<h1>Europe-Finder</h1>
+<p>Machine-readable live data feed for the <b>Europe Opportunity Finder</b> app.</p>
+<ul>
+<li><a href="eof-live.js"><code>eof-live.js</code></a> — the bundle
+(<code>window.__EOF_LIVE__</code>), refreshed daily at 09:30 Asia/Tehran.</li>
+</ul>
+<p>The app fetches this file on every open (via <code>&lt;script&gt;</code>,
+so it works from <code>file://</code> on iOS too) and falls back to its
+embedded snapshot when offline.</p>
+</body>
+</html>

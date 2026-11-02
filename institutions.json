@@ -1,0 +1,1495 @@
+{
+ "meta": {
+  "connected_count": 6,
+  "prospect_count": 178,
+  "total": 184
+ },
+ "connected": [
+  {
+   "name": "Aalto University",
+   "country": "FI",
+   "city": "Espoo",
+   "ats": "workday",
+   "careers_url": "https://www.aalto.fi/en/open-positions",
+   "endpoint": "https://aalto.wd3.myworkdayjobs.com/wday/cxs/aalto/aalto/jobs",
+   "checked_at": "2026-10-31",
+   "register_match": true
+  },
+  {
+   "name": "KTH Royal Institute of Technology",
+   "country": "SE",
+   "city": "Stockholm",
+   "ats": "varbi",
+   "careers_url": "https://www.kth.se/lediga-jobb?l=en",
+   "endpoint": "https://api.varbi.com/v1/jobs?filter%5Borganization%5D=177",
+   "checked_at": "2026-10-31",
+   "register_match": false
+  },
+  {
+   "name": "Lund University",
+   "country": "SE",
+   "city": "Lund",
+   "ats": "varbi",
+   "careers_url": "https://lu.varbi.com/en/what:findjob/",
+   "endpoint": "https://api.varbi.com/v1/jobs?filter%5Borganization%5D=318",
+   "checked_at": "2026-10-31",
+   "register_match": true
+  },
+  {
+   "name": "University of the Arts London",
+   "country": "GB",
+   "city": "London",
+   "ats": "wp",
+   "careers_url": "https://jobs.arts.ac.uk/vacancies/",
+   "endpoint": "https://jobs.arts.ac.uk/wp-json/wp/v2/job",
+   "checked_at": "2026-10-31",
+   "register_match": true
+  },
+  {
+   "name": "University of Glasgow",
+   "country": "GB",
+   "city": "Glasgow",
+   "ats": "volcanic",
+   "careers_url": "https://www.jobs.gla.ac.uk/",
+   "endpoint": "https://www.jobs.gla.ac.uk/api/v1/jobs.json",
+   "checked_at": "2026-10-31",
+   "register_match": true
+  },
+  {
+   "name": "KU Leuven",
+   "country": "BE",
+   "city": "Leuven",
+   "ats": "kuleuven",
+   "careers_url": "https://www.kuleuven.be/personeel/jobsite/en/vacancies",
+   "endpoint": "https://icts-p-fii-toep-component-filter2.cloud.icts.kuleuven.be/api/projects/Jobsite_academic/search",
+   "checked_at": "2026-10-31",
+   "register_match": true
+  }
+ ],
+ "prospects": [
+  {
+   "name": "University of Brighton",
+   "country": "GB",
+   "official_url": null,
+   "type": "university_or_higher_education_institution",
+   "priority": "medium",
+   "status": "seed_only_needs_current_verification"
+  },
+  {
+   "name": "University of Leeds",
+   "country": "GB",
+   "official_url": null,
+   "type": "university_or_higher_education_institution",
+   "priority": "medium",
+   "status": "seed_only_needs_current_verification"
+  },
+  {
+   "name": "University of Edinburgh",
+   "country": "GB",
+   "official_url": null,
+   "type": "university_or_higher_education_institution",
+   "priority": "medium",
+   "status": "seed_only_needs_current_verification"
+  },
+  {
+   "name": "University of Manchester",
+   "country": "GB",
+   "official_url": null,
+   "type": "university_or_higher_education_institution",
+   "priority": "medium",
+   "status": "seed_only_needs_current_verification"
+  },
+  {
+   "name": "University of Oxford",
+   "country": "GB",
+   "official_url": null,
+   "type": "university_or_higher_education_institution",
+   "priority": "medium",
+   "status": "seed_only_needs_current_verification"
+  },
+  {
+   "name": "University of Exeter",
+   "country": "GB",
+   "official_url": null,
+   "type": "university_or_higher_education_institution",
+   "priority": "medium",
+   "status": "seed_only_needs_current_verification"
+  },
+  {
+   "name": "University of Westminster",
+   "country": "GB",
+   "official_url": null,
+   "type": "university_or_higher_education_institution",
+   "priority": "medium",
+   "status": "seed_only_needs_current_verification"
+  },
+  {
+   "name": "Université Paris 1 Panthéon-Sorbonne",
+   "country": "FR",
+   "official_url": null,
+   "type": "university_or_higher_education_institution",
+   "priority": "high",
+   "status": "seed_only_needs_current_verification"
+  },
+  {
+   "name": "Institut Français de la Mode (IFM) – مؤسسه تخصصی فشن؛ دو مسیر دکتری با دانشگاه‌های همکار",
+   "country": "FR",
+   "official_url": "https://www.ifmparis.fr/en/programs",
+   "type": "art_design_institution_or_specialist_school",
+   "priority": "high",
+   "status": "seed_only_needs_current_verification"
+  },
+  {
+   "name": "École Nationale Supérieure des Arts Décoratifs (ENSAD) / Université PSL – مسیر پژوهش هنری SACRe",
+   "country": "FR",
+   "official_url": null,
+   "type": "art_design_institution_or_specialist_school",
+   "priority": "high",
+   "status": "seed_only_needs_current_verification"
+  },
+  {
+   "name": "Sorbonne Université – تاریخ هنر و باستان‌شناسی",
+   "country": "FR",
+   "official_url": "https://www.sorbonne-universite.fr/en/node/1911",
+   "type": "university_or_higher_education_institution",
+   "priority": "high",
+   "status": "seed_only_needs_current_verification"
+  },
+  {
+   "name": "Université Paris 8 Vincennes–Saint-Denis – هنرهای تجسمی، عکاسی، سینما، تئاتر و هنرهای اجرایی",
+   "country": "FR",
+   "official_url": "https://edesta.univ-paris8.fr/Doctorats-prepares-par-l-ED",
+   "type": "university_or_higher_education_institution",
+   "priority": "high",
+   "status": "seed_only_needs_current_verification"
+  },
+  {
+   "name": "École des hautes études en sciences sociales (EHESS) – علوم اجتماعی، تاریخ، مردم‌شناسی و فرهنگ بصری؛ تناسب پروژه و استاد باید بررسی شود",
+   "country": "FR",
+   "official_url": "https://enseignements.ehess.fr/2026-2027/doctorat",
+   "type": "university_or_higher_education_institution",
+   "priority": "high",
+   "status": "seed_only_needs_current_verification"
+  },
+  {
+   "name": "Université Paris Nanterre – تاریخ هنر و باستان‌شناسی",
+   "country": "FR",
+   "official_url": "https://dep-hist-art.parisnanterre.fr/formations/doctorats",
+   "type": "university_or_higher_education_institution",
+   "priority": "high",
+   "status": "seed_only_needs_current_verification"
+  },
+  {
+   "name": "Université Rennes 2 – هنرهای کاربردی، هنرهای تجسمی، هنرهای اجرایی و تاریخ هنر",
+   "country": "FR",
+   "official_url": "https://formations.univ-rennes2.fr/fr/liste-des-formations.html",
+   "type": "university_or_higher_education_institution",
+   "priority": "high",
+   "status": "seed_only_needs_current_verification"
+  },
+  {
+   "name": "Université de Strasbourg – هنرهای بصری، طراحی، تاریخ هنر و زیبایی‌شناسی",
+   "country": "FR",
+   "official_url": "https://accra-recherche.unistra.fr/laccra/doctorats/",
+   "type": "university_or_higher_education_institution",
+   "priority": "high",
+   "status": "seed_only_needs_current_verification"
+  },
+  {
+   "name": "Aix-Marseille Université – هنرهای تجسمی، علوم هنر، سینما، تئاتر، میانجی‌گری فرهنگی و تاریخ هنر",
+   "country": "FR",
+   "official_url": "https://ecole-doctorale-354.univ-amu.fr/",
+   "type": "university_or_higher_education_institution",
+   "priority": "high",
+   "status": "seed_only_needs_current_verification"
+  },
+  {
+   "name": "ENSCI–Les Ateliers / ENS Paris-Saclay – مرکز مشترک پژوهش در طراحی و مسیر دکتری طراحی؛ مدرک از مسیر مدرسه دکتری همکار",
+   "country": "FR",
+   "official_url": "https://www.ensci.com/recherche/le-centre-de-recherche-en-design/doctorat-en-design",
+   "type": "art_design_institution_or_specialist_school",
+   "priority": "high",
+   "status": "seed_only_needs_current_verification"
+  },
+  {
+   "name": "University of Groningen",
+   "country": "NL",
+   "official_url": null,
+   "type": "university_or_higher_education_institution",
+   "priority": "medium",
+   "status": "seed_only_needs_current_verification"
+  },
+  {
+   "name": "Vrije Universiteit Amsterdam",
+   "country": "NL",
+   "official_url": null,
+   "type": "university_or_higher_education_institution",
+   "priority": "medium",
+   "status": "seed_only_needs_current_verification"
+  },
+  {
+   "name": "Utrecht University",
+   "country": "NL",
+   "official_url": null,
+   "type": "university_or_higher_education_institution",
+   "priority": "medium",
+   "status": "seed_only_needs_current_verification"
+  },
+  {
+   "name": "University of Antwerp",
+   "country": "BE",
+   "official_url": null,
+   "type": "university_or_higher_education_institution",
+   "priority": "medium",
+   "status": "seed_only_needs_current_verification"
+  },
+  {
+   "name": "University of Gothenburg",
+   "country": "SE",
+   "official_url": null,
+   "type": "university_or_higher_education_institution",
+   "priority": "medium",
+   "status": "seed_only_needs_current_verification"
+  },
+  {
+   "name": "University of Copenhagen",
+   "country": "DK",
+   "official_url": null,
+   "type": "university_or_higher_education_institution",
+   "priority": "high",
+   "status": "seed_only_needs_current_verification"
+  },
+  {
+   "name": "Aarhus University",
+   "country": "DK",
+   "official_url": null,
+   "type": "university_or_higher_education_institution",
+   "priority": "high",
+   "status": "seed_only_needs_current_verification"
+  },
+  {
+   "name": "Design School Kolding (Designskolen Kolding) – دکتری طراحی؛ آزمایشگاه‌های پایداری و طراحی اجتماعی",
+   "country": "DK",
+   "official_url": "https://www.designskolenkolding.dk/en/study-at-the-school/phd",
+   "type": "art_design_institution_or_specialist_school",
+   "priority": "high",
+   "status": "seed_only_needs_current_verification"
+  },
+  {
+   "name": "Royal Danish Academy (Det Kongelige Akademi) – دکتری طراحی، معماری و حفاظت",
+   "country": "DK",
+   "official_url": "https://royaldanishacademy.com/en/phd-school",
+   "type": "art_design_institution_or_specialist_school",
+   "priority": "high",
+   "status": "seed_only_needs_current_verification"
+  },
+  {
+   "name": "Roskilde University – دکتری Communication and Arts، فرهنگ زیباشناختی و مطالعات رسانه/فرهنگ",
+   "country": "DK",
+   "official_url": "https://ruc.dk/en/phd-programme-communication-and-arts",
+   "type": "university_or_higher_education_institution",
+   "priority": "high",
+   "status": "seed_only_needs_current_verification"
+  },
+  {
+   "name": "University of Southern Denmark (SDU) – دکتری علوم انسانی؛ پروژه‌های مرتبط با فرهنگ طراحی و مد نیازمند تأیید استاد راهنما هستند",
+   "country": "DK",
+   "official_url": null,
+   "type": "university_or_higher_education_institution",
+   "priority": "high",
+   "status": "seed_only_needs_current_verification"
+  },
+  {
+   "name": "University of Helsinki",
+   "country": "FI",
+   "official_url": null,
+   "type": "university_or_higher_education_institution",
+   "priority": "medium",
+   "status": "seed_only_needs_current_verification"
+  },
+  {
+   "name": "Oslo National Academy of the Arts (KHiO)",
+   "country": "NO",
+   "official_url": null,
+   "type": "art_design_institution_or_specialist_school",
+   "priority": "medium",
+   "status": "seed_only_needs_current_verification"
+  },
+  {
+   "name": "UiT The Arctic University of Norway",
+   "country": "NO",
+   "official_url": null,
+   "type": "university_or_higher_education_institution",
+   "priority": "medium",
+   "status": "seed_only_needs_current_verification"
+  },
+  {
+   "name": "Bauhaus-Universität Weimar – دکتری Art and Design با مؤلفه نظری و عملی؛ شرایط مدرک و زبان باید دقیق بررسی شود",
+   "country": "DE",
+   "official_url": "https://www.uni-weimar.de/en/studies/degree-programmes/doctorate-at-the-faculty-of-art-and-design/",
+   "type": "university_or_higher_education_institution",
+   "priority": "high",
+   "status": "seed_only_needs_current_verification"
+  },
+  {
+   "name": "Hochschule für bildende Künste Hamburg (HFBK Hamburg) – دکتری Dr. phil. in art و PhD in Art Practice",
+   "country": "DE",
+   "official_url": "https://hfbk-hamburg.de/en/information/prospective-students/apply/application-doctoral-programs",
+   "type": "art_design_institution_or_specialist_school",
+   "priority": "high",
+   "status": "seed_only_needs_current_verification"
+  },
+  {
+   "name": "Freie Universität Berlin – برنامه دکتری History and Cultural Studies، شامل تاریخ هنر",
+   "country": "DE",
+   "official_url": "https://www.geschkult.fu-berlin.de/en/studium/promotion/promotionsstudium/application/index.html",
+   "type": "university_or_higher_education_institution",
+   "priority": "high",
+   "status": "seed_only_needs_current_verification"
+  },
+  {
+   "name": "Universität der Künste Berlin (UdK Berlin) – مسیرهای دکتری هنرهای زیبا، طراحی و هنرهای اجرایی؛ دکتری practice-based ارائه نمی‌کند",
+   "country": "DE",
+   "official_url": "https://www.udk-berlin.de/en/research/doctoral-studies/information-for-prospective-doctoral-students/",
+   "type": "university_or_higher_education_institution",
+   "priority": "high",
+   "status": "seed_only_needs_current_verification"
+  },
+  {
+   "name": "Hochschule für Gestaltung Offenbach (HfG Offenbach) – دکتری در هنر و طراحی (Dr. phil.)",
+   "country": "DE",
+   "official_url": "https://www.hfg-offenbach.de/de/pages/promotion",
+   "type": "art_design_institution_or_specialist_school",
+   "priority": "high",
+   "status": "seed_only_needs_current_verification"
+  },
+  {
+   "name": "University of Cologne (Universität zu Köln) – دکتری علوم انسانی، از جمله تاریخ هنر و مطالعات تئاتر و رسانه",
+   "country": "DE",
+   "official_url": "https://artes.phil-fak.uni-koeln.de/en/doctorate/funding-programmes/artes-eumanities/faq",
+   "type": "university_or_higher_education_institution",
+   "priority": "high",
+   "status": "seed_only_needs_current_verification"
+  },
+  {
+   "name": "University of Bonn (Universität Bonn) – دکتری علوم انسانی، از جمله تاریخ هنر و مطالعات فرهنگی",
+   "country": "DE",
+   "official_url": "https://www.uni-bonn.de/en/research-and-teaching/ecrs/considering-a-doctorate/first-steps",
+   "type": "university_or_higher_education_institution",
+   "priority": "high",
+   "status": "seed_only_needs_current_verification"
+  },
+  {
+   "name": "University of Hamburg (Universität Hamburg) – دکتری علوم انسانی، از جمله تاریخ هنر",
+   "country": "DE",
+   "official_url": "https://www.gw.uni-hamburg.de/en/studium/graduiertenschule/doktorandenkolleg-gw.html",
+   "type": "university_or_higher_education_institution",
+   "priority": "high",
+   "status": "seed_only_needs_current_verification"
+  },
+  {
+   "name": "TU Dresden – تاریخ هنر، مطالعات بصری و فرصت‌های دکتری مرتبط با فرهنگ و هنر",
+   "country": "DE",
+   "official_url": "https://tu-dresden.de/gsw/schauflerlab/schaufler-kolleg/phase-3?set_language=en",
+   "type": "university_or_higher_education_institution",
+   "priority": "high",
+   "status": "seed_only_needs_current_verification"
+  },
+  {
+   "name": "University Mozarteum Salzburg",
+   "country": "AT",
+   "official_url": null,
+   "type": "art_design_institution_or_specialist_school",
+   "priority": "medium",
+   "status": "seed_only_needs_current_verification"
+  },
+  {
+   "name": "University of Basel",
+   "country": "CH",
+   "official_url": null,
+   "type": "university_or_higher_education_institution",
+   "priority": "medium",
+   "status": "seed_only_needs_current_verification"
+  },
+  {
+   "name": "University of Bern",
+   "country": "CH",
+   "official_url": null,
+   "type": "university_or_higher_education_institution",
+   "priority": "medium",
+   "status": "seed_only_needs_current_verification"
+  },
+  {
+   "name": "University of Geneva",
+   "country": "CH",
+   "official_url": null,
+   "type": "university_or_higher_education_institution",
+   "priority": "medium",
+   "status": "seed_only_needs_current_verification"
+  },
+  {
+   "name": "Zurich University of the Arts (ZHdK) – پژوهش هنری و مسیرهای دکتری با دانشگاه‌های همکار",
+   "country": "CH",
+   "official_url": null,
+   "type": "art_design_institution_or_specialist_school",
+   "priority": "medium",
+   "status": "seed_only_needs_current_verification"
+  },
+  {
+   "name": "Sapienza University of Rome",
+   "country": "IT",
+   "official_url": null,
+   "type": "university_or_higher_education_institution",
+   "priority": "medium",
+   "status": "seed_only_needs_current_verification"
+  },
+  {
+   "name": "University of Bologna",
+   "country": "IT",
+   "official_url": null,
+   "type": "university_or_higher_education_institution",
+   "priority": "medium",
+   "status": "seed_only_needs_current_verification"
+  },
+  {
+   "name": "University of Florence",
+   "country": "IT",
+   "official_url": null,
+   "type": "university_or_higher_education_institution",
+   "priority": "medium",
+   "status": "seed_only_needs_current_verification"
+  },
+  {
+   "name": "University of Valencia",
+   "country": "ES",
+   "official_url": null,
+   "type": "university_or_higher_education_institution",
+   "priority": "medium",
+   "status": "seed_only_needs_current_verification"
+  },
+  {
+   "name": "Universitat Autònoma de Barcelona (UAB)",
+   "country": "ES",
+   "official_url": null,
+   "type": "university_or_higher_education_institution",
+   "priority": "medium",
+   "status": "seed_only_needs_current_verification"
+  },
+  {
+   "name": "Complutense University of Madrid",
+   "country": "ES",
+   "official_url": null,
+   "type": "university_or_higher_education_institution",
+   "priority": "medium",
+   "status": "seed_only_needs_current_verification"
+  },
+  {
+   "name": "University of Porto",
+   "country": "PT",
+   "official_url": null,
+   "type": "university_or_higher_education_institution",
+   "priority": "medium",
+   "status": "seed_only_needs_current_verification"
+  },
+  {
+   "name": "University of Lisbon",
+   "country": "PT",
+   "official_url": null,
+   "type": "university_or_higher_education_institution",
+   "priority": "medium",
+   "status": "seed_only_needs_current_verification"
+  },
+  {
+   "name": "University of Coimbra",
+   "country": "PT",
+   "official_url": null,
+   "type": "university_or_higher_education_institution",
+   "priority": "medium",
+   "status": "seed_only_needs_current_verification"
+  },
+  {
+   "name": "Trinity College Dublin",
+   "country": "IE",
+   "official_url": null,
+   "type": "university_or_higher_education_institution",
+   "priority": "medium",
+   "status": "seed_only_needs_current_verification"
+  },
+  {
+   "name": "Royal College of Art",
+   "country": "GB",
+   "official_url": null,
+   "type": "specialist_art_design_university",
+   "priority": "high",
+   "status": "additional_candidate_needs_programme_and_official_page_verification"
+  },
+  {
+   "name": "Goldsmiths, University of London",
+   "country": "GB",
+   "official_url": null,
+   "type": "university",
+   "priority": "high",
+   "status": "additional_candidate_needs_programme_and_official_page_verification"
+  },
+  {
+   "name": "The Glasgow School of Art",
+   "country": "GB",
+   "official_url": null,
+   "type": "specialist_art_design_university",
+   "priority": "high",
+   "status": "additional_candidate_needs_programme_and_official_page_verification"
+  },
+  {
+   "name": "Nottingham Trent University",
+   "country": "GB",
+   "official_url": null,
+   "type": "university",
+   "priority": "high",
+   "status": "additional_candidate_needs_programme_and_official_page_verification"
+  },
+  {
+   "name": "Northumbria University",
+   "country": "GB",
+   "official_url": null,
+   "type": "university",
+   "priority": "high",
+   "status": "additional_candidate_needs_programme_and_official_page_verification"
+  },
+  {
+   "name": "Kingston University",
+   "country": "GB",
+   "official_url": null,
+   "type": "university",
+   "priority": "medium",
+   "status": "additional_candidate_needs_programme_and_official_page_verification"
+  },
+  {
+   "name": "Falmouth University",
+   "country": "GB",
+   "official_url": null,
+   "type": "specialist_art_design_university",
+   "priority": "medium",
+   "status": "additional_candidate_needs_programme_and_official_page_verification"
+  },
+  {
+   "name": "University for the Creative Arts",
+   "country": "GB",
+   "official_url": null,
+   "type": "specialist_art_design_university",
+   "priority": "high",
+   "status": "additional_candidate_needs_programme_and_official_page_verification"
+  },
+  {
+   "name": "University of Dundee – Duncan of Jordanstone College of Art & Design",
+   "country": "GB",
+   "official_url": null,
+   "type": "university_faculty",
+   "priority": "medium",
+   "status": "additional_candidate_needs_programme_and_official_page_verification"
+  },
+  {
+   "name": "The Courtauld Institute of Art",
+   "country": "GB",
+   "official_url": null,
+   "type": "specialist_research_institute",
+   "priority": "high",
+   "status": "additional_candidate_needs_programme_and_official_page_verification"
+  },
+  {
+   "name": "University of Huddersfield",
+   "country": "GB",
+   "official_url": null,
+   "type": "university",
+   "priority": "medium",
+   "status": "additional_candidate_needs_programme_and_official_page_verification"
+  },
+  {
+   "name": "École nationale supérieure des beaux-arts de Paris (Beaux-Arts de Paris)",
+   "country": "FR",
+   "official_url": null,
+   "type": "specialist_art_school",
+   "priority": "high",
+   "status": "additional_candidate_needs_programme_and_official_page_verification"
+  },
+  {
+   "name": "École Boulle",
+   "country": "FR",
+   "official_url": null,
+   "type": "specialist_art_design_school",
+   "priority": "medium",
+   "status": "additional_candidate_needs_programme_and_official_page_verification"
+  },
+  {
+   "name": "École Duperré",
+   "country": "FR",
+   "official_url": null,
+   "type": "specialist_art_design_school",
+   "priority": "high",
+   "status": "additional_candidate_needs_programme_and_official_page_verification"
+  },
+  {
+   "name": "ENSAAMA – École nationale supérieure des arts appliqués et des métiers d’art",
+   "country": "FR",
+   "official_url": null,
+   "type": "specialist_art_design_school",
+   "priority": "medium",
+   "status": "additional_candidate_needs_programme_and_official_page_verification"
+  },
+  {
+   "name": "Université Lumière Lyon 2",
+   "country": "FR",
+   "official_url": null,
+   "type": "university",
+   "priority": "high",
+   "status": "additional_candidate_needs_programme_and_official_page_verification"
+  },
+  {
+   "name": "Université Bordeaux Montaigne",
+   "country": "FR",
+   "official_url": null,
+   "type": "university",
+   "priority": "high",
+   "status": "additional_candidate_needs_programme_and_official_page_verification"
+  },
+  {
+   "name": "Université de Lille",
+   "country": "FR",
+   "official_url": null,
+   "type": "university",
+   "priority": "medium",
+   "status": "additional_candidate_needs_programme_and_official_page_verification"
+  },
+  {
+   "name": "Université Paris Cité",
+   "country": "FR",
+   "official_url": null,
+   "type": "university",
+   "priority": "medium",
+   "status": "additional_candidate_needs_programme_and_official_page_verification"
+  },
+  {
+   "name": "Université Jean Moulin Lyon 3",
+   "country": "FR",
+   "official_url": null,
+   "type": "university",
+   "priority": "medium",
+   "status": "additional_candidate_needs_programme_and_official_page_verification"
+  },
+  {
+   "name": "Université Grenoble Alpes",
+   "country": "FR",
+   "official_url": null,
+   "type": "university",
+   "priority": "medium",
+   "status": "additional_candidate_needs_programme_and_official_page_verification"
+  },
+  {
+   "name": "Weißensee Academy of Art Berlin (Kunsthochschule Berlin-Weißensee)",
+   "country": "DE",
+   "official_url": null,
+   "type": "specialist_art_design_university",
+   "priority": "high",
+   "status": "additional_candidate_needs_programme_and_official_page_verification"
+  },
+  {
+   "name": "Burg Giebichenstein University of Art and Design Halle",
+   "country": "DE",
+   "official_url": null,
+   "type": "specialist_art_design_university",
+   "priority": "high",
+   "status": "additional_candidate_needs_programme_and_official_page_verification"
+  },
+  {
+   "name": "Kunsthochschule Kassel",
+   "country": "DE",
+   "official_url": null,
+   "type": "specialist_art_design_university",
+   "priority": "medium",
+   "status": "additional_candidate_needs_programme_and_official_page_verification"
+  },
+  {
+   "name": "University of the Arts Bremen (Hochschule für Künste Bremen)",
+   "country": "DE",
+   "official_url": null,
+   "type": "specialist_art_design_university",
+   "priority": "medium",
+   "status": "additional_candidate_needs_programme_and_official_page_verification"
+  },
+  {
+   "name": "Hochschule für Bildende Künste Braunschweig (HBK Braunschweig)",
+   "country": "DE",
+   "official_url": null,
+   "type": "specialist_art_university",
+   "priority": "medium",
+   "status": "additional_candidate_needs_programme_and_official_page_verification"
+  },
+  {
+   "name": "Folkwang University of the Arts",
+   "country": "DE",
+   "official_url": null,
+   "type": "specialist_arts_university",
+   "priority": "medium",
+   "status": "additional_candidate_needs_programme_and_official_page_verification"
+  },
+  {
+   "name": "Academy of Fine Arts Munich (Akademie der Bildenden Künste München)",
+   "country": "DE",
+   "official_url": null,
+   "type": "specialist_art_academy",
+   "priority": "medium",
+   "status": "additional_candidate_needs_programme_and_official_page_verification"
+  },
+  {
+   "name": "Academy of Media Arts Cologne (KHM)",
+   "country": "DE",
+   "official_url": null,
+   "type": "specialist_media_arts_university",
+   "priority": "medium",
+   "status": "additional_candidate_needs_programme_and_official_page_verification"
+  },
+  {
+   "name": "Leuphana University Lüneburg",
+   "country": "DE",
+   "official_url": null,
+   "type": "university",
+   "priority": "medium",
+   "status": "additional_candidate_needs_programme_and_official_page_verification"
+  },
+  {
+   "name": "University of Amsterdam (UvA)",
+   "country": "NL",
+   "official_url": null,
+   "type": "university",
+   "priority": "high",
+   "status": "additional_candidate_needs_programme_and_official_page_verification"
+  },
+  {
+   "name": "Leiden University",
+   "country": "NL",
+   "official_url": null,
+   "type": "university",
+   "priority": "medium",
+   "status": "additional_candidate_needs_programme_and_official_page_verification"
+  },
+  {
+   "name": "Erasmus University Rotterdam",
+   "country": "NL",
+   "official_url": null,
+   "type": "university",
+   "priority": "medium",
+   "status": "additional_candidate_needs_programme_and_official_page_verification"
+  },
+  {
+   "name": "ArtEZ University of the Arts",
+   "country": "NL",
+   "official_url": null,
+   "type": "specialist_art_design_university",
+   "priority": "high",
+   "status": "additional_candidate_needs_programme_and_official_page_verification"
+  },
+  {
+   "name": "Design Academy Eindhoven",
+   "country": "NL",
+   "official_url": null,
+   "type": "specialist_design_school",
+   "priority": "high",
+   "status": "additional_candidate_needs_programme_and_official_page_verification"
+  },
+  {
+   "name": "Gerrit Rietveld Academie",
+   "country": "NL",
+   "official_url": null,
+   "type": "specialist_art_school",
+   "priority": "medium",
+   "status": "additional_candidate_needs_programme_and_official_page_verification"
+  },
+  {
+   "name": "Royal Academy of Art, The Hague (KABK)",
+   "country": "NL",
+   "official_url": null,
+   "type": "specialist_art_design_school",
+   "priority": "high",
+   "status": "additional_candidate_needs_programme_and_official_page_verification"
+  },
+  {
+   "name": "HKU University of the Arts Utrecht",
+   "country": "NL",
+   "official_url": null,
+   "type": "specialist_art_university",
+   "priority": "medium",
+   "status": "additional_candidate_needs_programme_and_official_page_verification"
+  },
+  {
+   "name": "Amsterdam University of the Arts (AHK)",
+   "country": "NL",
+   "official_url": null,
+   "type": "specialist_arts_university",
+   "priority": "medium",
+   "status": "additional_candidate_needs_programme_and_official_page_verification"
+  },
+  {
+   "name": "Willem de Kooning Academy – Rotterdam University of Applied Sciences",
+   "country": "NL",
+   "official_url": null,
+   "type": "university_faculty",
+   "priority": "medium",
+   "status": "additional_candidate_needs_programme_and_official_page_verification"
+  },
+  {
+   "name": "Ghent University",
+   "country": "BE",
+   "official_url": null,
+   "type": "university",
+   "priority": "high",
+   "status": "additional_candidate_needs_programme_and_official_page_verification"
+  },
+  {
+   "name": "Vrije Universiteit Brussel (VUB)",
+   "country": "BE",
+   "official_url": null,
+   "type": "university",
+   "priority": "medium",
+   "status": "additional_candidate_needs_programme_and_official_page_verification"
+  },
+  {
+   "name": "Université libre de Bruxelles (ULB)",
+   "country": "BE",
+   "official_url": null,
+   "type": "university",
+   "priority": "medium",
+   "status": "additional_candidate_needs_programme_and_official_page_verification"
+  },
+  {
+   "name": "LUCA School of Arts",
+   "country": "BE",
+   "official_url": null,
+   "type": "specialist_art_design_university",
+   "priority": "high",
+   "status": "additional_candidate_needs_programme_and_official_page_verification"
+  },
+  {
+   "name": "Royal Academy of Fine Arts Antwerp – AP University of Applied Sciences and Arts",
+   "country": "BE",
+   "official_url": null,
+   "type": "specialist_art_school",
+   "priority": "high",
+   "status": "additional_candidate_needs_programme_and_official_page_verification"
+  },
+  {
+   "name": "La Cambre – École nationale supérieure des arts visuels",
+   "country": "BE",
+   "official_url": null,
+   "type": "specialist_art_design_school",
+   "priority": "high",
+   "status": "additional_candidate_needs_programme_and_official_page_verification"
+  },
+  {
+   "name": "University of Liège",
+   "country": "BE",
+   "official_url": null,
+   "type": "university",
+   "priority": "medium",
+   "status": "additional_candidate_needs_programme_and_official_page_verification"
+  },
+  {
+   "name": "Konstfack – University of Arts, Crafts and Design",
+   "country": "SE",
+   "official_url": null,
+   "type": "specialist_art_design_university",
+   "priority": "high",
+   "status": "additional_candidate_needs_programme_and_official_page_verification"
+  },
+  {
+   "name": "Stockholm University",
+   "country": "SE",
+   "official_url": null,
+   "type": "university",
+   "priority": "medium",
+   "status": "additional_candidate_needs_programme_and_official_page_verification"
+  },
+  {
+   "name": "University of Borås – Swedish School of Textiles",
+   "country": "SE",
+   "official_url": null,
+   "type": "university_faculty",
+   "priority": "high",
+   "status": "additional_candidate_needs_programme_and_official_page_verification"
+  },
+  {
+   "name": "Malmö University",
+   "country": "SE",
+   "official_url": null,
+   "type": "university",
+   "priority": "medium",
+   "status": "additional_candidate_needs_programme_and_official_page_verification"
+  },
+  {
+   "name": "Umeå University – Umeå Institute of Design",
+   "country": "SE",
+   "official_url": null,
+   "type": "university_faculty",
+   "priority": "medium",
+   "status": "additional_candidate_needs_programme_and_official_page_verification"
+  },
+  {
+   "name": "University of the Arts Helsinki (Uniarts Helsinki)",
+   "country": "FI",
+   "official_url": null,
+   "type": "specialist_arts_university",
+   "priority": "medium",
+   "status": "additional_candidate_needs_programme_and_official_page_verification"
+  },
+  {
+   "name": "University of Lapland – Faculty of Art and Design",
+   "country": "FI",
+   "official_url": null,
+   "type": "university_faculty",
+   "priority": "high",
+   "status": "additional_candidate_needs_programme_and_official_page_verification"
+  },
+  {
+   "name": "Tampere University",
+   "country": "FI",
+   "official_url": null,
+   "type": "university",
+   "priority": "medium",
+   "status": "additional_candidate_needs_programme_and_official_page_verification"
+  },
+  {
+   "name": "University of Turku",
+   "country": "FI",
+   "official_url": null,
+   "type": "university",
+   "priority": "medium",
+   "status": "additional_candidate_needs_programme_and_official_page_verification"
+  },
+  {
+   "name": "University of Oslo",
+   "country": "NO",
+   "official_url": null,
+   "type": "university",
+   "priority": "medium",
+   "status": "additional_candidate_needs_programme_and_official_page_verification"
+  },
+  {
+   "name": "University of Bergen",
+   "country": "NO",
+   "official_url": null,
+   "type": "university",
+   "priority": "medium",
+   "status": "additional_candidate_needs_programme_and_official_page_verification"
+  },
+  {
+   "name": "Oslo Metropolitan University (OsloMet)",
+   "country": "NO",
+   "official_url": null,
+   "type": "university",
+   "priority": "medium",
+   "status": "additional_candidate_needs_programme_and_official_page_verification"
+  },
+  {
+   "name": "Norwegian University of Science and Technology (NTNU)",
+   "country": "NO",
+   "official_url": null,
+   "type": "university",
+   "priority": "medium",
+   "status": "additional_candidate_needs_programme_and_official_page_verification"
+  },
+  {
+   "name": "Aalborg University",
+   "country": "DK",
+   "official_url": null,
+   "type": "university",
+   "priority": "medium",
+   "status": "additional_candidate_needs_programme_and_official_page_verification"
+  },
+  {
+   "name": "Funen Art Academy (Det Fynske Kunstakademi)",
+   "country": "DK",
+   "official_url": null,
+   "type": "specialist_art_school",
+   "priority": "medium",
+   "status": "additional_candidate_needs_programme_and_official_page_verification"
+  },
+  {
+   "name": "Aarhus School of Architecture",
+   "country": "DK",
+   "official_url": null,
+   "type": "specialist_design_architecture_school",
+   "priority": "medium",
+   "status": "additional_candidate_needs_programme_and_official_page_verification"
+  },
+  {
+   "name": "Università Iuav di Venezia",
+   "country": "IT",
+   "official_url": null,
+   "type": "university",
+   "priority": "high",
+   "status": "additional_candidate_needs_programme_and_official_page_verification"
+  },
+  {
+   "name": "Ca’ Foscari University of Venice",
+   "country": "IT",
+   "official_url": null,
+   "type": "university",
+   "priority": "medium",
+   "status": "additional_candidate_needs_programme_and_official_page_verification"
+  },
+  {
+   "name": "University of Padua",
+   "country": "IT",
+   "official_url": null,
+   "type": "university",
+   "priority": "medium",
+   "status": "additional_candidate_needs_programme_and_official_page_verification"
+  },
+  {
+   "name": "University of Turin",
+   "country": "IT",
+   "official_url": null,
+   "type": "university",
+   "priority": "medium",
+   "status": "additional_candidate_needs_programme_and_official_page_verification"
+  },
+  {
+   "name": "University of Milan (La Statale)",
+   "country": "IT",
+   "official_url": null,
+   "type": "university",
+   "priority": "medium",
+   "status": "additional_candidate_needs_programme_and_official_page_verification"
+  },
+  {
+   "name": "NABA – Nuova Accademia di Belle Arti",
+   "country": "IT",
+   "official_url": null,
+   "type": "specialist_art_design_university",
+   "priority": "high",
+   "status": "additional_candidate_needs_programme_and_official_page_verification"
+  },
+  {
+   "name": "Domus Academy",
+   "country": "IT",
+   "official_url": null,
+   "type": "specialist_design_school",
+   "priority": "high",
+   "status": "additional_candidate_needs_programme_and_official_page_verification"
+  },
+  {
+   "name": "Polimoda",
+   "country": "IT",
+   "official_url": null,
+   "type": "specialist_fashion_school",
+   "priority": "high",
+   "status": "additional_candidate_needs_programme_and_official_page_verification"
+  },
+  {
+   "name": "IED – Istituto Europeo di Design",
+   "country": "IT",
+   "official_url": null,
+   "type": "specialist_art_design_school",
+   "priority": "medium",
+   "status": "additional_candidate_needs_programme_and_official_page_verification"
+  },
+  {
+   "name": "Accademia Costume & Moda",
+   "country": "IT",
+   "official_url": null,
+   "type": "specialist_fashion_school",
+   "priority": "high",
+   "status": "additional_candidate_needs_programme_and_official_page_verification"
+  },
+  {
+   "name": "Accademia di Belle Arti di Brera",
+   "country": "IT",
+   "official_url": null,
+   "type": "specialist_art_academy",
+   "priority": "medium",
+   "status": "additional_candidate_needs_programme_and_official_page_verification"
+  },
+  {
+   "name": "Accademia di Belle Arti di Bologna",
+   "country": "IT",
+   "official_url": null,
+   "type": "specialist_art_academy",
+   "priority": "medium",
+   "status": "additional_candidate_needs_programme_and_official_page_verification"
+  },
+  {
+   "name": "University of Barcelona (Universitat de Barcelona)",
+   "country": "ES",
+   "official_url": null,
+   "type": "university",
+   "priority": "medium",
+   "status": "additional_candidate_needs_programme_and_official_page_verification"
+  },
+  {
+   "name": "Pompeu Fabra University",
+   "country": "ES",
+   "official_url": null,
+   "type": "university",
+   "priority": "medium",
+   "status": "additional_candidate_needs_programme_and_official_page_verification"
+  },
+  {
+   "name": "University of Granada",
+   "country": "ES",
+   "official_url": null,
+   "type": "university",
+   "priority": "medium",
+   "status": "additional_candidate_needs_programme_and_official_page_verification"
+  },
+  {
+   "name": "University of Seville",
+   "country": "ES",
+   "official_url": null,
+   "type": "university",
+   "priority": "medium",
+   "status": "additional_candidate_needs_programme_and_official_page_verification"
+  },
+  {
+   "name": "Elisava Barcelona School of Design and Engineering",
+   "country": "ES",
+   "official_url": null,
+   "type": "specialist_design_school",
+   "priority": "high",
+   "status": "additional_candidate_needs_programme_and_official_page_verification"
+  },
+  {
+   "name": "BAU – College of Arts and Design of Barcelona",
+   "country": "ES",
+   "official_url": null,
+   "type": "specialist_art_design_school",
+   "priority": "high",
+   "status": "additional_candidate_needs_programme_and_official_page_verification"
+  },
+  {
+   "name": "IED Barcelona",
+   "country": "ES",
+   "official_url": null,
+   "type": "specialist_art_design_school",
+   "priority": "medium",
+   "status": "additional_candidate_needs_programme_and_official_page_verification"
+  },
+  {
+   "name": "NOVA University Lisbon – School of Social Sciences and Humanities (FCSH)",
+   "country": "PT",
+   "official_url": null,
+   "type": "university_faculty",
+   "priority": "medium",
+   "status": "additional_candidate_needs_programme_and_official_page_verification"
+  },
+  {
+   "name": "University of Aveiro",
+   "country": "PT",
+   "official_url": null,
+   "type": "university",
+   "priority": "medium",
+   "status": "additional_candidate_needs_programme_and_official_page_verification"
+  },
+  {
+   "name": "University of Lisbon – Faculty of Fine Arts",
+   "country": "PT",
+   "official_url": null,
+   "type": "university_faculty",
+   "priority": "high",
+   "status": "additional_candidate_needs_programme_and_official_page_verification"
+  },
+  {
+   "name": "ESAD – College of Art and Design (Matosinhos)",
+   "country": "PT",
+   "official_url": null,
+   "type": "specialist_art_design_school",
+   "priority": "medium",
+   "status": "additional_candidate_needs_programme_and_official_page_verification"
+  },
+  {
+   "name": "National College of Art and Design (NCAD)",
+   "country": "IE",
+   "official_url": null,
+   "type": "specialist_art_design_university",
+   "priority": "high",
+   "status": "additional_candidate_needs_programme_and_official_page_verification"
+  },
+  {
+   "name": "University College Dublin (UCD)",
+   "country": "IE",
+   "official_url": null,
+   "type": "university",
+   "priority": "medium",
+   "status": "additional_candidate_needs_programme_and_official_page_verification"
+  },
+  {
+   "name": "University of Galway",
+   "country": "IE",
+   "official_url": null,
+   "type": "university",
+   "priority": "medium",
+   "status": "additional_candidate_needs_programme_and_official_page_verification"
+  },
+  {
+   "name": "HEAD – Genève, Geneva University of Art and Design",
+   "country": "CH",
+   "official_url": null,
+   "type": "specialist_art_design_university",
+   "priority": "high",
+   "status": "additional_candidate_needs_programme_and_official_page_verification"
+  },
+  {
+   "name": "ECAL – University of Art and Design Lausanne",
+   "country": "CH",
+   "official_url": null,
+   "type": "specialist_art_design_university",
+   "priority": "high",
+   "status": "additional_candidate_needs_programme_and_official_page_verification"
+  },
+  {
+   "name": "Bern University of the Arts (HKB)",
+   "country": "CH",
+   "official_url": null,
+   "type": "specialist_arts_university",
+   "priority": "medium",
+   "status": "additional_candidate_needs_programme_and_official_page_verification"
+  },
+  {
+   "name": "FHNW Academy of Art and Design Basel",
+   "country": "CH",
+   "official_url": null,
+   "type": "specialist_art_design_university",
+   "priority": "medium",
+   "status": "additional_candidate_needs_programme_and_official_page_verification"
+  },
+  {
+   "name": "University of Applied Arts Vienna (Die Angewandte)",
+   "country": "AT",
+   "official_url": null,
+   "type": "specialist_art_design_university",
+   "priority": "high",
+   "status": "additional_candidate_needs_programme_and_official_page_verification"
+  },
+  {
+   "name": "Academy of Fine Arts Vienna",
+   "country": "AT",
+   "official_url": null,
+   "type": "specialist_art_university",
+   "priority": "medium",
+   "status": "additional_candidate_needs_programme_and_official_page_verification"
+  },
+  {
+   "name": "University of Art and Design Linz (Kunstuniversität Linz)",
+   "country": "AT",
+   "official_url": null,
+   "type": "specialist_art_design_university",
+   "priority": "high",
+   "status": "additional_candidate_needs_programme_and_official_page_verification"
+  },
+  {
+   "name": "Academy of Fine Arts in Warsaw",
+   "country": "PL",
+   "official_url": null,
+   "type": "specialist_art_university",
+   "priority": "medium",
+   "status": "additional_candidate_needs_programme_and_official_page_verification"
+  },
+  {
+   "name": "Jan Matejko Academy of Fine Arts in Krakow",
+   "country": "PL",
+   "official_url": null,
+   "type": "specialist_art_university",
+   "priority": "medium",
+   "status": "additional_candidate_needs_programme_and_official_page_verification"
+  },
+  {
+   "name": "Academy of Fine Arts in Gdańsk",
+   "country": "PL",
+   "official_url": null,
+   "type": "specialist_art_university",
+   "priority": "medium",
+   "status": "additional_candidate_needs_programme_and_official_page_verification"
+  },
+  {
+   "name": "Academy of Fine Arts in Katowice",
+   "country": "PL",
+   "official_url": null,
+   "type": "specialist_art_design_university",
+   "priority": "medium",
+   "status": "additional_candidate_needs_programme_and_official_page_verification"
+  },
+  {
+   "name": "Eugeniusz Geppert Academy of Art and Design in Wrocław",
+   "country": "PL",
+   "official_url": null,
+   "type": "specialist_art_design_university",
+   "priority": "medium",
+   "status": "additional_candidate_needs_programme_and_official_page_verification"
+  },
+  {
+   "name": "University of Warsaw",
+   "country": "PL",
+   "official_url": null,
+   "type": "university",
+   "priority": "medium",
+   "status": "additional_candidate_needs_programme_and_official_page_verification"
+  },
+  {
+   "name": "Jagiellonian University",
+   "country": "PL",
+   "official_url": null,
+   "type": "university",
+   "priority": "medium",
+   "status": "additional_candidate_needs_programme_and_official_page_verification"
+  },
+  {
+   "name": "Estonian Academy of Arts (EKA)",
+   "country": "EE",
+   "official_url": null,
+   "type": "specialist_art_design_university",
+   "priority": "high",
+   "status": "additional_candidate_needs_programme_and_official_page_verification"
+  },
+  {
+   "name": "Art Academy of Latvia",
+   "country": "LV",
+   "official_url": null,
+   "type": "specialist_art_design_university",
+   "priority": "medium",
+   "status": "additional_candidate_needs_programme_and_official_page_verification"
+  },
+  {
+   "name": "Vilnius Academy of Arts",
+   "country": "LT",
+   "official_url": null,
+   "type": "specialist_art_design_university",
+   "priority": "medium",
+   "status": "additional_candidate_needs_programme_and_official_page_verification"
+  },
+  {
+   "name": "Academy of Arts, Architecture and Design in Prague (UMPRUM)",
+   "country": "CZ",
+   "official_url": null,
+   "type": "specialist_art_design_university",
+   "priority": "high",
+   "status": "additional_candidate_needs_programme_and_official_page_verification"
+  },
+  {
+   "name": "Charles University",
+   "country": "CZ",
+   "official_url": null,
+   "type": "university",
+   "priority": "medium",
+   "status": "additional_candidate_needs_programme_and_official_page_verification"
+  },
+  {
+   "name": "Moholy-Nagy University of Art and Design (MOME)",
+   "country": "HU",
+   "official_url": null,
+   "type": "specialist_art_design_university",
+   "priority": "high",
+   "status": "additional_candidate_needs_programme_and_official_page_verification"
+  },
+  {
+   "name": "University of Art and Design Cluj-Napoca",
+   "country": "RO",
+   "official_url": null,
+   "type": "specialist_art_design_university",
+   "priority": "medium",
+   "status": "additional_candidate_needs_programme_and_official_page_verification"
+  },
+  {
+   "name": "National University of Arts Bucharest",
+   "country": "RO",
+   "official_url": null,
+   "type": "specialist_art_university",
+   "priority": "medium",
+   "status": "additional_candidate_needs_programme_and_official_page_verification"
+  },
+  {
+   "name": "Athens School of Fine Arts",
+   "country": "GR",
+   "official_url": null,
+   "type": "specialist_art_university",
+   "priority": "medium",
+   "status": "additional_candidate_needs_programme_and_official_page_verification"
+  },
+  {
+   "name": "Iceland University of the Arts",
+   "country": "IS",
+   "official_url": null,
+   "type": "specialist_art_university",
+   "priority": "medium",
+   "status": "additional_candidate_needs_programme_and_official_page_verification"
+  },
+  {
+   "name": "University of Ljubljana – Academy of Fine Arts and Design",
+   "country": "SI",
+   "official_url": null,
+   "type": "university_faculty",
+   "priority": "medium",
+   "status": "additional_candidate_needs_programme_and_official_page_verification"
+  },
+  {
+   "name": "University of Zagreb – Academy of Fine Arts",
+   "country": "HR",
+   "official_url": null,
+   "type": "university_faculty",
+   "priority": "medium",
+   "status": "additional_candidate_needs_programme_and_official_page_verification"
+  },
+  {
+   "name": "University of Arts in Belgrade",
+   "country": "RS",
+   "official_url": null,
+   "type": "specialist_arts_university",
+   "priority": "medium",
+   "status": "additional_candidate_needs_programme_and_official_page_verification"
+  },
+  {
+   "name": "University of Novi Sad – Academy of Arts",
+   "country": "RS",
+   "official_url": null,
+   "type": "university_faculty",
+   "priority": "medium",
+   "status": "additional_candidate_needs_programme_and_official_page_verification"
+  },
+  {
+   "name": "Academy of Fine Arts and Design Bratislava (VŠVU)",
+   "country": "SK",
+   "official_url": null,
+   "type": "specialist_art_design_university",
+   "priority": "medium",
+   "status": "additional_candidate_needs_programme_and_official_page_verification"
+  },
+  {
+   "name": "National Academy of Art Sofia",
+   "country": "BG",
+   "official_url": null,
+   "type": "specialist_art_university",
+   "priority": "medium",
+   "status": "additional_candidate_needs_programme_and_official_page_verification"
+  },
+  {
+   "name": "University of Luxembourg",
+   "country": "LU",
+   "official_url": null,
+   "type": "university",
+   "priority": "low",
+   "status": "additional_candidate_needs_programme_and_official_page_verification"
+  },
+  {
+   "name": "University of Malta",
+   "country": "MT",
+   "official_url": null,
+   "type": "university",
+   "priority": "low",
+   "status": "additional_candidate_needs_programme_and_official_page_verification"
+  },
+  {
+   "name": "Cyprus University of Technology",
+   "country": "CY",
+   "official_url": null,
+   "type": "university",
+   "priority": "low",
+   "status": "additional_candidate_needs_programme_and_official_page_verification"
+  }
+ ]
+}
