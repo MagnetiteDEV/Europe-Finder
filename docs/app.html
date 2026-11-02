@@ -1,0 +1,519 @@
+<!doctype html>
+<html lang="fa" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Europe Opportunity Finder — فرصت‌های اروپا</title>
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="Europe Finder">
+<meta name="theme-color" content="#1d4ed8">
+<link rel="icon" href="data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%20128%20128%22%3E%0A%3Crect%20width%3D%22128%22%20height%3D%22128%22%20rx%3D%2228%22%20fill%3D%22%234f46e5%22%2F%3E%0A%3Ccircle%20cx%3D%2256%22%20cy%3D%2256%22%20r%3D%2226%22%20fill%3D%22none%22%20stroke%3D%22%23fff%22%20stroke-width%3D%2210%22%2F%3E%0A%3Cline%20x1%3D%2276%22%20y1%3D%2276%22%20x2%3D%22102%22%20y2%3D%22102%22%20stroke%3D%22%23fff%22%20stroke-width%3D%2212%22%20stroke-linecap%3D%22round%22%2F%3E%0A%3Crect%20x%3D%2244%22%20y%3D%2244%22%20width%3D%2224%22%20height%3D%2216%22%20rx%3D%223%22%20fill%3D%22%23fff%22%20transform%3D%22rotate%28-12%2056%2052%29%22%2F%3E%0A%3C%2Fsvg%3E%0A" type="image/svg+xml">
+<link rel="apple-touch-icon" href="data:image/png;base64,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">
+<style>:root{
+  --bg:#f6f7fb; --card:#fff; --ink:#1e2433; --muted:#6b7280;
+  --accent:#4f46e5; --line:#e5e7eb;
+  --g1:#16a34a; --g2:#0d9488; --g3:#d97706; --g4:#9ca3af;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);
+  font-family:"Vazirmatn","IRANSans","Segoe UI",Tahoma,Arial,sans-serif;line-height:1.7}
+.topbar{display:flex;justify-content:space-between;align-items:center;gap:12px;
+  padding:14px 18px;background:var(--card);border-bottom:1px solid var(--line);
+  position:sticky;top:0;z-index:5}
+.topbar h1{margin:0;font-size:1.15rem}
+.meta{margin:2px 0 0;color:var(--muted);font-size:.8rem}
+.badge{background:var(--accent);color:#fff;font-size:.75rem;font-weight:700;
+  padding:6px 12px;border-radius:999px;white-space:nowrap}
+.digest{margin:12px 16px 0;padding:10px 14px;border-radius:12px;
+  background:#eef2ff;border:1px solid #c7d2fe;font-size:.9rem}
+.hidden{display:none!important}
+.filters{margin:12px 16px 0;padding:12px;background:var(--card);
+  border:1px solid var(--line);border-radius:12px}
+.filters input[type=search]{width:100%;padding:10px 12px;font-size:1rem;
+  border:1px solid var(--line);border-radius:10px;font-family:inherit}
+.row{display:flex;flex-wrap:wrap;gap:8px;margin-top:10px}
+.row select{padding:8px 10px;border:1px solid var(--line);border-radius:10px;
+  font-family:inherit;font-size:.85rem;background:#fff}
+.checks label{font-size:.85rem;color:var(--muted);display:flex;gap:6px;align-items:center}
+#results{padding:12px 16px 40px;display:grid;gap:10px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:12px;
+  padding:12px 14px;cursor:pointer}
+.card:hover{border-color:var(--accent)}
+.card h3{margin:0 0 4px;font-size:1rem}
+.card .sub{color:var(--muted);font-size:.82rem;margin:0 0 8px}
+.pills{display:flex;flex-wrap:wrap;gap:6px;align-items:center}
+.pill{font-size:.72rem;padding:3px 10px;border-radius:999px;background:#f1f5f9;color:#475569}
+.fit{font-weight:700;color:#fff}
+.fit.f0{background:var(--g1)} .fit.f1{background:var(--g2)}
+.fit.f2{background:var(--g3)} .fit.f3{background:var(--g4)}
+.deadline{background:#fef3c7;color:#92400e}
+.deadline.soon{background:#fee2e2;color:#991b1b}
+.savebtn{margin-inline-start:auto;background:none;border:1px solid var(--line);
+  border-radius:999px;padding:3px 12px;font-size:.75rem;cursor:pointer;font-family:inherit}
+.savebtn.on{background:#fef9c3;border-color:#facc15}
+.empty{text-align:center;color:var(--muted);padding:40px 10px}
+.modal{position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:20;
+  display:flex;align-items:flex-end;justify-content:center}
+@media(min-width:700px){.modal{align-items:center;padding:30px}}
+.sheet{background:#fff;width:100%;max-width:760px;max-height:92vh;overflow:auto;
+  border-radius:16px 16px 0 0;padding:20px;position:relative}
+@media(min-width:700px){.sheet{border-radius:16px}}
+.x{position:absolute;top:10px;left:10px;border:none;background:#f1f5f9;
+  border-radius:50%;width:32px;height:32px;cursor:pointer;font-size:1rem}
+.sheet h2{margin:0 0 6px;font-size:1.15rem;padding-left:36px}
+.why{margin:10px 0;padding:0;list-style:none}
+.why li{font-size:.88rem;margin:4px 0;padding:6px 10px;border-radius:8px;background:#f0fdf4}
+.why li.flag{background:#fef2f2}
+.desc{white-space:pre-wrap;font-size:.9rem;color:#374151;
+  max-height:40vh;overflow:auto;border:1px solid var(--line);
+  border-radius:10px;padding:10px;margin:10px 0}
+.actions{display:flex;gap:8px;margin-top:12px}
+.btn{display:inline-block;padding:10px 18px;border-radius:10px;text-decoration:none;
+  font-size:.9rem;font-family:inherit;cursor:pointer;border:1px solid var(--line);background:#fff}
+.btn.primary{background:var(--accent);color:#fff;border-color:var(--accent)}
+footer{padding:20px;text-align:center;color:var(--muted);font-size:.78rem}
+
+.fit.fx{background:#b91c1c}
+.fundok{background:#dcfce7;color:#166534}
+.fundwarn{background:#fef3c7;color:#92400e}
+.panel{margin:12px 16px 0;background:var(--card);border:1px solid var(--line);border-radius:12px}
+.panel summary{cursor:pointer;padding:12px 14px;font-weight:700;font-size:.9rem}
+.panel .pad{padding:0 14px 14px}
+.instlist{margin:8px 0;padding-inline-start:18px;font-size:.85rem}
+.instlist li{margin:4px 0}
+.tabs{display:flex;gap:8px;padding:10px 16px 0;flex-wrap:wrap}
+.tabs button{border:1px solid var(--line);background:var(--card);border-radius:10px;padding:9px 14px;font:inherit;font-size:.88rem;cursor:pointer;color:var(--ink)}
+.tabs button.active{background:#1d4ed8;border-color:#1d4ed8;color:#fff}
+.tabs .tcount{opacity:.75;font-size:.78rem}
+
+/* iOS: lock background scroll when the modal sheet is open */
+body.lock{overflow:hidden}
+
+.more{display:block;margin:6px auto;padding:10px 22px;border:1px solid var(--line);border-radius:10px;background:var(--card);font:inherit;cursor:pointer}
+.pill.stale{background:#e5e7eb;color:#374151}
+.card:focus-visible,.btn:focus-visible,.tabs button:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+@media(prefers-color-scheme:dark){:root{--bg:#0f1220;--card:#181c2e;--ink:#e6e8f0;--muted:#9aa3b5;--line:#2a3050}
+.sheet,.row select{background:var(--card);color:var(--ink)}.pill{background:#232842;color:#c3c9d9}.desc{color:var(--ink)}
+.digest{background:#1e2447;border-color:#33407a}.x{background:#232842;color:var(--ink)}.btn{background:var(--card);color:var(--ink)}}
+.digest.warn{background:#fef3c7;border-color:#fcd34d;color:#78350f}
+.tools{margin-top:10px}.tools .btn{padding:6px 12px;font-size:.78rem}
+.tracker{display:grid;gap:8px;margin:10px 0;padding:10px;border:1px solid var(--line);border-radius:10px}
+.tracker select,.tracker textarea{font:inherit;padding:6px 8px;border:1px solid var(--line);border-radius:8px;background:var(--card);color:var(--ink);width:100%}
+#mDismiss{margin-top:6px}
+</style>
+</head>
+<body>
+<header class="topbar"><div><h1>Europe Opportunity Finder</h1><p id="metaLine" class="meta"></p></div><span class="badge">v2.3 • اتصال زنده</span></header>
+<div id="digestBar" class="digest hidden"></div>
+<nav class="tabs" id="tabs" role="tablist">
+<button data-tab="phd" class="active" role="tab">🎓 دکتری <span class="tcount" id="cPhd"></span></button>
+<button data-tab="job" role="tab">💼 فرصت‌های شغلی <span class="tcount" id="cJob"></span></button>
+<button data-tab="master" role="tab">📚 مستر با فاند <span class="tcount" id="cMaster"></span></button>
+<button data-tab="scholarship" role="tab">🏛️ بورس‌های دولتی و منطقه‌ای <span class="tcount" id="cSch"></span></button>
+</nav>
+<section class="filters">
+<input id="q" type="search" placeholder="جست‌وجو در عنوان، سازمان یا متن آگهی…" aria-label="جست‌وجو">
+<div class="row">
+<select id="fGroup"><option value="">همه گروه‌های رشته‌ای</option></select>
+<select id="fCountry"><option value="">همه کشورها</option></select>
+<select id="fBand"><option value="">هر تناسبی</option><option>تناسب قوی</option><option>تناسب متوسط</option><option>تناسب ضعیف</option><option>حذف‌شده</option></select>
+<select id="fSource"><option value="">همه منابع</option></select>
+<select id="fSort"><option value="fit">مرتب‌سازی: تناسب</option><option value="priority">اولویت کشور + تناسب</option><option value="deadline">نزدیک‌ترین ددلاین</option><option value="newest">جدیدترین</option></select>
+</div>
+<div class="row checks">
+<label title="دکتری: فقط استخدام با حقوق یا بورسیه کامل تأییدشده — آگهی‌های استخدامی دانشگاهی فقط با تصریح «بدون فاند» حذف می‌شوند"><input type="checkbox" id="cFunded" checked> فقط تأمین مالی تأییدشده</label>
+<label><input type="checkbox" id="cPriority"> فقط کشورهای اولویت‌دار (FR/DK/DE)</label>
+<label><input type="checkbox" id="cDeadline"> فقط دارای ددلاین</label>
+<label><input type="checkbox" id="cDigest"> فقط برترین پیشنهادها</label>
+<label><input type="checkbox" id="cSaved"> فقط ذخیره‌شده‌ها</label>
+<label><input type="checkbox" id="cExcluded"> نمایش حذف‌شده‌های مهندسی‌محور</label>
+<label><input type="checkbox" id="cExpired"> نمایش ددلاین‌گذشته‌ها</label>
+</div>
+</section>
+<details class="panel" id="coveragePanel"><summary>📡 پوشش منابع و سیاست جست‌وجو</summary><div id="coverageBody" class="pad"></div></details>
+<main id="results" aria-live="polite"></main>
+<div id="modal" class="modal hidden" role="dialog" aria-modal="true" aria-label="جزئیات آگهی"><div class="sheet"><button id="mClose" class="x" aria-label="بستن">✕</button><div id="mBody"></div></div></div>
+<footer><p>آگهی‌ها مستقیماً از منابع رسمی خوانده می‌شوند؛ همیشه متن اصلی را در سایت منتشرکننده بررسی کنید.</p><p id="footMeta" class="meta"></p></footer>
+<script>
+/* live-shell: data loads from EOF_LIVE_URL at runtime */
+</script>
+<script>
+/* Europe Opportunity Finder v2.3 — offline PWA frontend. Data: window.EOF_DATA (data/data.js) */
+(function () {
+"use strict";
+const D = window.EOF_DATA || {};
+D.postings = D.postings || []; D.groups = D.groups || []; D.digest = D.digest || { picks: [] }; D.meta = D.meta || {};
+const $ = (id) => document.getElementById(id);
+const FA_DAYS = ["یکشنبه","دوشنبه","سه‌شنبه","چهارشنبه","پنجشنبه","جمعه","شنبه"];
+const FA_MONTHS = ["ژانویه","فوریه","مارس","آوریل","مه","ژوئن","ژوئیه","اوت","سپتامبر","اکتبر","نوامبر","دسامبر"];
+const CC_FA = {GB:"بریتانیا",IE:"ایرلند",FR:"فرانسه",DE:"آلمان",NL:"هلند",BE:"بلژیک",ES:"اسپانیا",IT:"ایتالیا",PT:"پرتغال",SE:"سوئد",NO:"نروژ",DK:"دانمارک",FI:"فنلاند",AT:"اتریش",CH:"سوئیس",PL:"لهستان",CZ:"چک",HU:"مجارستان",GR:"یونان",HR:"کرواسی",RO:"رومانی",US:"آمریکا",CA:"کانادا",CN:"چین",JP:"ژاپن",KR:"کره جنوبی",AU:"استرالیا",EU:"اتحادیه اروپا"};
+const ccName = (c) => CC_FA[c] || c || "نامشخص";
+const BAND_CLASS = {"تناسب قوی":"f0","تناسب متوسط":"f1","تناسب ضعیف":"f2","حذف‌شده":"fx"};
+const FUND_OK = new Set(D.funding_accepted || []);
+const ELIG = D.eligibility_labels || {};
+const PAGE = 50;
+
+// storage never throws (private mode / corrupt values)
+const store = {
+  get(k, d) { try { const v = localStorage.getItem(k); return v == null ? d : JSON.parse(v); } catch (e) { return d; } },
+  set(k, v) { try { localStorage.setItem(k, JSON.stringify(v)); } catch (e) {} },
+};
+const pkey = (p) => p.source + "::" + p.external_id;
+// LIVE-SHELL (Pages build has no embedded data): restore the last cached
+// bundle so the app still opens offline after its first successful load.
+if (!D.postings.length) {
+  const _c = store.get("eof_cache", null);
+  if (_c && _c.data && Array.isArray(_c.data.postings) && _c.data.postings.length) {
+    ["postings", "groups", "digest", "meta", "version", "institutions",
+     "priority_countries", "funding_accepted", "eligibility_labels"].forEach((k) => {
+      if (_c.data[k] !== undefined) D[k] = _c.data[k];
+    });
+    D._fromCache = true;
+  }
+}
+const byKey = new Map(D.postings.map((p) => [pkey(p), p]));
+// saved = key -> snapshot, so a saved posting survives removal from fresh data
+let saved = store.get("eof_saved2", null);
+if (!saved || typeof saved !== "object" || Array.isArray(saved)) {
+  saved = {};
+  const old = store.get("eof_saved", []);
+  (Array.isArray(old) ? old : []).forEach((k) => { saved[k] = byKey.get(k) || { _missing: true }; });
+  store.set("eof_saved2", saved);
+}
+const persist = () => store.set("eof_saved2", saved);
+const track = store.get("eof_track", {}), dismissed = store.get("eof_dismissed", {});
+let jalali = store.get("eof_jalali", false);
+const saveAux = () => { store.set("eof_track", track); store.set("eof_dismissed", dismissed); store.set("eof_jalali", jalali); };
+const TRACK_ST = { prep: "در حال آماده‌سازی", sent: "ارسال‌شده", interview: "مصاحبه", rejected: "رد شد", accepted: "پذیرفته شد" };
+const state = { tab: "phd", limit: PAGE };
+const TAB_COUNT = { phd: "cPhd", job: "cJob", master: "cMaster", scholarship: "cSch" };
+
+function parseDay(iso) { const d = new Date(iso + "T12:00:00"); return isNaN(d) ? null : d; }
+// FIX: Intl with the Persian calendar can throw on older browsers —
+// never let date formatting kill the whole app.
+let JF = null;
+try { JF = new Intl.DateTimeFormat("fa-IR-u-ca-persian", { weekday: "long", day: "numeric", month: "long", year: "numeric" }); } catch (e) { JF = null; }
+function faDate(iso) { if (!iso) return ""; const d = parseDay(iso); if (!d) return String(iso); return (jalali && JF) ? JF.format(d) : `${FA_DAYS[d.getDay()]} ${d.getDate()} ${FA_MONTHS[d.getMonth()]} ${d.getFullYear()}`; }
+function daysLeft(iso) { if (!iso) return null; const d = parseDay(iso); return d ? Math.ceil((d - Date.now()) / 86400000) : null; }
+const esc = (s) => String(s == null ? "" : s).replace(/[&<>"']/g, (c) => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+const safeUrl = (u) => { try { const x = new URL(u); return /^https?:$/.test(x.protocol) ? x.href : ""; } catch (e) { return ""; } };
+const SRC_FA = { nature: "Nature Careers", adzuna: "Adzuna" };
+const ATS_FA = { workday:"Workday", varbi:"Varbi", wp:"سایت دانشگاه", volcanic:"Volcanic", kuleuven:"KU Leuven", greenhouse:"Greenhouse", lever:"Lever", ashby:"Ashby" };
+const srcName = (s) => SRC_FA[s] || (s === "curated:master" || s === "curated:scholarship" ? "مسیر منتخب" : (String(s).startsWith("ats:") ? ATS_FA[s.slice(4)] || s.slice(4) : s));
+const hay = (p) => p._h || (p._h = ((p.title || "") + " " + (p.organization || "") + " " + (p.description || "")).toLowerCase());
+
+// filter controls
+D.groups.forEach((g) => $("fGroup").insertAdjacentHTML("beforeend", `<option value="${esc(g.fa)}">${esc(g.fa)}</option>`));
+[...new Set(D.postings.map((p) => p.country).filter(Boolean))].sort().forEach((c) => $("fCountry").insertAdjacentHTML("beforeend", `<option value="${esc(c)}">${esc(ccName(c))}</option>`));
+[...new Set(D.postings.map((p) => p.source))].sort().forEach((s) => $("fSource").insertAdjacentHTML("beforeend", `<option value="${esc(s)}">${esc(srcName(s))}</option>`));
+
+const digestIds = new Set((D.digest.picks || []).map(pkey));
+function refreshDigestBar() {
+  const bar = $("digestBar"), show = digestIds.size && (state.tab === "phd" || state.tab === "job");
+  bar.classList.toggle("hidden", !show);
+  if (show) bar.innerHTML = `✨ <b>${digestIds.size} پیشنهاد برتر</b> با تناسب قوی <span class="meta">(${esc((D.digest.generated_at || "").slice(0, 10))})</span> — تیک «فقط برترین پیشنهادها» را بزنید.`;
+}
+
+const f = () => ({
+  q: $("q").value.trim().toLowerCase(), group: $("fGroup").value, country: $("fCountry").value, band: $("fBand").value, source: $("fSource").value, sort: $("fSort").value,
+  funded: $("cFunded").checked, priority: $("cPriority").checked, onlyDeadline: $("cDeadline").checked, onlyDigest: $("cDigest").checked,
+  onlySaved: $("cSaved").checked, showExcluded: $("cExcluded").checked, showExpired: $("cExpired").checked,
+});
+function fundedPass(p) {
+  if (p.kind === "other") return false;
+  if (FUND_OK.has(p.funding_category)) return true;
+  return p.kind === "job" && p.funding_category !== "unfunded";
+}
+// pool = fresh data + saved snapshots no longer in the data (marked stale)
+function pool() {
+  const extra = Object.entries(saved).filter(([k, v]) => !byKey.has(k) && v && !v._missing).map(([, v]) => Object.assign({}, v, { _stale: true }));
+  return extra.length ? D.postings.concat(extra) : D.postings;
+}
+function passes(p, x, tab) {
+  if ((p.kind || "job") !== tab) return false;
+  const isSaved = !!saved[pkey(p)];
+  // FIX: "saved only" used to early-return and ignore every other filter
+  // (search box, group, country...). Now it composes with all filters.
+  if (x.onlySaved && !isSaved) return false;
+  // stale snapshots (saved items removed from fresh data) only surface
+  // in the "saved" view, never in the normal list
+  if (p._stale && !x.onlySaved) return false;
+  if (dismissed[pkey(p)]) return false;
+  if (p.excluded && !x.showExcluded) return false;
+  if (x.funded && !fundedPass(p)) return false;
+  if (!x.showExpired && p.deadline && (daysLeft(p.deadline) ?? 0) < 0) return false;
+  if (x.group && !(p.groups || []).includes(x.group)) return false;
+  if (x.country && p.country !== x.country) return false;
+  if (x.band && p.fit_band !== x.band) return false;
+  if (x.source && p.source !== x.source) return false;
+  if (x.priority && !p.priority_country) return false;
+  if (x.onlyDeadline && !p.deadline) return false;
+  if (x.onlyDigest && !digestIds.has(pkey(p))) return false;
+  if (x.q && !hay(p).includes(x.q)) return false;
+  return true;
+}
+const SORTS = {
+  priority: (a, b) => ((b.priority_country ? 1 : 0) - (a.priority_country ? 1 : 0)) || b.fit_score - a.fit_score,
+  deadline: (a, b) => (a.deadline || "9999").localeCompare(b.deadline || "9999"),
+  newest: (a, b) => (b.posted_date || "").localeCompare(a.posted_date || ""),
+  fit: (a, b) => b.fit_score - a.fit_score,
+};
+function filtered() { const x = f(); return pool().filter((p) => passes(p, x, state.tab)).sort(SORTS[x.sort] || SORTS.fit); }
+
+// tab counts use the SAME filters as the list
+function refreshTabs() {
+  const x = f(), P = pool(), c = { phd: 0, job: 0, master: 0, scholarship: 0 };
+  Object.keys(c).forEach((t) => { c[t] = P.reduce((n, p) => n + (passes(p, x, t) ? 1 : 0), 0); $(TAB_COUNT[t]).textContent = `(${c[t]})`; });
+  document.querySelectorAll("#tabs button").forEach((b) => { const on = b.dataset.tab === state.tab; b.classList.toggle("active", on); b.setAttribute("aria-selected", on); });
+  // FIX: the digest checkbox is meaningless on curated tabs (no digest picks
+  // there) — disable it instead of showing a confusing empty list.
+  const liveTab = state.tab === "phd" || state.tab === "job";
+  $("cDigest").disabled = !liveTab;
+  if (!liveTab) $("cDigest").checked = false;
+  refreshDigestBar();
+}
+
+const meta = D.meta;
+$("metaLine").textContent = `${D.postings.filter((p) => !p.excluded).length} آگهی فعال • آخرین به‌روزرسانی: ${(meta.generated_at || "").slice(0, 10)}`;
+$("footMeta").textContent = `نسخه داده: ${D.version || "v2"} • منابع: ${(meta.sources || []).join("، ")}`;
+(function coverage() {
+  const inst = D.institutions || {};
+  const rows = (inst.connected || []).map((c) => { const u = safeUrl(c.careers_url); return `<li><b>${esc(c.name)}</b> <span class="meta">${esc(ccName(c.country))} • ${esc(c.ats)}${u ? ` • <a href="${esc(u)}" target="_blank" rel="noopener noreferrer">صفحه فرصت‌ها ↗</a>` : ""}</span></li>`; }).join("");
+  $("coverageBody").innerHTML = `<p>📡 <b>${inst.connected_count || 0} دانشگاه</b> با اتصال زنده تأییدشده، از میان ${inst.prospect_count || 0} مؤسسهٔ هدف در فهرست اکتشافی.</p><ul class="instlist">${rows}</ul><p class="meta">سیاست‌ها: فیلتر پیش‌فرض فقط «استخدام دکتری با حقوق» یا «بورسیه کامل تأییدشده» را نشان می‌دهد • آگهی‌های مهندسی‌محور به‌صورت خودکار حذف می‌شوند • وضعیت واجد شرایط بودن هرگز حدس زده نمی‌شود • کشورهای اولویت‌دار: ${esc((D.priority_countries || []).map(ccName).join("، "))}</p>`;
+})();
+
+// rendering
+const pill = (c, t, title) => `<span class="pill ${c}"${title ? ` title="${esc(title)}"` : ""}>${t}</span>`;
+function fundPill(p) { return pill(FUND_OK.has(p.funding_category) ? "fundok" : "fundwarn", `💰 ${esc(p.funding_fa || "")}`, (p.funding_notes || []).join("؛ ")); }
+function deadlinePill(p) {
+  if (p.curated && p.deadline_note) return pill("deadline", `📅 ${esc(p.deadline_note)}`);
+  if (!p.deadline) return "";
+  const n = daysLeft(p.deadline);
+  const txt = n === null ? faDate(p.deadline) : n < 0 ? "ددلاین گذشته" : `${n} روز مانده`;
+  return pill(n !== null && n >= 0 && n <= 30 ? "deadline soon" : "deadline", `📅 ${esc(txt)}${n === null ? "" : " — " + esc(faDate(p.deadline))}`);
+}
+function kindPill(p) {
+  if (p.kind === "phd") return pill("kind", "🎓 دکتری");
+  if (p.kind === "other") return pill("kind", "🧪 سایر");
+  return pill("kind", p.curated ? "📋 مسیر بورسیه" : "💼 شغلی");
+}
+function card(p) {
+  const k = pkey(p), loc = [p.city, ccName(p.country)].filter(Boolean).join("، ");
+  const sub = p.curated ? `${esc(p.organization || "")}${p.coverage_fa ? " • " + esc(p.coverage_fa) : ""}` : `${esc(p.organization || "")}${p.organization && loc ? " • " : ""}${esc(loc)}`;
+  return `<article class="card" tabindex="0" data-k="${esc(k)}"><h3>${p.priority_country ? "⭐ " : ""}${esc(p.title)}</h3><p class="sub">${sub}</p><div class="pills">` +
+    pill(`fit ${BAND_CLASS[p.fit_band] || "f2"}`, `${esc(p.fit_band)} ${esc(p.fit_score)}`) + kindPill(p) + fundPill(p) + deadlinePill(p) +
+    (p._stale ? pill("stale", "از داده حذف شده") : "") + trackPill(k) +
+    (p.groups || []).slice(0, 2).map((g) => pill("", esc(g))).join("") +
+    `<button class="savebtn${saved[k] ? " on" : ""}" data-save="${esc(k)}">${saved[k] ? "★ ذخیره شده" : "☆ ذخیره"}</button></div></article>`;
+}
+function render() {
+  const list = filtered(), el = $("results");
+  refreshTabs();
+  if (!list.length) { el.innerHTML = `<div class="empty">آگهی‌ای با این فیلترها پیدا نشد.<br>فیلتر «فقط تأمین مالی تأییدشده» یا «تناسب» را بازتر کنید.</div>`; return; }
+  const shown = list.slice(0, state.limit);
+  el.innerHTML = `<p class="meta">${list.length} آگهی</p>` + shown.map(card).join("") +
+    (list.length > shown.length ? `<button class="more" id="more">نمایش بیشتر (${list.length - shown.length} مورد دیگر)</button>` : "");
+}
+const rerender = () => { state.limit = PAGE; render(); };
+
+const trackPill = (k) => (track[k] && track[k].s ? pill("kind", "📌 " + esc(TRACK_ST[track[k].s] || "")) : "");
+function trackerHtml(k) {
+  const t = track[k] || {};
+  const tr = saved[k] ? `<div class="tracker"><label>وضعیت درخواست <select id="mStatus"><option value="">—</option>${Object.entries(TRACK_ST).map(([v, l]) => `<option value="${v}"${t.s === v ? " selected" : ""}>${l}</option>`).join("")}</select></label><textarea id="mNote" rows="3" placeholder="یادداشت (مدارک، استاد راهنما، مراحل بعدی…)">${esc(t.n || "")}</textarea></div>` : "";
+  return tr + `<button class="btn" id="mDismiss">🚫 نامربوط است (مخفی کن)</button>`;
+}
+function openModal(k) {
+  const p = byKey.get(k) || saved[k];
+  if (!p || p._missing) return;
+  const why = (p.fit_reasons || []).map((r) => `<li>✓ ${esc(r)}</li>`).join("") + (p.red_flags || []).map((r) => `<li class="flag">⚠ ${esc(r)}</li>`).join("");
+  const fundNotes = (p.funding_notes || []).map((n) => `<li>💰 ${esc(n)}</li>`).join("");
+  const lv = { master: "مستر", phd: "دکتری", both: "مستر و دکتری" };
+  const curated = p.curated ? `<ul class="why">${p.coverage_fa ? `<li>💰 پوشش: ${esc(p.coverage_fa)}</li>` : ""}${p.deadline_note ? `<li>📅 ددلاین: ${esc(p.deadline_note)}</li>` : ""}${p.curated_eligibility ? `<li>🛂 شرایط متقاضی: ${esc(p.curated_eligibility)}</li>` : ""}${p.level ? `<li>🎓 مقطع: ${esc(lv[p.level] || p.level)}</li>` : ""}</ul>` : "";
+  const url = safeUrl(p.url);
+  $("mBody").innerHTML = `<h2>${p.priority_country ? "⭐ " : ""}${esc(p.title)}</h2><p class="sub">${esc(p.organization || "")} • ${esc([p.city, ccName(p.country)].filter(Boolean).join("، "))}</p>
+<div class="pills">${pill(`fit ${BAND_CLASS[p.fit_band] || "f2"}`, `${esc(p.fit_band)} ${esc(p.fit_score)}`)}${kindPill(p)}${fundPill(p)}${deadlinePill(p)}${pill("", esc(srcName(p.source)))}${(p.also_in || []).map((x) => pill("", esc(srcName(x)))).join("")}</div>
+<ul class="why">${why}${fundNotes}</ul>${curated}
+<p class="meta">وضعیت متقاضی ایرانی: <b>${esc(ELIG[p.eligibility] || p.eligibility)}</b>${p.eligibility_note ? ` — ${esc(p.eligibility_note)}` : ""}</p>
+${(p.subfields || []).length ? `<p class="meta">واژگان منطبق: ${esc(p.subfields.slice(0, 8).join("، "))}</p>` : ""}
+<div class="desc">${esc(p.description || "متن آگهی در دسترس نیست — از دکمه مشاهده آگهی استفاده کنید.")}</div>
+${trackerHtml(k)}<div class="actions">${url ? `<a class="btn primary" href="${esc(url)}" target="_blank" rel="noopener noreferrer">مشاهده آگهی ↗</a>` : ""}<button class="btn" id="mSave">${saved[k] ? "★ ذخیره شده" : "☆ ذخیره"}</button></div>`;
+  $("modal").classList.remove("hidden");
+  document.body.classList.add("lock"); // FIX (iOS): stop background scroll while modal is open
+  $("mSave").onclick = () => { toggleSave(k); openModal(k); };
+  const ms = $("mStatus");
+  if (ms) { ms.onchange = () => { (track[k] = track[k] || {}).s = ms.value; saveAux(); render(); }; $("mNote").oninput = (e) => { (track[k] = track[k] || {}).n = e.target.value; saveAux(); }; }
+  $("mDismiss").onclick = () => { dismissed[k] = { t: p.title, at: Date.now() }; saveAux(); closeModal(); render(); };
+  $("mClose").focus();
+}
+const closeModal = () => { $("modal").classList.add("hidden"); document.body.classList.remove("lock"); };
+// FIX: unsaving then re-saving a stale item (not in fresh data) used to
+// replace its snapshot with {} — the saved data was lost. Keep a stash.
+let lastUnsaved = null;
+function toggleSave(k) {
+  if (saved[k]) { lastUnsaved = { k, v: saved[k] }; delete saved[k]; }
+  else {
+    saved[k] = byKey.get(k) || (lastUnsaved && lastUnsaved.k === k ? lastUnsaved.v : null) || {};
+    lastUnsaved = null; // stash is single-use: only the immediate re-save may claim it
+  }
+  persist(); render();
+}
+
+// events
+// data-health banner: stale data or adapter warnings (meta.health from tools/postprocess.py)
+(function health() {
+  const w = [], g = Date.parse(meta.generated_at || "");
+  if (isNaN(g)) w.push("تاریخ تولید داده نامشخص است"); else { const age = Math.floor((Date.now() - g) / 864e5); if (age > 3) w.push(`داده ${age} روز قدیمی است — run.sh را اجرا و دوباره منتشر کنید`); }
+  ((meta.health || {}).warnings || []).forEach((x) => w.push(x));
+  if (!w.length) return;
+  const el = document.createElement("div"); el.className = "digest warn"; el.setAttribute("role", "alert");
+  el.innerHTML = "⚠️ " + w.map(esc).join(" • "); $("digestBar").before(el);
+})();
+// tools: backup/import, CSV, calendar, Jalali dates, restore dismissed
+const tb = document.createElement("div"); tb.className = "row tools";
+tb.innerHTML = `<button class="btn" id="tJson">⬇ پشتیبان</button><label class="btn">⬆ ورود پشتیبان<input type="file" id="tImport" accept="application/json" hidden></label><button class="btn" id="tCsv">⬇ CSV ذخیره‌شده‌ها</button><button class="btn" id="tIcs">📅 تقویم ددلاین‌ها</button><button class="btn" id="tJal">🗓 تاریخ شمسی</button><button class="btn" id="tRestore">↩ بازگردانی نامربوط‌ها</button>`;
+document.querySelector(".filters").appendChild(tb);
+function dl(name, text, type) {
+  const blob = new Blob([text], { type });
+  const url = URL.createObjectURL(blob);
+  const done = () => setTimeout(() => URL.revokeObjectURL(url), 60000);
+  // FIX (iOS): Safari ignores the download attribute — navigating to the
+  // blob would lose app state. Open in a new tab so the Share sheet can save it.
+  const isiOS = /iPad|iPhone|iPod/.test(navigator.userAgent) ||
+    (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1);
+  if (isiOS) { window.open(url, "_blank"); done(); return; }
+  const a = document.createElement("a"); a.href = url; a.download = name;
+  document.body.appendChild(a); a.click(); a.remove(); done();
+}
+const savedList = () => Object.entries(saved).filter(([, v]) => v && !v._missing).map(([k, v]) => [k, byKey.get(k) || v]);
+$("tJson").onclick = () => dl("eof-backup.json", JSON.stringify({ app: "eof", v: 2, saved, track, dismissed,
+  feedback: [...Object.entries(saved).map(([k, v]) => ({ key: k, title: (v || {}).title, label: "relevant" })), ...Object.entries(dismissed).map(([k, v]) => ({ key: k, title: v.t, label: "irrelevant" }))] }, null, 1), "application/json");
+$("tImport").onchange = (e) => { const fl = e.target.files[0]; if (!fl) return; fl.text().then((t) => { let j; try { j = JSON.parse(t); } catch (x) { return; }
+  if (!j || j.app !== "eof") return; Object.assign(saved, j.saved || {}); Object.assign(track, j.track || {}); Object.assign(dismissed, j.dismissed || {}); persist(); saveAux(); render(); }); };
+const csvCell = (v) => { v = String(v == null ? "" : v); if (/^[=+\-@\t\r]/.test(v)) v = "'" + v; return '"' + v.replace(/"/g, '""') + '"'; };
+$("tCsv").onclick = () => dl("eof-saved.csv", "\ufeff" + [["عنوان", "سازمان", "کشور", "ددلاین", "وضعیت", "لینک", "یادداشت"], ...savedList().map(([k, p]) => [p.title, p.organization, ccName(p.country), p.deadline, TRACK_ST[(track[k] || {}).s] || "", safeUrl(p.url), (track[k] || {}).n])].map((r) => r.map(csvCell).join(",")).join("\r\n"), "text/csv;charset=utf-8");
+const icsEsc = (t) => String(t || "").replace(/\\/g, "\\\\").replace(/[;,]/g, (c) => "\\" + c).replace(/\r?\n/g, "\\n");
+$("tIcs").onclick = () => {
+  const ev = savedList().filter(([k, p]) => p.deadline && daysLeft(p.deadline) !== null && daysLeft(p.deadline) >= 0).map(([k, p]) => {
+    const d = p.deadline.replace(/-/g, ""), n = new Date(parseDay(p.deadline).getTime() + 864e5), e = n.getFullYear() + String(n.getMonth() + 1).padStart(2, "0") + String(n.getDate()).padStart(2, "0");
+    return ["BEGIN:VEVENT", "UID:" + d + "-" + icsEsc(k).replace(/[^\w.-]/g, "") + "@eof", "DTSTAMP:" + new Date().toISOString().replace(/[-:]|\.\d+/g, ""), "DTSTART;VALUE=DATE:" + d, "DTEND;VALUE=DATE:" + e,
+      "SUMMARY:" + icsEsc("ددلاین: " + String(p.title).slice(0, 120)), "DESCRIPTION:" + icsEsc((p.organization || "") + " " + safeUrl(p.url)),
+      "BEGIN:VALARM", "ACTION:DISPLAY", "DESCRIPTION:Deadline", "TRIGGER:-P7D", "END:VALARM", "BEGIN:VALARM", "ACTION:DISPLAY", "DESCRIPTION:Deadline", "TRIGGER:-P1D", "END:VALARM", "END:VEVENT"].join("\r\n"); });
+  dl("eof-deadlines.ics", ["BEGIN:VCALENDAR", "VERSION:2.0", "PRODID:-//EOF//v2.3//FA", ...ev, "END:VCALENDAR"].join("\r\n"), "text/calendar;charset=utf-8");
+};
+const jalLabel = () => { $("tJal").textContent = jalali ? "🗓 تاریخ میلادی" : "🗓 تاریخ شمسی"; };
+$("tJal").onclick = () => { jalali = !jalali; saveAux(); jalLabel(); render(); }; jalLabel();
+$("tRestore").onclick = () => { Object.keys(dismissed).forEach((k) => delete dismissed[k]); saveAux(); render(); };
+let timer;
+$("q").addEventListener("input", () => { clearTimeout(timer); timer = setTimeout(rerender, 150); });
+["fGroup","fCountry","fBand","fSource","fSort","cFunded","cPriority","cDeadline","cDigest","cSaved","cExcluded","cExpired"].forEach((id) => $(id).addEventListener("change", rerender));
+document.querySelectorAll("#tabs button").forEach((b) => b.addEventListener("click", () => { state.tab = b.dataset.tab; rerender(); }));
+$("results").addEventListener("click", (e) => {
+  if (e.target.closest("#more")) { state.limit += PAGE; render(); return; }
+  const sv = e.target.closest("[data-save]");
+  if (sv) { e.stopPropagation(); toggleSave(sv.dataset.save); return; }
+  const c = e.target.closest(".card"); if (c) openModal(c.dataset.k);
+});
+$("results").addEventListener("keydown", (e) => { const c = e.target.classList && e.target.classList.contains("card"); if (c && (e.key === "Enter" || e.key === " ")) { e.preventDefault(); openModal(e.target.dataset.k); } });
+$("mClose").onclick = closeModal;
+$("modal").addEventListener("click", (e) => { if (e.target.id === "modal") closeModal(); });
+// FIX: Escape used to close the modal even while typing in the notes
+// textarea / selects — annoying. Only close when not editing a field.
+document.addEventListener("keydown", (e) => {
+  if (e.key !== "Escape" || $("modal").classList.contains("hidden")) return;
+  const t = e.target;
+  if (t && /^(INPUT|TEXTAREA|SELECT)$/.test(t.tagName)) return;
+  closeModal();
+});
+render();
+// LIVE DATA via JSONP <script> tag — works from file:// on iOS Safari,
+// where fetch() is CORS-blocked but <script src> is not.
+// Publisher must host:  window.__EOF_LIVE__ = {...};  (same schema as EOF_DATA)
+// Build injects the URL into https://magnetitedev.github.io/Europe-Finder/eof-live.js; empty => feature stays off.
+(function liveData() {
+  const LIVE_URL = "https://magnetitedev.github.io/Europe-Finder/eof-live.js";
+  if (!LIVE_URL || LIVE_URL[0] === "_") return; // not configured
+  const badge = document.createElement("span");
+  badge.id = "liveDot";
+  badge.style.cssText = "font-size:.8rem;margin-right:8px;white-space:nowrap";
+  const setBadge = (t) => { badge.textContent = t; };
+  setBadge("⚪");
+  badge.title = "وضعیت داده زنده";
+  $("metaLine").after(badge);
+  const refBtn = document.createElement("button");
+  refBtn.className = "btn"; refBtn.style.cssText = "padding:4px 10px;font-size:.8rem;margin-right:6px";
+  refBtn.textContent = "🔄 به‌روزرسانی";
+  refBtn.title = "دریافت تازه‌ترین داده";
+  badge.after(refBtn);
+
+  function validLive(d) {
+    if (!d || typeof d !== "object") return false;
+    if (typeof d.version !== "string") return false;
+    if (!Array.isArray(d.postings)) return false;
+    if (!d.meta || isNaN(Date.parse(d.meta.generated_at || ""))) return false;
+    for (const p of d.postings) {
+      if (!p || typeof p.source !== "string" || typeof p.external_id !== "string" ||
+          typeof p.kind !== "string" || typeof p.title !== "string") return false;
+    }
+    return true;
+  }
+  function applyLive(d) {
+    D.postings = d.postings; D.groups = d.groups || []; D.digest = d.digest || { picks: [] };
+    D.meta = d.meta || {}; D.version = d.version; D.institutions = d.institutions || {};
+    D.priority_countries = d.priority_countries || [];
+    D.funding_accepted = d.funding_accepted || D.funding_accepted;
+    D.eligibility_labels = d.eligibility_labels || D.eligibility_labels;
+    delete D._fromCache;
+    byKey.clear(); D.postings.forEach((p) => byKey.set(pkey(p), p));
+    // cache the bundle so the app opens offline after its first load
+    const prev = store.get("eof_cache", null);
+    if (!prev || !prev.data || !prev.data.meta || prev.data.meta.generated_at !== d.meta.generated_at) {
+      store.set("eof_cache", { at: Date.now(), data: d });
+    }
+    $("metaLine").textContent = `${D.postings.filter((p) => !p.excluded).length} آگهی فعال • آخرین به‌روزرسانی: ${(D.meta.generated_at || "").slice(0, 10)}`;
+    $("footMeta").textContent = `نسخه داده: ${D.version || "v2"} • منابع: ${(D.meta.sources || []).join("، ")}`;
+    state.limit = PAGE; render();
+  }
+  function showNotice(html) {
+    $("results").innerHTML = `<div class="empty" style="text-align:center;padding:48px 16px">${html}</div>`;
+  }
+  let loading = false;
+  function load() {
+    if (loading) return; loading = true; setBadge("🟡 در حال دریافت…");
+    const s = document.createElement("script");
+    let settled = false;
+    const to = setTimeout(() => fin("timeout"), 15000);
+    function fin(reason, data) {
+      if (settled) return; settled = true; clearTimeout(to); loading = false;
+      try { s.remove(); } catch (e) {}
+      if (reason === "ok" && validLive(data)) { applyLive(data); setBadge("🟢 زنده"); }
+      else {
+        setBadge("⚪ آفلاین");
+        badge.title = "دریافت داده زنده ناموفق بود (" + reason + ")";
+        if (!D.postings.length) {
+          showNotice(`⚪ اتصال به داده زنده برقرار نشد.<br><span class="meta">برای اولین بار به اینترنت نیاز است.</span><br><br><button class="btn primary" id="retryLive">🔄 تلاش مجدد</button>`);
+          $("retryLive").onclick = load;
+        }
+      }
+      window.__EOF_LIVE__ = undefined;
+    }
+    s.onload = () => fin("ok", window.__EOF_LIVE__);
+    s.onerror = () => fin("network");
+    s.async = true;
+    s.src = LIVE_URL + (LIVE_URL.indexOf("?") < 0 ? "?" : "&") + "t=" + Date.now(); // cache-buster
+    document.head.appendChild(s);
+  }
+  refBtn.onclick = load;
+  if (!D.postings.length) {
+    showNotice(`🟡 در حال دریافت تازه‌ترین داده…<br><span class="meta">برای اولین بار به اینترنت نیاز است</span>`);
+  }
+  load(); // auto-fetch on every open
+})();
+
+/* single-file build: service worker omitted — the whole app is one local file */
+})();
+
+</script>
+</body>
+</html>
