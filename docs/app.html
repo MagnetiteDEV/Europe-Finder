@@ -3,6 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="color-scheme" content="light dark">
 <title>Europe Opportunity Finder — فرصت‌های اروپا</title>
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
@@ -102,25 +103,57 @@ body.lock{overflow:hidden}
 .tracker{display:grid;gap:8px;margin:10px 0;padding:10px;border:1px solid var(--line);border-radius:10px}
 .tracker select,.tracker textarea{font:inherit;padding:6px 8px;border:1px solid var(--line);border-radius:8px;background:var(--card);color:var(--ink);width:100%}
 #mDismiss{margin-top:6px}
+
+/* ===== v2.4 audit fixes ===== */
+/* FIX-20: WCAG AA contrast for the white-on-colour fit pills (were 3.2-3.7:1) */
+:root{--g1:#15803d;--g2:#0f766e;--g3:#b45309;--g4:#6b7280}
+.sr{position:absolute;width:1px;height:1px;margin:-1px;padding:0;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap;border:0}
+#toast{position:fixed;inset-inline:16px;bottom:calc(16px + env(safe-area-inset-bottom,0px));z-index:40;background:#111827;color:#fff;padding:10px 14px;border-radius:12px;font-size:.9rem;text-align:center;box-shadow:0 6px 20px rgba(0,0,0,.35)}
+/* FIX-16/safe-area (iOS notch, landscape, home indicator) */
+body{padding-left:env(safe-area-inset-left,0px);padding-right:env(safe-area-inset-right,0px)}
+.topbar{padding-top:calc(14px + env(safe-area-inset-top,0px))}
+footer{padding-bottom:calc(20px + env(safe-area-inset-bottom,0px))}
+.sheet{max-height:92vh;max-height:92dvh;overscroll-behavior:contain;-webkit-overflow-scrolling:touch;padding-bottom:calc(20px + env(safe-area-inset-bottom,0px))}
+.desc{overscroll-behavior:contain}
+body.lock{overflow:hidden;position:fixed;left:0;right:0;width:100%}
+/* FIX-20: dark mode — these had light-on-light / dark-on-dark text */
+.filters input[type=search]{background:var(--card);color:var(--ink)}
+.savebtn,.more{color:var(--ink)}
+.savebtn.on{color:#713f12}
+@media(prefers-color-scheme:dark){
+.why li{background:#12301f;color:#d1fae5}.why li.flag{background:#3b1518;color:#fecaca}
+.savebtn.on{background:#4a3f0b;border-color:#a16207;color:#fef3c7}
+.filters input[type=search]::placeholder{color:var(--muted)}
+}
+/* FIX-20: touch targets >= 40-44px and 16px form controls (iOS Safari zooms the page on focus below 16px) */
+@media(pointer:coarse){
+.savebtn{padding:9px 16px;font-size:.85rem;min-height:40px}
+.x{width:44px;height:44px}.sheet h2{padding-left:52px}
+.tools .btn{padding:10px 14px;font-size:.85rem}
+.tabs button{min-height:44px}
+.row select{font-size:16px;min-height:44px}
+.checks label{min-height:32px}.checks input{width:20px;height:20px}
+.btn{min-height:44px}
+}
 </style>
 </head>
 <body>
-<header class="topbar"><div><h1>Europe Opportunity Finder</h1><p id="metaLine" class="meta"></p></div><span class="badge">v2.3 • اتصال زنده</span></header>
+<header class="topbar"><div><h1>Europe Opportunity Finder</h1><p id="metaLine" class="meta"></p></div><span class="badge">v2.4 • اتصال زنده</span></header>
 <div id="digestBar" class="digest hidden"></div>
 <nav class="tabs" id="tabs" role="tablist">
-<button data-tab="phd" class="active" role="tab">🎓 دکتری <span class="tcount" id="cPhd"></span></button>
-<button data-tab="job" role="tab">💼 فرصت‌های شغلی <span class="tcount" id="cJob"></span></button>
-<button data-tab="master" role="tab">📚 مستر با فاند <span class="tcount" id="cMaster"></span></button>
-<button data-tab="scholarship" role="tab">🏛️ بورس‌های دولتی و منطقه‌ای <span class="tcount" id="cSch"></span></button>
+<button data-tab="phd" class="active" role="tab" aria-controls="results">🎓 دکتری <span class="tcount" id="cPhd"></span></button>
+<button data-tab="job" role="tab" aria-controls="results">💼 فرصت‌های شغلی <span class="tcount" id="cJob"></span></button>
+<button data-tab="master" role="tab" aria-controls="results">📚 مستر با فاند <span class="tcount" id="cMaster"></span></button>
+<button data-tab="scholarship" role="tab" aria-controls="results">🏛️ بورس‌های دولتی و منطقه‌ای <span class="tcount" id="cSch"></span></button>
 </nav>
 <section class="filters">
-<input id="q" type="search" placeholder="جست‌وجو در عنوان، سازمان یا متن آگهی…" aria-label="جست‌وجو">
+<input id="q" type="search" placeholder="جست‌وجو در عنوان، سازمان یا متن آگهی…" aria-label="جست‌وجو" enterkeyhint="search" autocomplete="off">
 <div class="row">
-<select id="fGroup"><option value="">همه گروه‌های رشته‌ای</option></select>
-<select id="fCountry"><option value="">همه کشورها</option></select>
-<select id="fBand"><option value="">هر تناسبی</option><option>تناسب قوی</option><option>تناسب متوسط</option><option>تناسب ضعیف</option><option>حذف‌شده</option></select>
-<select id="fSource"><option value="">همه منابع</option></select>
-<select id="fSort"><option value="fit">مرتب‌سازی: تناسب</option><option value="priority">اولویت کشور + تناسب</option><option value="deadline">نزدیک‌ترین ددلاین</option><option value="newest">جدیدترین</option></select>
+<select id="fGroup" aria-label="گروه رشته‌ای"><option value="">همه گروه‌های رشته‌ای</option></select>
+<select id="fCountry" aria-label="کشور"><option value="">همه کشورها</option></select>
+<select id="fBand" aria-label="سطح تناسب"><option value="">هر تناسبی</option><option>تناسب قوی</option><option>تناسب متوسط</option><option>تناسب ضعیف</option><option>حذف‌شده</option></select>
+<select id="fSource" aria-label="منبع"><option value="">همه منابع</option></select>
+<select id="fSort" aria-label="مرتب‌سازی"><option value="fit">مرتب‌سازی: تناسب</option><option value="priority">اولویت کشور + تناسب</option><option value="deadline">نزدیک‌ترین ددلاین</option><option value="newest">جدیدترین</option></select>
 </div>
 <div class="row checks">
 <label title="دکتری: فقط استخدام با حقوق یا بورسیه کامل تأییدشده — آگهی‌های استخدامی دانشگاهی فقط با تصریح «بدون فاند» حذف می‌شوند"><input type="checkbox" id="cFunded" checked> فقط تأمین مالی تأییدشده</label>
@@ -133,14 +166,16 @@ body.lock{overflow:hidden}
 </div>
 </section>
 <details class="panel" id="coveragePanel"><summary>📡 پوشش منابع و سیاست جست‌وجو</summary><div id="coverageBody" class="pad"></div></details>
-<main id="results" aria-live="polite"></main>
+<div id="srStatus" class="sr" role="status" aria-live="polite"></div>
+<main id="results" role="tabpanel" aria-label="نتایج"></main>
 <div id="modal" class="modal hidden" role="dialog" aria-modal="true" aria-label="جزئیات آگهی"><div class="sheet"><button id="mClose" class="x" aria-label="بستن">✕</button><div id="mBody"></div></div></div>
 <footer><p>آگهی‌ها مستقیماً از منابع رسمی خوانده می‌شوند؛ همیشه متن اصلی را در سایت منتشرکننده بررسی کنید.</p><p id="footMeta" class="meta"></p></footer>
 <script>
-/* live-shell: data loads from EOF_LIVE_URL at runtime */
+window.EOF_DATA = {"version":"v2.4","meta":{"generated_at":""},"postings":[],"groups":[],"digest":{"picks":[]},"institutions":{},"priority_countries":[],"funding_accepted":[],"eligibility_labels":{}};
 </script>
 <script>
-/* Europe Opportunity Finder v2.3 — offline PWA frontend. Data: window.EOF_DATA (data/data.js) */
+/* Europe Opportunity Finder v2.4 — offline PWA frontend. Data: window.EOF_DATA (data/data.js)
+   v2.4 = v2.3 + audit fixes. Every fix is tagged "FIX-n" in a comment. */
 (function () {
 "use strict";
 const D = window.EOF_DATA || {};
@@ -151,73 +186,156 @@ const FA_MONTHS = ["ژانویه","فوریه","مارس","آوریل","مه","�
 const CC_FA = {GB:"بریتانیا",IE:"ایرلند",FR:"فرانسه",DE:"آلمان",NL:"هلند",BE:"بلژیک",ES:"اسپانیا",IT:"ایتالیا",PT:"پرتغال",SE:"سوئد",NO:"نروژ",DK:"دانمارک",FI:"فنلاند",AT:"اتریش",CH:"سوئیس",PL:"لهستان",CZ:"چک",HU:"مجارستان",GR:"یونان",HR:"کرواسی",RO:"رومانی",US:"آمریکا",CA:"کانادا",CN:"چین",JP:"ژاپن",KR:"کره جنوبی",AU:"استرالیا",EU:"اتحادیه اروپا"};
 const ccName = (c) => CC_FA[c] || c || "نامشخص";
 const BAND_CLASS = {"تناسب قوی":"f0","تناسب متوسط":"f1","تناسب ضعیف":"f2","حذف‌شده":"fx"};
-const FUND_OK = new Set(D.funding_accepted || []);
-const ELIG = D.eligibility_labels || {};
 const PAGE = 50;
+const CACHE_KEY = "eof_live_cache";
+const isObj = (v) => !!v && typeof v === "object" && !Array.isArray(v);
+const esc = (s) => String(s == null ? "" : s).replace(/[&<>"']/g, (c) => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+// FIX-17 (RTL): English titles inside an RTL paragraph flip their parentheses/punctuation; <bdi> isolates them.
+const bdi = (s) => `<bdi>${esc(s)}</bdi>`;
+const safeUrl = (u) => { try { const x = new URL(u); return /^https?:$/.test(x.protocol) ? x.href : ""; } catch (e) { return ""; } };
 
-// storage never throws (private mode / corrupt values)
+// ---- small toast (FIX-3/5: failures used to be silent) ----
+let toastTimer;
+function toast(msg) {
+  let el = $("toast");
+  if (!el) { el = document.createElement("div"); el.id = "toast"; el.setAttribute("role", "status"); document.body.appendChild(el); }
+  el.textContent = msg; el.classList.remove("hidden");
+  clearTimeout(toastTimer); toastTimer = setTimeout(() => el.classList.add("hidden"), 5000);
+}
+
+// storage never throws (private mode / corrupt values). FIX-3: it now reports failure and frees the
+// live-data cache first (user data is more valuable than the cache) instead of failing silently.
 const store = {
   get(k, d) { try { const v = localStorage.getItem(k); return v == null ? d : JSON.parse(v); } catch (e) { return d; } },
-  set(k, v) { try { localStorage.setItem(k, JSON.stringify(v)); } catch (e) {} },
+  set(k, v) {
+    let s; try { s = JSON.stringify(v); } catch (e) { return false; }
+    try { localStorage.setItem(k, s); return true; } catch (e) {}
+    if (k !== CACHE_KEY) { try { localStorage.removeItem(CACHE_KEY); localStorage.setItem(k, s); return true; } catch (e2) {} }
+    return false;
+  },
 };
-const pkey = (p) => p.source + "::" + p.external_id;
-// LIVE-SHELL (Pages build has no embedded data): restore the last cached
-// bundle so the app still opens offline after its first successful load.
-if (!D.postings.length) {
-  const _c = store.get("eof_cache", null);
-  if (_c && _c.data && Array.isArray(_c.data.postings) && _c.data.postings.length) {
-    ["postings", "groups", "digest", "meta", "version", "institutions",
-     "priority_countries", "funding_accepted", "eligibility_labels"].forEach((k) => {
-      if (_c.data[k] !== undefined) D[k] = _c.data[k];
-    });
-    D._fromCache = true;
+const warnStorage = () => toast("⚠️ ذخیره در حافظهٔ مرورگر ممکن نشد (حافظه پر یا غیرفعال است). از «⬇ پشتیبان» استفاده کنید.");
+
+// ---- live payload validation / adoption (moved to top level so the offline cache can use it) ----
+function validLive(d) {
+  if (!d || typeof d !== "object") return false;
+  if (typeof d.version !== "string") return false;
+  if (!Array.isArray(d.postings)) return false;
+  if (!d.meta || isNaN(Date.parse(d.meta.generated_at || ""))) return false;
+  for (const p of d.postings) {
+    if (!p || typeof p.source !== "string" || typeof p.external_id !== "string" ||
+        typeof p.kind !== "string" || typeof p.title !== "string") return false;
   }
+  return true;
 }
-const byKey = new Map(D.postings.map((p) => [pkey(p), p]));
+function adopt(d) {
+  D.postings = d.postings; D.groups = d.groups || []; D.digest = d.digest || { picks: [] };
+  D.meta = d.meta || {}; D.version = d.version; D.institutions = d.institutions || {};
+  D.priority_countries = d.priority_countries || [];
+  D.funding_accepted = d.funding_accepted || D.funding_accepted;
+  D.eligibility_labels = d.eligibility_labels || D.eligibility_labels;
+}
+// FIX-2: the last successfully fetched live payload is cached, so an offline launch shows the newest
+// data seen — not the (older) snapshot baked into this file.
+let fromCache = false;
+(function adoptCache() {
+  try {
+    const raw = localStorage.getItem(CACHE_KEY); if (!raw) return;
+    const c = JSON.parse(raw), base = Date.parse((D.meta || {}).generated_at || "");
+    if (validLive(c) && (isNaN(base) || Date.parse(c.meta.generated_at) > base)) { adopt(c); fromCache = true; }
+  } catch (e) {}
+})();
+
+const pkey = (p) => p.source + "::" + p.external_id;
+// derived state is rebuilt by syncDerived() — FIX-1: it used to be frozen at startup, so live data
+// never updated the digest picks, the funding whitelist or the eligibility labels.
+let FUND_OK = new Set(), ELIG = {}, digestIds = new Set();
+const byKey = new Map();
+function syncDerived() {
+  FUND_OK = new Set(D.funding_accepted || []); ELIG = D.eligibility_labels || {};
+  digestIds = new Set(((D.digest || {}).picks || []).map(pkey));
+  byKey.clear(); D.postings.forEach((p) => byKey.set(pkey(p), p));
+}
+syncDerived();
+
+// FIX-4: snapshots never carry search-cache / stale markers (they used to leak `_h` into storage + backups).
+const clean = (p) => { const o = Object.assign({}, p); delete o._h; delete o._stale; return o; };
+
 // saved = key -> snapshot, so a saved posting survives removal from fresh data
 let saved = store.get("eof_saved2", null);
-if (!saved || typeof saved !== "object" || Array.isArray(saved)) {
+if (!isObj(saved)) {
   saved = {};
   const old = store.get("eof_saved", []);
-  (Array.isArray(old) ? old : []).forEach((k) => { saved[k] = byKey.get(k) || { _missing: true }; });
+  (Array.isArray(old) ? old : []).forEach((k) => { saved[k] = byKey.get(k) ? clean(byKey.get(k)) : { _missing: true }; });
   store.set("eof_saved2", saved);
 }
-const persist = () => store.set("eof_saved2", saved);
-const track = store.get("eof_track", {}), dismissed = store.get("eof_dismissed", {});
+const persist = () => { if (!store.set("eof_saved2", saved)) warnStorage(); };
+let track = store.get("eof_track", {}), dismissed = store.get("eof_dismissed", {});
+if (!isObj(track)) track = {};
+if (!isObj(dismissed)) dismissed = {};
 let jalali = store.get("eof_jalali", false);
-const saveAux = () => { store.set("eof_track", track); store.set("eof_dismissed", dismissed); store.set("eof_jalali", jalali); };
+const saveAux = () => {
+  const a = store.set("eof_track", track), b = store.set("eof_dismissed", dismissed), c = store.set("eof_jalali", jalali);
+  if (!(a && b && c)) warnStorage();
+};
+// FIX-14: refresh saved snapshots from fresh data (also heals old `{_missing:true}` entries) and drop junk.
+function syncSaved() {
+  let changed = false;
+  Object.keys(saved).forEach((k) => {
+    const v = saved[k], fresh = byKey.get(k);
+    if (fresh) { saved[k] = clean(fresh); changed = true; }
+    else if (!isObj(v)) { delete saved[k]; changed = true; }
+    else if ("_h" in v || "_stale" in v) { saved[k] = clean(v); changed = true; }
+  });
+  if (changed) persist();
+}
+syncSaved();
 const TRACK_ST = { prep: "در حال آماده‌سازی", sent: "ارسال‌شده", interview: "مصاحبه", rejected: "رد شد", accepted: "پذیرفته شد" };
 const state = { tab: "phd", limit: PAGE };
 const TAB_COUNT = { phd: "cPhd", job: "cJob", master: "cMaster", scholarship: "cSch" };
+const LIVE_TABS = { phd: 1, job: 1 };
+const TAB_KINDS = ["phd", "job", "master", "scholarship"];
 
 function parseDay(iso) { const d = new Date(iso + "T12:00:00"); return isNaN(d) ? null : d; }
-// FIX: Intl with the Persian calendar can throw on older browsers —
-// never let date formatting kill the whole app.
+// FIX: Intl with the Persian calendar can throw on older browsers — never let date formatting kill the app.
 let JF = null;
 try { JF = new Intl.DateTimeFormat("fa-IR-u-ca-persian", { weekday: "long", day: "numeric", month: "long", year: "numeric" }); } catch (e) { JF = null; }
 function faDate(iso) { if (!iso) return ""; const d = parseDay(iso); if (!d) return String(iso); return (jalali && JF) ? JF.format(d) : `${FA_DAYS[d.getDay()]} ${d.getDate()} ${FA_MONTHS[d.getMonth()]} ${d.getFullYear()}`; }
-function daysLeft(iso) { if (!iso) return null; const d = parseDay(iso); return d ? Math.ceil((d - Date.now()) / 86400000) : null; }
-const esc = (s) => String(s == null ? "" : s).replace(/[&<>"']/g, (c) => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
-const safeUrl = (u) => { try { const x = new URL(u); return /^https?:$/.test(x.protocol) ? x.href : ""; } catch (e) { return ""; } };
+// FIX-9: whole calendar days (deadline noon vs. today's midnight). The old ceil() version kept
+// yesterday's deadline "alive" (0 days left) until noon of the following day.
+function daysLeft(iso) { if (!iso) return null; const d = parseDay(iso); if (!d) return null; const t = new Date(); t.setHours(0, 0, 0, 0); return Math.floor((d - t) / 864e5); }
 const SRC_FA = { nature: "Nature Careers", adzuna: "Adzuna" };
 const ATS_FA = { workday:"Workday", varbi:"Varbi", wp:"سایت دانشگاه", volcanic:"Volcanic", kuleuven:"KU Leuven", greenhouse:"Greenhouse", lever:"Lever", ashby:"Ashby" };
 const srcName = (s) => SRC_FA[s] || (s === "curated:master" || s === "curated:scholarship" ? "مسیر منتخب" : (String(s).startsWith("ats:") ? ATS_FA[s.slice(4)] || s.slice(4) : s));
-const hay = (p) => p._h || (p._h = ((p.title || "") + " " + (p.organization || "") + " " + (p.description || "")).toLowerCase());
+// FIX-13: search normalises Arabic/Persian letter + digit variants and also looks at city, country (fa),
+// groups and matched terms. FIX-4: the cache lives in a WeakMap, not on the posting object.
+const norm = (s) => String(s || "").toLowerCase().replace(/ي/g, "ی").replace(/ك/g, "ک").replace(/[۰-۹]/g, (c) => c.charCodeAt(0) - 1776).replace(/[٠-٩]/g, (c) => c.charCodeAt(0) - 1632);
+const hayCache = new WeakMap();
+const hay = (p) => {
+  let h = hayCache.get(p);
+  if (h === undefined) { h = norm([p.title, p.organization, p.city, ccName(p.country), (p.groups || []).join(" "), (p.subfields || []).join(" "), p.description].join(" ")); hayCache.set(p, h); }
+  return h;
+};
 
-// filter controls
-D.groups.forEach((g) => $("fGroup").insertAdjacentHTML("beforeend", `<option value="${esc(g.fa)}">${esc(g.fa)}</option>`));
-[...new Set(D.postings.map((p) => p.country).filter(Boolean))].sort().forEach((c) => $("fCountry").insertAdjacentHTML("beforeend", `<option value="${esc(c)}">${esc(ccName(c))}</option>`));
-[...new Set(D.postings.map((p) => p.source))].sort().forEach((s) => $("fSource").insertAdjacentHTML("beforeend", `<option value="${esc(s)}">${esc(srcName(s))}</option>`));
+// filter controls — FIX-1: rebuilt after live data arrives (new countries/groups/sources used to be unselectable)
+function buildFilters() {
+  const keep = { g: $("fGroup").value, c: $("fCountry").value, s: $("fSource").value };
+  $("fGroup").length = 1; $("fCountry").length = 1; $("fSource").length = 1;
+  D.groups.forEach((g) => $("fGroup").insertAdjacentHTML("beforeend", `<option value="${esc(g.fa)}">${esc(g.fa)}</option>`));
+  [...new Set(D.postings.map((p) => p.country).filter(Boolean))].sort().forEach((c) => $("fCountry").insertAdjacentHTML("beforeend", `<option value="${esc(c)}">${esc(ccName(c))}</option>`));
+  [...new Set(D.postings.map((p) => p.source))].sort().forEach((s) => $("fSource").insertAdjacentHTML("beforeend", `<option value="${esc(s)}">${esc(srcName(s))}</option>`));
+  [["fGroup", keep.g], ["fCountry", keep.c], ["fSource", keep.s]].forEach(([id, v]) => { $(id).value = v; if ($(id).value !== v) $(id).value = ""; });
+}
+buildFilters();
 
-const digestIds = new Set((D.digest.picks || []).map(pkey));
 function refreshDigestBar() {
-  const bar = $("digestBar"), show = digestIds.size && (state.tab === "phd" || state.tab === "job");
+  const bar = $("digestBar"), show = digestIds.size && LIVE_TABS[state.tab];
   bar.classList.toggle("hidden", !show);
-  if (show) bar.innerHTML = `✨ <b>${digestIds.size} پیشنهاد برتر</b> با تناسب قوی <span class="meta">(${esc((D.digest.generated_at || "").slice(0, 10))})</span> — تیک «فقط برترین پیشنهادها» را بزنید.`;
+  if (show) bar.innerHTML = `✨ <b>${digestIds.size} پیشنهاد برتر</b> با تناسب قوی <span class="meta">(${esc(((D.digest || {}).generated_at || "").slice(0, 10))})</span> — تیک «فقط برترین پیشنهادها» را بزنید.`;
 }
 
 const f = () => ({
-  q: $("q").value.trim().toLowerCase(), group: $("fGroup").value, country: $("fCountry").value, band: $("fBand").value, source: $("fSource").value, sort: $("fSort").value,
+  q: norm($("q").value.trim()), group: $("fGroup").value, country: $("fCountry").value, band: $("fBand").value, source: $("fSource").value, sort: $("fSort").value,
   funded: $("cFunded").checked, priority: $("cPriority").checked, onlyDeadline: $("cDeadline").checked, onlyDigest: $("cDigest").checked,
   onlySaved: $("cSaved").checked, showExcluded: $("cExcluded").checked, showExpired: $("cExpired").checked,
 });
@@ -228,25 +346,25 @@ function fundedPass(p) {
 }
 // pool = fresh data + saved snapshots no longer in the data (marked stale)
 function pool() {
-  const extra = Object.entries(saved).filter(([k, v]) => !byKey.has(k) && v && !v._missing).map(([, v]) => Object.assign({}, v, { _stale: true }));
+  const extra = Object.entries(saved).filter(([k, v]) => !byKey.has(k) && isObj(v) && !v._missing && typeof v.title === "string").map(([, v]) => Object.assign({}, v, { _stale: true }));
   return extra.length ? D.postings.concat(extra) : D.postings;
 }
 function passes(p, x, tab) {
   if ((p.kind || "job") !== tab) return false;
   const isSaved = !!saved[pkey(p)];
-  // FIX: "saved only" used to early-return and ignore every other filter
-  // (search box, group, country...). Now it composes with all filters.
+  // "saved only" composes with every other filter (search, group, country...)
   if (x.onlySaved && !isSaved) return false;
-  // stale snapshots (saved items removed from fresh data) only surface
-  // in the "saved" view, never in the normal list
+  // stale snapshots (saved items removed from fresh data) only surface in the "saved" view
   if (p._stale && !x.onlySaved) return false;
   if (dismissed[pkey(p)]) return false;
-  if (p.excluded && !x.showExcluded) return false;
+  // FIX-8: choosing the band "حذف‌شده" now shows excluded items instead of an unexplained empty list
+  if (p.excluded && !x.showExcluded && x.band !== "حذف‌شده") return false;
   if (x.funded && !fundedPass(p)) return false;
   if (!x.showExpired && p.deadline && (daysLeft(p.deadline) ?? 0) < 0) return false;
   if (x.group && !(p.groups || []).includes(x.group)) return false;
   if (x.country && p.country !== x.country) return false;
-  if (x.band && p.fit_band !== x.band) return false;
+  // FIX-19: curated routes have no real fit score (always 0 / "weak") — the band filter must not hide them
+  if (x.band && !p.curated && p.fit_band !== x.band) return false;
   if (x.source && p.source !== x.source) return false;
   if (x.priority && !p.priority_country) return false;
   if (x.onlyDeadline && !p.deadline) return false;
@@ -254,44 +372,53 @@ function passes(p, x, tab) {
   if (x.q && !hay(p).includes(x.q)) return false;
   return true;
 }
+const fit = (p) => Number(p.fit_score) || 0;
 const SORTS = {
-  priority: (a, b) => ((b.priority_country ? 1 : 0) - (a.priority_country ? 1 : 0)) || b.fit_score - a.fit_score,
+  priority: (a, b) => ((b.priority_country ? 1 : 0) - (a.priority_country ? 1 : 0)) || fit(b) - fit(a),
   deadline: (a, b) => (a.deadline || "9999").localeCompare(b.deadline || "9999"),
   newest: (a, b) => (b.posted_date || "").localeCompare(a.posted_date || ""),
-  fit: (a, b) => b.fit_score - a.fit_score,
+  fit: (a, b) => fit(b) - fit(a),
 };
 function filtered() { const x = f(); return pool().filter((p) => passes(p, x, state.tab)).sort(SORTS[x.sort] || SORTS.fit); }
 
 // tab counts use the SAME filters as the list
 function refreshTabs() {
   const x = f(), P = pool(), c = { phd: 0, job: 0, master: 0, scholarship: 0 };
-  Object.keys(c).forEach((t) => { c[t] = P.reduce((n, p) => n + (passes(p, x, t) ? 1 : 0), 0); $(TAB_COUNT[t]).textContent = `(${c[t]})`; });
+  // FIX-7: the digest filter is disabled (and reset) on curated tabs, so counts must ignore it there too
+  const xc = Object.assign({}, x, { onlyDigest: false });
+  Object.keys(c).forEach((t) => { const xx = LIVE_TABS[t] ? x : xc; c[t] = P.reduce((n, p) => n + (passes(p, xx, t) ? 1 : 0), 0); $(TAB_COUNT[t]).textContent = `(${c[t]})`; });
   document.querySelectorAll("#tabs button").forEach((b) => { const on = b.dataset.tab === state.tab; b.classList.toggle("active", on); b.setAttribute("aria-selected", on); });
-  // FIX: the digest checkbox is meaningless on curated tabs (no digest picks
-  // there) — disable it instead of showing a confusing empty list.
-  const liveTab = state.tab === "phd" || state.tab === "job";
+  const liveTab = !!LIVE_TABS[state.tab];
   $("cDigest").disabled = !liveTab;
   if (!liveTab) $("cDigest").checked = false;
   refreshDigestBar();
 }
 
-const meta = D.meta;
-$("metaLine").textContent = `${D.postings.filter((p) => !p.excluded).length} آگهی فعال • آخرین به‌روزرسانی: ${(meta.generated_at || "").slice(0, 10)}`;
-$("footMeta").textContent = `نسخه داده: ${D.version || "v2"} • منابع: ${(meta.sources || []).join("، ")}`;
-(function coverage() {
-  const inst = D.institutions || {};
+// FIX-26: "active" = in a visible tab, not excluded, not past its deadline (it used to count everything)
+const isActive = (p) => !p.excluded && TAB_KINDS.includes(p.kind || "job") && !(p.deadline && (daysLeft(p.deadline) ?? 0) < 0);
+function setMeta() {
+  $("metaLine").textContent = `${D.postings.filter(isActive).length} آگهی فعال • آخرین به‌روزرسانی: ${(D.meta.generated_at || "").slice(0, 10)}`;
+  $("footMeta").textContent = `نسخه داده: ${D.version || "v2"} • منابع: ${(D.meta.sources || []).join("، ")}`;
+}
+setMeta();
+// FIX-1: re-runnable (used to run once at startup, so the coverage panel never reflected live data)
+function coverage() {
+  const inst = D.institutions || {}, num = (v) => Number(v) || 0;
   const rows = (inst.connected || []).map((c) => { const u = safeUrl(c.careers_url); return `<li><b>${esc(c.name)}</b> <span class="meta">${esc(ccName(c.country))} • ${esc(c.ats)}${u ? ` • <a href="${esc(u)}" target="_blank" rel="noopener noreferrer">صفحه فرصت‌ها ↗</a>` : ""}</span></li>`; }).join("");
-  $("coverageBody").innerHTML = `<p>📡 <b>${inst.connected_count || 0} دانشگاه</b> با اتصال زنده تأییدشده، از میان ${inst.prospect_count || 0} مؤسسهٔ هدف در فهرست اکتشافی.</p><ul class="instlist">${rows}</ul><p class="meta">سیاست‌ها: فیلتر پیش‌فرض فقط «استخدام دکتری با حقوق» یا «بورسیه کامل تأییدشده» را نشان می‌دهد • آگهی‌های مهندسی‌محور به‌صورت خودکار حذف می‌شوند • وضعیت واجد شرایط بودن هرگز حدس زده نمی‌شود • کشورهای اولویت‌دار: ${esc((D.priority_countries || []).map(ccName).join("، "))}</p>`;
-})();
+  $("coverageBody").innerHTML = `<p>📡 <b>${num(inst.connected_count)} دانشگاه</b> با اتصال زنده تأییدشده، از میان ${num(inst.prospect_count)} مؤسسهٔ هدف در فهرست اکتشافی.</p><ul class="instlist">${rows}</ul><p class="meta">سیاست‌ها: فیلتر پیش‌فرض فقط «استخدام دکتری با حقوق» یا «بورسیه کامل تأییدشده» را نشان می‌دهد • آگهی‌های مهندسی‌محور به‌صورت خودکار حذف می‌شوند • وضعیت واجد شرایط بودن هرگز حدس زده نمی‌شود • کشورهای اولویت‌دار: ${esc((D.priority_countries || []).map(ccName).join("، "))}</p>`;
+}
+coverage();
 
 // rendering
 const pill = (c, t, title) => `<span class="pill ${c}"${title ? ` title="${esc(title)}"` : ""}>${t}</span>`;
 function fundPill(p) { return pill(FUND_OK.has(p.funding_category) ? "fundok" : "fundwarn", `💰 ${esc(p.funding_fa || "")}`, (p.funding_notes || []).join("؛ ")); }
+// FIX-19: curated routes show no fake "weak fit 0" pill
+const fitPill = (p) => p.curated ? "" : pill(`fit ${BAND_CLASS[p.fit_band] || "f2"}`, `${esc(p.fit_band)} ${esc(p.fit_score)}`);
 function deadlinePill(p) {
   if (p.curated && p.deadline_note) return pill("deadline", `📅 ${esc(p.deadline_note)}`);
   if (!p.deadline) return "";
   const n = daysLeft(p.deadline);
-  const txt = n === null ? faDate(p.deadline) : n < 0 ? "ددلاین گذشته" : `${n} روز مانده`;
+  const txt = n === null ? faDate(p.deadline) : n < 0 ? "ددلاین گذشته" : n === 0 ? "امروز آخرین مهلت است" : `${n} روز مانده`;
   return pill(n !== null && n >= 0 && n <= 30 ? "deadline soon" : "deadline", `📅 ${esc(txt)}${n === null ? "" : " — " + esc(faDate(p.deadline))}`);
 }
 function kindPill(p) {
@@ -299,18 +426,25 @@ function kindPill(p) {
   if (p.kind === "other") return pill("kind", "🧪 سایر");
   return pill("kind", p.curated ? "📋 مسیر بورسیه" : "💼 شغلی");
 }
+const trackOf = (k) => (isObj(track[k]) ? track[k] : {});
+const trackPill = (k) => (trackOf(k).s ? pill("kind", "📌 " + esc(TRACK_ST[trackOf(k).s] || "")) : "");
 function card(p) {
   const k = pkey(p), loc = [p.city, ccName(p.country)].filter(Boolean).join("، ");
-  const sub = p.curated ? `${esc(p.organization || "")}${p.coverage_fa ? " • " + esc(p.coverage_fa) : ""}` : `${esc(p.organization || "")}${p.organization && loc ? " • " : ""}${esc(loc)}`;
-  return `<article class="card" tabindex="0" data-k="${esc(k)}"><h3>${p.priority_country ? "⭐ " : ""}${esc(p.title)}</h3><p class="sub">${sub}</p><div class="pills">` +
-    pill(`fit ${BAND_CLASS[p.fit_band] || "f2"}`, `${esc(p.fit_band)} ${esc(p.fit_score)}`) + kindPill(p) + fundPill(p) + deadlinePill(p) +
+  const sub = p.curated ? `${bdi(p.organization || "")}${p.coverage_fa ? " • " + esc(p.coverage_fa) : ""}` : `${bdi(p.organization || "")}${p.organization && loc ? " • " : ""}${bdi(loc)}`;
+  return `<article class="card" tabindex="0" data-k="${esc(k)}"><h3>${p.priority_country ? "⭐ " : ""}${bdi(p.title)}</h3><p class="sub">${sub}</p><div class="pills">` +
+    fitPill(p) + kindPill(p) + fundPill(p) + deadlinePill(p) +
     (p._stale ? pill("stale", "از داده حذف شده") : "") + trackPill(k) +
     (p.groups || []).slice(0, 2).map((g) => pill("", esc(g))).join("") +
     `<button class="savebtn${saved[k] ? " on" : ""}" data-save="${esc(k)}">${saved[k] ? "★ ذخیره شده" : "☆ ذخیره"}</button></div></article>`;
 }
 function render() {
+  // FIX-7b: reset the (curated-tab-disabled) digest checkbox BEFORE filtering — switching to a curated tab
+  // with it ticked used to show an empty list although the tab counter said otherwise.
+  if (!LIVE_TABS[state.tab]) { $("cDigest").disabled = true; $("cDigest").checked = false; }
   const list = filtered(), el = $("results");
   refreshTabs();
+  // FIX-18: screen readers get a short status line instead of re-reading the whole list (old aria-live on <main>)
+  $("srStatus").textContent = list.length ? `${list.length} آگهی` : "آگهی‌ای پیدا نشد";
   if (!list.length) { el.innerHTML = `<div class="empty">آگهی‌ای با این فیلترها پیدا نشد.<br>فیلتر «فقط تأمین مالی تأییدشده» یا «تناسب» را بازتر کنید.</div>`; return; }
   const shown = list.slice(0, state.limit);
   el.innerHTML = `<p class="meta">${list.length} آگهی</p>` + shown.map(card).join("") +
@@ -318,89 +452,153 @@ function render() {
 }
 const rerender = () => { state.limit = PAGE; render(); };
 
-const trackPill = (k) => (track[k] && track[k].s ? pill("kind", "📌 " + esc(TRACK_ST[track[k].s] || "")) : "");
 function trackerHtml(k) {
-  const t = track[k] || {};
+  const t = trackOf(k);
   const tr = saved[k] ? `<div class="tracker"><label>وضعیت درخواست <select id="mStatus"><option value="">—</option>${Object.entries(TRACK_ST).map(([v, l]) => `<option value="${v}"${t.s === v ? " selected" : ""}>${l}</option>`).join("")}</select></label><textarea id="mNote" rows="3" placeholder="یادداشت (مدارک، استاد راهنما، مراحل بعدی…)">${esc(t.n || "")}</textarea></div>` : "";
   return tr + `<button class="btn" id="mDismiss">🚫 نامربوط است (مخفی کن)</button>`;
 }
+// FIX-6: the modal can always find the snapshot it is showing (also right after un-saving a stale item)
+let lastUnsaved = null, openKey = null, modalOpener = null, scrollY = 0;
+function findPosting(k) {
+  if (byKey.get(k)) return byKey.get(k);
+  if (isObj(saved[k]) && !saved[k]._missing) return saved[k];
+  return lastUnsaved && lastUnsaved.k === k ? lastUnsaved.v : null;
+}
+// FIX-16 (iOS): overflow:hidden on <body> does not stop touch-scroll of the page behind the sheet; fixing the body does.
+function lockScroll() { if (document.body.classList.contains("lock")) return; scrollY = window.scrollY || 0; document.body.style.top = (-scrollY) + "px"; document.body.classList.add("lock"); }
+function unlockScroll() { if (!document.body.classList.contains("lock")) return; document.body.classList.remove("lock"); document.body.style.top = ""; window.scrollTo(0, scrollY); }
 function openModal(k) {
-  const p = byKey.get(k) || saved[k];
-  if (!p || p._missing) return;
+  const p = findPosting(k);
+  if (!p || p._missing || typeof p.title !== "string") return;
+  const reopen = !$("modal").classList.contains("hidden");
   const why = (p.fit_reasons || []).map((r) => `<li>✓ ${esc(r)}</li>`).join("") + (p.red_flags || []).map((r) => `<li class="flag">⚠ ${esc(r)}</li>`).join("");
   const fundNotes = (p.funding_notes || []).map((n) => `<li>💰 ${esc(n)}</li>`).join("");
   const lv = { master: "مستر", phd: "دکتری", both: "مستر و دکتری" };
   const curated = p.curated ? `<ul class="why">${p.coverage_fa ? `<li>💰 پوشش: ${esc(p.coverage_fa)}</li>` : ""}${p.deadline_note ? `<li>📅 ددلاین: ${esc(p.deadline_note)}</li>` : ""}${p.curated_eligibility ? `<li>🛂 شرایط متقاضی: ${esc(p.curated_eligibility)}</li>` : ""}${p.level ? `<li>🎓 مقطع: ${esc(lv[p.level] || p.level)}</li>` : ""}</ul>` : "";
   const url = safeUrl(p.url);
-  $("mBody").innerHTML = `<h2>${p.priority_country ? "⭐ " : ""}${esc(p.title)}</h2><p class="sub">${esc(p.organization || "")} • ${esc([p.city, ccName(p.country)].filter(Boolean).join("، "))}</p>
-<div class="pills">${pill(`fit ${BAND_CLASS[p.fit_band] || "f2"}`, `${esc(p.fit_band)} ${esc(p.fit_score)}`)}${kindPill(p)}${fundPill(p)}${deadlinePill(p)}${pill("", esc(srcName(p.source)))}${(p.also_in || []).map((x) => pill("", esc(srcName(x)))).join("")}</div>
+  $("mBody").innerHTML = `<h2>${p.priority_country ? "⭐ " : ""}${bdi(p.title)}</h2><p class="sub">${bdi(p.organization || "")} • ${bdi([p.city, ccName(p.country)].filter(Boolean).join("، "))}</p>
+<div class="pills">${fitPill(p)}${kindPill(p)}${fundPill(p)}${deadlinePill(p)}${pill("", esc(srcName(p.source)))}${(p.also_in || []).map((x) => pill("", esc(srcName(x)))).join("")}</div>
 <ul class="why">${why}${fundNotes}</ul>${curated}
 <p class="meta">وضعیت متقاضی ایرانی: <b>${esc(ELIG[p.eligibility] || p.eligibility)}</b>${p.eligibility_note ? ` — ${esc(p.eligibility_note)}` : ""}</p>
-${(p.subfields || []).length ? `<p class="meta">واژگان منطبق: ${esc(p.subfields.slice(0, 8).join("، "))}</p>` : ""}
-<div class="desc">${esc(p.description || "متن آگهی در دسترس نیست — از دکمه مشاهده آگهی استفاده کنید.")}</div>
+${(p.subfields || []).length ? `<p class="meta">واژگان منطبق: ${bdi((p.subfields || []).slice(0, 8).join("، "))}</p>` : ""}
+<div class="desc" dir="auto">${esc(p.description || "متن آگهی در دسترس نیست — از دکمه مشاهده آگهی استفاده کنید.")}</div>
 ${trackerHtml(k)}<div class="actions">${url ? `<a class="btn primary" href="${esc(url)}" target="_blank" rel="noopener noreferrer">مشاهده آگهی ↗</a>` : ""}<button class="btn" id="mSave">${saved[k] ? "★ ذخیره شده" : "☆ ذخیره"}</button></div>`;
   $("modal").classList.remove("hidden");
-  document.body.classList.add("lock"); // FIX (iOS): stop background scroll while modal is open
-  $("mSave").onclick = () => { toggleSave(k); openModal(k); };
+  lockScroll();
+  $("mSave").onclick = () => { toggleSave(k, true); openModal(k); };
   const ms = $("mStatus");
-  if (ms) { ms.onchange = () => { (track[k] = track[k] || {}).s = ms.value; saveAux(); render(); }; $("mNote").oninput = (e) => { (track[k] = track[k] || {}).n = e.target.value; saveAux(); }; }
+  if (ms) { ms.onchange = () => { track[k] = trackOf(k); track[k].s = ms.value; saveAux(); render(); }; $("mNote").oninput = (e) => { track[k] = trackOf(k); track[k].n = e.target.value; saveAux(); }; }
   $("mDismiss").onclick = () => { dismissed[k] = { t: p.title, at: Date.now() }; saveAux(); closeModal(); render(); };
-  $("mClose").focus();
+  if (reopen) $("mSave").focus();
+  else { openKey = k; modalOpener = document.activeElement; $("mClose").focus(); }
 }
-const closeModal = () => { $("modal").classList.add("hidden"); document.body.classList.remove("lock"); };
-// FIX: unsaving then re-saving a stale item (not in fresh data) used to
-// replace its snapshot with {} — the saved data was lost. Keep a stash.
-let lastUnsaved = null;
-function toggleSave(k) {
-  if (saved[k]) { lastUnsaved = { k, v: saved[k] }; delete saved[k]; }
-  else {
-    saved[k] = byKey.get(k) || (lastUnsaved && lastUnsaved.k === k ? lastUnsaved.v : null) || {};
-    lastUnsaved = null; // stash is single-use: only the immediate re-save may claim it
+// FIX-15: focus goes back to the card that opened the sheet (keyboard / screen-reader users)
+function closeModal() {
+  $("modal").classList.add("hidden"); unlockScroll();
+  let el = modalOpener && modalOpener.isConnected ? modalOpener : null;
+  if (!el && openKey) el = [...document.querySelectorAll("#results .card")].find((c) => c.dataset.k === openKey) || null;
+  if (el && el.focus) { try { el.focus({ preventScroll: true }); } catch (e) {} }
+  openKey = null; modalOpener = null;
+}
+// FIX-6: un-saving a stale item keeps a single-use stash so the immediate re-save can restore it.
+function toggleSave(k, fromModal) {
+  if (saved[k]) {
+    if (!fromModal && !byKey.has(k) && typeof confirm === "function" &&
+        !confirm("این آگهی دیگر در داده تازه نیست؛ با برداشتن ذخیره، اسنپ‌شات آن از بین می‌رود. ادامه می‌دهید؟")) return;
+    lastUnsaved = { k, v: saved[k] }; delete saved[k];
+  } else {
+    const snap = byKey.get(k) ? clean(byKey.get(k)) : (lastUnsaved && lastUnsaved.k === k ? lastUnsaved.v : null);
+    if (!snap) return; // never store an empty `{}` snapshot
+    saved[k] = snap; lastUnsaved = null; // stash is single-use
+    if (dismissed[k]) { delete dismissed[k]; saveAux(); } // FIX-27: saving an item un-hides it
   }
   persist(); render();
 }
 
 // events
 // data-health banner: stale data or adapter warnings (meta.health from tools/postprocess.py)
-(function health() {
-  const w = [], g = Date.parse(meta.generated_at || "");
-  if (isNaN(g)) w.push("تاریخ تولید داده نامشخص است"); else { const age = Math.floor((Date.now() - g) / 864e5); if (age > 3) w.push(`داده ${age} روز قدیمی است — run.sh را اجرا و دوباره منتشر کنید`); }
-  ((meta.health || {}).warnings || []).forEach((x) => w.push(x));
+// FIX-1/21: re-evaluated after live data arrives, and the message no longer tells end users to run a dev script.
+function health() {
+  const old = $("healthBar"); if (old) old.remove();
+  const w = [], g = Date.parse(D.meta.generated_at || "");
+  if (isNaN(g)) w.push("تاریخ تولید داده نامشخص است"); else { const age = Math.floor((Date.now() - g) / 864e5); if (age > 3) w.push(`داده ${age} روز قدیمی است — آنلاین شوید و «🔄 به‌روزرسانی» را بزنید`); }
+  ((D.meta.health || {}).warnings || []).forEach((x) => w.push(x));
   if (!w.length) return;
-  const el = document.createElement("div"); el.className = "digest warn"; el.setAttribute("role", "alert");
+  const el = document.createElement("div"); el.id = "healthBar"; el.className = "digest warn"; el.setAttribute("role", "alert");
   el.innerHTML = "⚠️ " + w.map(esc).join(" • "); $("digestBar").before(el);
-})();
+}
+health();
 // tools: backup/import, CSV, calendar, Jalali dates, restore dismissed
 const tb = document.createElement("div"); tb.className = "row tools";
-tb.innerHTML = `<button class="btn" id="tJson">⬇ پشتیبان</button><label class="btn">⬆ ورود پشتیبان<input type="file" id="tImport" accept="application/json" hidden></label><button class="btn" id="tCsv">⬇ CSV ذخیره‌شده‌ها</button><button class="btn" id="tIcs">📅 تقویم ددلاین‌ها</button><button class="btn" id="tJal">🗓 تاریخ شمسی</button><button class="btn" id="tRestore">↩ بازگردانی نامربوط‌ها</button>`;
+tb.innerHTML = `<button class="btn" id="tJson">⬇ پشتیبان</button><label class="btn">⬆ ورود پشتیبان<input type="file" id="tImport" accept=".json,application/json" hidden></label><button class="btn" id="tCsv">⬇ CSV ذخیره‌شده‌ها</button><button class="btn" id="tIcs">📅 تقویم ددلاین‌ها</button><button class="btn" id="tJal">🗓 تاریخ شمسی</button><button class="btn" id="tRestore">↩ بازگردانی نامربوط‌ها</button>`;
 document.querySelector(".filters").appendChild(tb);
+// FIX-12 (iOS): Safari ignores the download attribute and a bare blob: tab is a dead end in a home-screen app —
+// hand a real File to the Share Sheet ("Save to Files") when available, else fall back to a new tab / <a download>.
 function dl(name, text, type) {
-  const blob = new Blob([text], { type });
-  const url = URL.createObjectURL(blob);
-  const done = () => setTimeout(() => URL.revokeObjectURL(url), 60000);
-  // FIX (iOS): Safari ignores the download attribute — navigating to the
-  // blob would lose app state. Open in a new tab so the Share sheet can save it.
-  const isiOS = /iPad|iPhone|iPod/.test(navigator.userAgent) ||
-    (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1);
-  if (isiOS) { window.open(url, "_blank"); done(); return; }
-  const a = document.createElement("a"); a.href = url; a.download = name;
-  document.body.appendChild(a); a.click(); a.remove(); done();
+  const isiOS = /iPad|iPhone|iPod/.test(navigator.userAgent) || (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1);
+  const mime = String(type).split(";")[0];
+  function viaBlob() {
+    const url = URL.createObjectURL(new Blob([text], { type }));
+    const done = () => setTimeout(() => URL.revokeObjectURL(url), 60000);
+    if (isiOS) { const w = window.open(url, "_blank"); if (!w) toast("⚠️ مرورگر باز شدن فایل را مسدود کرد؛ پاپ‌آپ را مجاز کنید."); done(); return; }
+    const a = document.createElement("a"); a.href = url; a.download = name;
+    document.body.appendChild(a); a.click(); a.remove(); done();
+  }
+  if (isiOS && typeof navigator.share === "function" && typeof File === "function") {
+    try {
+      const file = new File([text], name, { type: mime });
+      if (!navigator.canShare || navigator.canShare({ files: [file] })) {
+        navigator.share({ files: [file], title: name }).catch((e) => { if (!e || e.name !== "AbortError") viaBlob(); });
+        return;
+      }
+    } catch (e) {}
+  }
+  viaBlob();
 }
-const savedList = () => Object.entries(saved).filter(([, v]) => v && !v._missing).map(([k, v]) => [k, byKey.get(k) || v]);
+const savedList = () => Object.entries(saved).filter(([, v]) => isObj(v) && !v._missing && typeof v.title === "string").map(([k, v]) => [k, byKey.get(k) || v]);
 $("tJson").onclick = () => dl("eof-backup.json", JSON.stringify({ app: "eof", v: 2, saved, track, dismissed,
   feedback: [...Object.entries(saved).map(([k, v]) => ({ key: k, title: (v || {}).title, label: "relevant" })), ...Object.entries(dismissed).map(([k, v]) => ({ key: k, title: v.t, label: "irrelevant" }))] }, null, 1), "application/json");
-$("tImport").onchange = (e) => { const fl = e.target.files[0]; if (!fl) return; fl.text().then((t) => { let j; try { j = JSON.parse(t); } catch (x) { return; }
-  if (!j || j.app !== "eof") return; Object.assign(saved, j.saved || {}); Object.assign(track, j.track || {}); Object.assign(dismissed, j.dismissed || {}); persist(); saveAux(); render(); }); };
+// FIX-5: import is validated (no prototype keys, objects only), reports the result, and can re-import the same file.
+const BAD_KEYS = { "__proto__": 1, "constructor": 1, "prototype": 1 };
+function mergeInto(target, src, tf) {
+  if (!isObj(src)) return 0; let n = 0;
+  Object.keys(src).forEach((k) => { if (BAD_KEYS[k] || !isObj(src[k])) return; target[k] = tf ? tf(src[k]) : src[k]; n++; });
+  return n;
+}
+function readText(fl) {
+  return new Promise((res, rej) => { const r = new FileReader(); r.onload = () => res(String(r.result)); r.onerror = () => rej(r.error); r.readAsText(fl); });
+}
+$("tImport").onchange = (e) => {
+  const inp = e.target, fl = inp.files && inp.files[0]; if (!fl) return;
+  readText(fl).then((t) => {
+    let j; try { j = JSON.parse(t); } catch (x) { toast("❌ فایل پشتیبان خوانده نشد (JSON نامعتبر)."); return; }
+    if (!isObj(j) || j.app !== "eof") { toast("❌ این فایل، پشتیبان این برنامه نیست."); return; }
+    const n = mergeInto(saved, j.saved, clean) + mergeInto(track, j.track) + mergeInto(dismissed, j.dismissed);
+    syncSaved(); persist(); saveAux(); render();
+    toast(n ? `✅ ${n} مورد از پشتیبان وارد شد.` : "ℹ️ فایل معتبر بود ولی موردی برای وارد کردن نداشت.");
+  }).catch(() => toast("❌ خواندن فایل ممکن نشد.")).then(() => { inp.value = ""; });
+};
 const csvCell = (v) => { v = String(v == null ? "" : v); if (/^[=+\-@\t\r]/.test(v)) v = "'" + v; return '"' + v.replace(/"/g, '""') + '"'; };
-$("tCsv").onclick = () => dl("eof-saved.csv", "\ufeff" + [["عنوان", "سازمان", "کشور", "ددلاین", "وضعیت", "لینک", "یادداشت"], ...savedList().map(([k, p]) => [p.title, p.organization, ccName(p.country), p.deadline, TRACK_ST[(track[k] || {}).s] || "", safeUrl(p.url), (track[k] || {}).n])].map((r) => r.map(csvCell).join(",")).join("\r\n"), "text/csv;charset=utf-8");
+// FIX-10: curated routes have no ISO deadline — export their deadline note instead of an empty cell
+$("tCsv").onclick = () => dl("eof-saved.csv", "\ufeff" + [["عنوان", "سازمان", "کشور", "ددلاین", "وضعیت", "لینک", "یادداشت"], ...savedList().map(([k, p]) => [p.title, p.organization, ccName(p.country), p.deadline || p.deadline_note, TRACK_ST[trackOf(k).s] || "", safeUrl(p.url), trackOf(k).n])].map((r) => r.map(csvCell).join(",")).join("\r\n"), "text/csv;charset=utf-8");
 const icsEsc = (t) => String(t || "").replace(/\\/g, "\\\\").replace(/[;,]/g, (c) => "\\" + c).replace(/\r?\n/g, "\\n");
+// FIX-11: RFC 5545 line folding (75 octets) + terminating CRLF; no more silently-empty calendar file
+const enc = typeof TextEncoder === "function" ? new TextEncoder() : null;
+function fold(line) {
+  if (!enc || enc.encode(line).length <= 75) return line;
+  const out = []; let cur = "", bytes = 0, limit = 75;
+  for (const ch of line) { const b = enc.encode(ch).length; if (bytes + b > limit) { out.push(cur); cur = ""; bytes = 0; limit = 74; } cur += ch; bytes += b; }
+  out.push(cur); return out.join("\r\n ");
+}
 $("tIcs").onclick = () => {
   const ev = savedList().filter(([k, p]) => p.deadline && daysLeft(p.deadline) !== null && daysLeft(p.deadline) >= 0).map(([k, p]) => {
     const d = p.deadline.replace(/-/g, ""), n = new Date(parseDay(p.deadline).getTime() + 864e5), e = n.getFullYear() + String(n.getMonth() + 1).padStart(2, "0") + String(n.getDate()).padStart(2, "0");
     return ["BEGIN:VEVENT", "UID:" + d + "-" + icsEsc(k).replace(/[^\w.-]/g, "") + "@eof", "DTSTAMP:" + new Date().toISOString().replace(/[-:]|\.\d+/g, ""), "DTSTART;VALUE=DATE:" + d, "DTEND;VALUE=DATE:" + e,
       "SUMMARY:" + icsEsc("ددلاین: " + String(p.title).slice(0, 120)), "DESCRIPTION:" + icsEsc((p.organization || "") + " " + safeUrl(p.url)),
-      "BEGIN:VALARM", "ACTION:DISPLAY", "DESCRIPTION:Deadline", "TRIGGER:-P7D", "END:VALARM", "BEGIN:VALARM", "ACTION:DISPLAY", "DESCRIPTION:Deadline", "TRIGGER:-P1D", "END:VALARM", "END:VEVENT"].join("\r\n"); });
-  dl("eof-deadlines.ics", ["BEGIN:VCALENDAR", "VERSION:2.0", "PRODID:-//EOF//v2.3//FA", ...ev, "END:VCALENDAR"].join("\r\n"), "text/calendar;charset=utf-8");
+      "BEGIN:VALARM", "ACTION:DISPLAY", "DESCRIPTION:Deadline", "TRIGGER:-P7D", "END:VALARM", "BEGIN:VALARM", "ACTION:DISPLAY", "DESCRIPTION:Deadline", "TRIGGER:-P1D", "END:VALARM", "END:VEVENT"]; });
+  if (!ev.length) { toast("ℹ️ هیچ آگهی ذخیره‌شده‌ای با ددلاین آینده برای تقویم وجود ندارد."); return; }
+  const lines = ["BEGIN:VCALENDAR", "VERSION:2.0", "PRODID:-//EOF//v2.4//FA", ...[].concat(...ev), "END:VCALENDAR"];
+  dl("eof-deadlines.ics", lines.map(fold).join("\r\n") + "\r\n", "text/calendar;charset=utf-8");
 };
 const jalLabel = () => { $("tJal").textContent = jalali ? "🗓 تاریخ میلادی" : "🗓 تاریخ شمسی"; };
 $("tJal").onclick = () => { jalali = !jalali; saveAux(); jalLabel(); render(); }; jalLabel();
@@ -418,13 +616,22 @@ $("results").addEventListener("click", (e) => {
 $("results").addEventListener("keydown", (e) => { const c = e.target.classList && e.target.classList.contains("card"); if (c && (e.key === "Enter" || e.key === " ")) { e.preventDefault(); openModal(e.target.dataset.k); } });
 $("mClose").onclick = closeModal;
 $("modal").addEventListener("click", (e) => { if (e.target.id === "modal") closeModal(); });
-// FIX: Escape used to close the modal even while typing in the notes
-// textarea / selects — annoying. Only close when not editing a field.
+// Escape closes the modal only when not editing a field; FIX-15: Tab is trapped inside the open dialog.
 document.addEventListener("keydown", (e) => {
-  if (e.key !== "Escape" || $("modal").classList.contains("hidden")) return;
-  const t = e.target;
-  if (t && /^(INPUT|TEXTAREA|SELECT)$/.test(t.tagName)) return;
-  closeModal();
+  if ($("modal").classList.contains("hidden")) return;
+  if (e.key === "Escape") {
+    const t = e.target;
+    if (t && /^(INPUT|TEXTAREA|SELECT)$/.test(t.tagName)) return;
+    closeModal(); return;
+  }
+  if (e.key === "Tab") {
+    const els = [...$("modal").querySelectorAll('a[href],button:not([disabled]),input:not([disabled]),select:not([disabled]),textarea:not([disabled])')];
+    if (!els.length) return;
+    const first = els[0], last = els[els.length - 1], a = document.activeElement;
+    if (!$("modal").contains(a)) { e.preventDefault(); first.focus(); }
+    else if (e.shiftKey && a === first) { e.preventDefault(); last.focus(); }
+    else if (!e.shiftKey && a === last) { e.preventDefault(); first.focus(); }
+  }
 });
 render();
 // LIVE DATA via JSONP <script> tag — works from file:// on iOS Safari,
@@ -438,7 +645,7 @@ render();
   badge.id = "liveDot";
   badge.style.cssText = "font-size:.8rem;margin-right:8px;white-space:nowrap";
   const setBadge = (t) => { badge.textContent = t; };
-  setBadge("⚪");
+  setBadge(fromCache ? "🟠 داده ذخیره‌شده" : "⚪");
   badge.title = "وضعیت داده زنده";
   $("metaLine").after(badge);
   const refBtn = document.createElement("button");
@@ -447,36 +654,10 @@ render();
   refBtn.title = "دریافت تازه‌ترین داده";
   badge.after(refBtn);
 
-  function validLive(d) {
-    if (!d || typeof d !== "object") return false;
-    if (typeof d.version !== "string") return false;
-    if (!Array.isArray(d.postings)) return false;
-    if (!d.meta || isNaN(Date.parse(d.meta.generated_at || ""))) return false;
-    for (const p of d.postings) {
-      if (!p || typeof p.source !== "string" || typeof p.external_id !== "string" ||
-          typeof p.kind !== "string" || typeof p.title !== "string") return false;
-    }
-    return true;
-  }
   function applyLive(d) {
-    D.postings = d.postings; D.groups = d.groups || []; D.digest = d.digest || { picks: [] };
-    D.meta = d.meta || {}; D.version = d.version; D.institutions = d.institutions || {};
-    D.priority_countries = d.priority_countries || [];
-    D.funding_accepted = d.funding_accepted || D.funding_accepted;
-    D.eligibility_labels = d.eligibility_labels || D.eligibility_labels;
-    delete D._fromCache;
-    byKey.clear(); D.postings.forEach((p) => byKey.set(pkey(p), p));
-    // cache the bundle so the app opens offline after its first load
-    const prev = store.get("eof_cache", null);
-    if (!prev || !prev.data || !prev.data.meta || prev.data.meta.generated_at !== d.meta.generated_at) {
-      store.set("eof_cache", { at: Date.now(), data: d });
-    }
-    $("metaLine").textContent = `${D.postings.filter((p) => !p.excluded).length} آگهی فعال • آخرین به‌روزرسانی: ${(D.meta.generated_at || "").slice(0, 10)}`;
-    $("footMeta").textContent = `نسخه داده: ${D.version || "v2"} • منابع: ${(D.meta.sources || []).join("، ")}`;
-    state.limit = PAGE; render();
-  }
-  function showNotice(html) {
-    $("results").innerHTML = `<div class="empty" style="text-align:center;padding:48px 16px">${html}</div>`;
+    adopt(d); syncDerived(); syncSaved(); buildFilters(); coverage(); setMeta(); health();
+    store.set(CACHE_KEY, d); // FIX-2 (best effort — failure just means no offline copy)
+    fromCache = false; state.limit = PAGE; render();
   }
   let loading = false;
   function load() {
@@ -487,14 +668,12 @@ render();
     function fin(reason, data) {
       if (settled) return; settled = true; clearTimeout(to); loading = false;
       try { s.remove(); } catch (e) {}
-      if (reason === "ok" && validLive(data)) { applyLive(data); setBadge("🟢 زنده"); }
+      if (reason === "ok" && !validLive(data)) reason = "invalid"; // FIX-22: a corrupt/incompatible payload used to be reported as "ok"
+      if (reason === "ok") { hideShellNotice(); applyLive(data); setBadge("🟢 زنده"); badge.title = "داده زنده دریافت شد"; }
       else {
-        setBadge("⚪ آفلاین");
-        badge.title = "دریافت داده زنده ناموفق بود (" + reason + ")";
-        if (!D.postings.length) {
-          showNotice(`⚪ اتصال به داده زنده برقرار نشد.<br><span class="meta">برای اولین بار به اینترنت نیاز است.</span><br><br><button class="btn primary" id="retryLive">🔄 تلاش مجدد</button>`);
-          $("retryLive").onclick = load;
-        }
+        setBadge(fromCache ? "🟠 آفلاین — داده ذخیره‌شده" : "⚪ آفلاین");
+        badge.title = "دریافت داده زنده ناموفق بود (" + reason + ") — آخرین داده موجود (" + ((D.meta.generated_at || "").slice(0, 10) || "؟") + ") نمایش داده می‌شود";
+        if (!D.postings.length) showShellNotice(); else hideShellNotice(); // SHELL: no data at all
       }
       window.__EOF_LIVE__ = undefined;
     }
@@ -504,16 +683,21 @@ render();
     s.src = LIVE_URL + (LIVE_URL.indexOf("?") < 0 ? "?" : "&") + "t=" + Date.now(); // cache-buster
     document.head.appendChild(s);
   }
-  refBtn.onclick = load;
-  if (!D.postings.length) {
-    showNotice(`🟡 در حال دریافت تازه‌ترین داده…<br><span class="meta">برای اولین بار به اینترنت نیاز است</span>`);
+  function showShellNotice() {
+    hideShellNotice();
+    const n = document.createElement("div");
+    n.id = "shellNotice"; n.className = "digest warn"; n.setAttribute("role", "alert");
+    n.innerHTML = '&#9888;&#65039; بدون اینترنت داده‌ای در دسترس نیست. آنلاین شوید و دوباره تلاش کنید. <button class="btn" id="retryLive" style="margin-right:8px">🔄 تلاش مجدد</button>';
+    document.querySelector(".tabs").before(n);
+    n.querySelector("#retryLive").onclick = () => { hideShellNotice(); load(); };
   }
+  function hideShellNotice() { const n = document.getElementById("shellNotice"); if (n) n.remove(); }
+  refBtn.onclick = load;
   load(); // auto-fetch on every open
 })();
 
 /* single-file build: service worker omitted — the whole app is one local file */
 })();
-
 </script>
 </body>
 </html>
