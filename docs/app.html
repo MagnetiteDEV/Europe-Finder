@@ -135,16 +135,32 @@ body.lock{overflow:hidden;position:fixed;left:0;right:0;width:100%}
 .checks label{min-height:32px}.checks input{width:20px;height:20px}
 .btn{min-height:44px}
 }
+
+/* v2.5: professors tab — only the search box applies, hide posting filters (keep tools row) */
+.filters.profmode .row:not(.tools){display:none}
+
+.more{display:block;margin:6px auto;padding:10px 22px;border:1px solid var(--line);border-radius:10px;background:var(--card);font:inherit;cursor:pointer}
+.pill.stale{background:#e5e7eb;color:#374151}
+.card:focus-visible,.btn:focus-visible,.tabs button:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+@media(prefers-color-scheme:dark){:root{--bg:#0f1220;--card:#181c2e;--ink:#e6e8f0;--muted:#9aa3b5;--line:#2a3050}
+.sheet,.row select{background:var(--card);color:var(--ink)}.pill{background:#232842;color:#c3c9d9}.desc{color:var(--ink)}
+.digest{background:#1e2447;border-color:#33407a}.x{background:#232842;color:var(--ink)}.btn{background:var(--card);color:var(--ink)}}
+.digest.warn{background:#fef3c7;border-color:#fcd34d;color:#78350f}
+.tools{margin-top:10px}.tools .btn{padding:6px 12px;font-size:.78rem}
+.tracker{display:grid;gap:8px;margin:10px 0;padding:10px;border:1px solid var(--line);border-radius:10px}
+.tracker select,.tracker textarea{font:inherit;padding:6px 8px;border:1px solid var(--line);border-radius:8px;background:var(--card);color:var(--ink);width:100%}
+#mDismiss{margin-top:6px}
 </style>
 </head>
 <body>
-<header class="topbar"><div><h1>Europe Opportunity Finder</h1><p id="metaLine" class="meta"></p></div><span class="badge">v2.4 • اتصال زنده</span></header>
+<header class="topbar"><div><h1>Europe Opportunity Finder</h1><p id="metaLine" class="meta"></p></div><span class="badge">v2.5 • اتصال زنده</span></header>
 <div id="digestBar" class="digest hidden"></div>
 <nav class="tabs" id="tabs" role="tablist">
 <button data-tab="phd" class="active" role="tab" aria-controls="results">🎓 دکتری <span class="tcount" id="cPhd"></span></button>
 <button data-tab="job" role="tab" aria-controls="results">💼 فرصت‌های شغلی <span class="tcount" id="cJob"></span></button>
 <button data-tab="master" role="tab" aria-controls="results">📚 مستر با فاند <span class="tcount" id="cMaster"></span></button>
 <button data-tab="scholarship" role="tab" aria-controls="results">🏛️ بورس‌های دولتی و منطقه‌ای <span class="tcount" id="cSch"></span></button>
+<button data-tab="professor" role="tab" aria-controls="results">👨‍🏫 اساتید <span class="tcount" id="cProf"></span></button>
 </nav>
 <section class="filters">
 <input id="q" type="search" placeholder="جست‌وجو در عنوان، سازمان یا متن آگهی…" aria-label="جست‌وجو" enterkeyhint="search" autocomplete="off">
@@ -171,7 +187,7 @@ body.lock{overflow:hidden;position:fixed;left:0;right:0;width:100%}
 <div id="modal" class="modal hidden" role="dialog" aria-modal="true" aria-label="جزئیات آگهی"><div class="sheet"><button id="mClose" class="x" aria-label="بستن">✕</button><div id="mBody"></div></div></div>
 <footer><p>آگهی‌ها مستقیماً از منابع رسمی خوانده می‌شوند؛ همیشه متن اصلی را در سایت منتشرکننده بررسی کنید.</p><p id="footMeta" class="meta"></p></footer>
 <script>
-window.EOF_DATA = {"version":"v2.4","meta":{"generated_at":""},"postings":[],"groups":[],"digest":{"picks":[]},"institutions":{},"priority_countries":[],"funding_accepted":[],"eligibility_labels":{}};
+window.EOF_DATA = {"version": "v2.5", "meta": {}, "groups": [], "funding_labels": {}, "funding_accepted": [], "priority_countries": [], "eligibility_labels": {}, "institutions": {"connected_count": 0, "prospect_count": 0, "connected": []}, "postings": [], "professors": [], "digest": {"picks": []}};
 </script>
 <script>
 /* Europe Opportunity Finder v2.4 — offline PWA frontend. Data: window.EOF_DATA (data/data.js)
@@ -231,6 +247,11 @@ function validLive(d) {
 function adopt(d) {
   D.postings = d.postings; D.groups = d.groups || []; D.digest = d.digest || { picks: [] };
   D.meta = d.meta || {}; D.version = d.version; D.institutions = d.institutions || {};
+  // v2.5: keep the snapshot's professors when a live bundle predates
+  // the professors layer (old eof-live.js has no `professors` field) —
+  // a live swap must never wipe a layer it doesn't carry.
+  if (Array.isArray(d.professors)) D.professors = d.professors;
+  else if (!Array.isArray(D.professors)) D.professors = [];
   D.priority_countries = d.priority_countries || [];
   D.funding_accepted = d.funding_accepted || D.funding_accepted;
   D.eligibility_labels = d.eligibility_labels || D.eligibility_labels;
@@ -292,7 +313,7 @@ function syncSaved() {
 syncSaved();
 const TRACK_ST = { prep: "در حال آماده‌سازی", sent: "ارسال‌شده", interview: "مصاحبه", rejected: "رد شد", accepted: "پذیرفته شد" };
 const state = { tab: "phd", limit: PAGE };
-const TAB_COUNT = { phd: "cPhd", job: "cJob", master: "cMaster", scholarship: "cSch" };
+const TAB_COUNT = { phd: "cPhd", job: "cJob", master: "cMaster", scholarship: "cSch", professor: "cProf" };
 const LIVE_TABS = { phd: 1, job: 1 };
 const TAB_KINDS = ["phd", "job", "master", "scholarship"];
 
@@ -383,10 +404,14 @@ function filtered() { const x = f(); return pool().filter((p) => passes(p, x, st
 
 // tab counts use the SAME filters as the list
 function refreshTabs() {
-  const x = f(), P = pool(), c = { phd: 0, job: 0, master: 0, scholarship: 0 };
+  const x = f(), P = pool(), c = { phd: 0, job: 0, master: 0, scholarship: 0, professor: 0 };
   // FIX-7: the digest filter is disabled (and reset) on curated tabs, so counts must ignore it there too
   const xc = Object.assign({}, x, { onlyDigest: false });
-  Object.keys(c).forEach((t) => { const xx = LIVE_TABS[t] ? x : xc; c[t] = P.reduce((n, p) => n + (passes(p, xx, t) ? 1 : 0), 0); $(TAB_COUNT[t]).textContent = `(${c[t]})`; });
+  Object.keys(c).forEach((t) => {
+    // v2.5: professors are not postings — count them by search query only
+    if (t === "professor") { c[t] = filteredProfs().length; $(TAB_COUNT[t]).textContent = `(${c[t]})`; return; }
+    const xx = LIVE_TABS[t] ? x : xc; c[t] = P.reduce((n, p) => n + (passes(p, xx, t) ? 1 : 0), 0); $(TAB_COUNT[t]).textContent = `(${c[t]})`;
+  });
   document.querySelectorAll("#tabs button").forEach((b) => { const on = b.dataset.tab === state.tab; b.classList.toggle("active", on); b.setAttribute("aria-selected", on); });
   const liveTab = !!LIVE_TABS[state.tab];
   $("cDigest").disabled = !liveTab;
@@ -437,10 +462,40 @@ function card(p) {
     (p.groups || []).slice(0, 2).map((g) => pill("", esc(g))).join("") +
     `<button class="savebtn${saved[k] ? " on" : ""}" data-save="${esc(k)}">${saved[k] ? "★ ذخیره شده" : "☆ ذخیره"}</button></div></article>`;
 }
+// v2.5: professors tab (ORCID + Crossref discovery). Professors are
+// people, not postings — they have their own list, filtered only by
+// the search box, and no funding/deadline pills.
+const profs = () => D.professors || [];
+const profHay = (pr) => norm([pr.name, pr.affiliation, (pr.groups || []).join(" "), (pr.works || []).map((w) => w.title).join(" ")].join(" "));
+function filteredProfs() {
+  const q = norm($("q").value.trim());
+  return profs().filter((pr) => !q || profHay(pr).includes(q));
+}
+function profCard(pr) {
+  const works = (pr.works || []).slice(0, 3).map((w) => `<li>${esc(w.title)}${w.year ? ` <span class="meta">(${esc(w.year)})</span>` : ""}${w.doi ? ` <a href="https://doi.org/${esc(w.doi)}" target="_blank" rel="noopener noreferrer">DOI ↗</a>` : ""}</li>`).join("");
+  const link = pr.profile_url ? `<a class="btn" href="${esc(safeUrl(pr.profile_url))}" target="_blank" rel="noopener noreferrer">پروفایل ORCID ↗</a>` : "";
+  return `<article class="card"><h3>${bdi(pr.name)}</h3><p class="sub">${bdi(pr.affiliation || "نامشخص")}${pr.country ? " • " + esc(ccName(pr.country)) : ""}</p><div class="pills">` +
+    pill(`fit ${BAND_CLASS[pr.fit_band] || "f2"}`, `${esc(pr.fit_band)} ${esc(pr.fit_score)}`) +
+    (pr.groups || []).slice(0, 2).map((g) => pill("", esc(g))).join("") +
+    (pr.sources || []).map((s) => pill("", s === "orcid" ? "ORCID" : "Crossref")).join("") +
+    `</div>${works ? `<ul class="why">${works}</ul>` : ""}<div class="actions">${link}</div></article>`;
+}
+function renderProfs() {
+  const list = filteredProfs(), el = $("results");
+  refreshTabs();
+  $("srStatus").textContent = list.length ? `${list.length} استاد` : "استادی پیدا نشد";
+  if (!list.length) { el.innerHTML = `<div class="empty">استادی با این جست‌وجو پیدا نشد.</div>`; return; }
+  const shown = list.slice(0, state.limit);
+  el.innerHTML = `<p class="meta">${list.length} استاد • از ORCID و Crossref</p>` + shown.map(profCard).join("") +
+    (list.length > shown.length ? `<button class="more" id="more">نمایش بیشتر (${list.length - shown.length} مورد دیگر)</button>` : "");
+}
 function render() {
   // FIX-7b: reset the (curated-tab-disabled) digest checkbox BEFORE filtering — switching to a curated tab
   // with it ticked used to show an empty list although the tab counter said otherwise.
   if (!LIVE_TABS[state.tab]) { $("cDigest").disabled = true; $("cDigest").checked = false; }
+  // v2.5: professors have their own render path (no posting filters)
+  document.querySelector(".filters").classList.toggle("profmode", state.tab === "professor");
+  if (state.tab === "professor") { renderProfs(); return; }
   const list = filtered(), el = $("results");
   refreshTabs();
   // FIX-18: screen readers get a short status line instead of re-reading the whole list (old aria-live on <main>)
@@ -669,11 +724,10 @@ render();
       if (settled) return; settled = true; clearTimeout(to); loading = false;
       try { s.remove(); } catch (e) {}
       if (reason === "ok" && !validLive(data)) reason = "invalid"; // FIX-22: a corrupt/incompatible payload used to be reported as "ok"
-      if (reason === "ok") { hideShellNotice(); applyLive(data); setBadge("🟢 زنده"); badge.title = "داده زنده دریافت شد"; }
+      if (reason === "ok") { applyLive(data); setBadge("🟢 زنده"); badge.title = "داده زنده دریافت شد"; }
       else {
         setBadge(fromCache ? "🟠 آفلاین — داده ذخیره‌شده" : "⚪ آفلاین");
         badge.title = "دریافت داده زنده ناموفق بود (" + reason + ") — آخرین داده موجود (" + ((D.meta.generated_at || "").slice(0, 10) || "؟") + ") نمایش داده می‌شود";
-        if (!D.postings.length) showShellNotice(); else hideShellNotice(); // SHELL: no data at all
       }
       window.__EOF_LIVE__ = undefined;
     }
@@ -683,15 +737,6 @@ render();
     s.src = LIVE_URL + (LIVE_URL.indexOf("?") < 0 ? "?" : "&") + "t=" + Date.now(); // cache-buster
     document.head.appendChild(s);
   }
-  function showShellNotice() {
-    hideShellNotice();
-    const n = document.createElement("div");
-    n.id = "shellNotice"; n.className = "digest warn"; n.setAttribute("role", "alert");
-    n.innerHTML = '&#9888;&#65039; بدون اینترنت داده‌ای در دسترس نیست. آنلاین شوید و دوباره تلاش کنید. <button class="btn" id="retryLive" style="margin-right:8px">🔄 تلاش مجدد</button>';
-    document.querySelector(".tabs").before(n);
-    n.querySelector("#retryLive").onclick = () => { hideShellNotice(); load(); };
-  }
-  function hideShellNotice() { const n = document.getElementById("shellNotice"); if (n) n.remove(); }
   refBtn.onclick = load;
   load(); // auto-fetch on every open
 })();
