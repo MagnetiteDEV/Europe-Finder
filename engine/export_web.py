@@ -29,6 +29,8 @@ def build_bundle() -> dict:
     policy = json.loads((ROOT / "policy.json").read_text(encoding="utf-8"))
     inst = json.loads((ROOT / "institutions.json").read_text(encoding="utf-8")) \
         if (ROOT / "institutions.json").exists() else {"meta": {}, "connected": []}
+    profs = json.loads((DATA / "professors.json").read_text(encoding="utf-8")) \
+        if (DATA / "professors.json").exists() else {"meta": {}, "professors": []}
     return {
         "version": VERSION,
         "meta": postings.get("meta", {}),
@@ -55,6 +57,7 @@ def build_bundle() -> dict:
             ],
         },
         "postings": postings.get("postings", []),
+        "professors": profs.get("professors", []),
         "digest": digest,
     }
 

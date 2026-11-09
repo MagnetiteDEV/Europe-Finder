@@ -17,7 +17,8 @@ from datetime import datetime, timezone
 from pathlib import Path
 
 from .adapters import FoundPosting
-from .adapters import adzuna, ats, rss_nature
+from .adapters import adzuna, ats, crossref, euraxess, orcid, rss_nature
+from .professors import merge_professors
 from .curated import load_all as load_curated
 from .eligibility import load_overrides, status_for
 from .extract import detect_kind, extract_country, extract_deadline
@@ -34,6 +35,7 @@ ADAPTERS = {
     "nature": rss_nature.search,
     "adzuna": adzuna.search,
     "ats": ats.search,
+    "euraxess": euraxess.search,
 }
 
 
@@ -73,6 +75,51 @@ def save_sqlite(posts: list[FoundPosting]) -> None:
                     (p.key(), json.dumps(p.to_dict(), ensure_ascii=False)))
     con.commit()
     con.close()
+
+
+PROFESSOR_ADAPTERS = {
+    "orcid": orcid.search,
+    "crossref": crossref.search,
+}
+
+
+def collect_professors(session, cfg: dict) -> list:
+    """Professor discovery (ORCID + Crossref). Never raises: a
+    professors failure must not kill the postings run."""
+    pcfg = cfg.get("professors", {})
+    collected = []
+    for name, fn in PROFESSOR_ADAPTERS.items():
+        scfg = pcfg.get(name, {})
+        if not scfg.get("enabled"):
+            print(f"[prof:{name}] disabled, skipping")
+            continue
+        try:
+            profs = fn(session, scfg)
+        except SourceBlocked as e:
+            print(f"[prof:{name}] blocked ({e}), skipping")
+            continue
+        except Exception as e:
+            print(f"[prof:{name}] error: {e}")
+            continue
+        print(f"[prof:{name}] {len(profs)} raw professors")
+        collected.extend(profs)
+        time.sleep(float(cfg.get("politeness", {}).get("delay_seconds", 1.5)))
+    merged = merge_professors(collected)
+    # keep only professors with a real field match
+    kept = [p for p in merged if p.fit_score >= 45][:60]
+    payload = {
+        "meta": {
+            "generated_at": datetime.now(timezone.utc).isoformat(),
+            "count": len(kept),
+            "sources": sorted({s for p in kept for s in p.sources}),
+        },
+        "professors": [p.to_dict() for p in kept],
+    }
+    (DATA / "professors.json").write_text(
+        json.dumps(payload, ensure_ascii=False, indent=1), encoding="utf-8")
+    print(f"[prof] {len(kept)} professors kept "
+          f"(from {len(merged)} merged)")
+    return kept
 
 
 def main() -> None:
@@ -180,6 +227,12 @@ def main() -> None:
     print(f"done: {len(posts)} postings in {time.time()-t0:.1f}s")
     print(f"  bands: {bands}")
     print(f"  funding: {funding}")
+
+    # professors layer: independent of postings, never blocks them
+    try:
+        collect_professors(session, cfg)
+    except Exception as e:
+        print(f"[prof] error: {e}")
 
 
 if __name__ == "__main__":
