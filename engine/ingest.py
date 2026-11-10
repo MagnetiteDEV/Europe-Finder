@@ -17,7 +17,7 @@ from datetime import datetime, timezone
 from pathlib import Path
 
 from .adapters import FoundPosting
-from .adapters import adzuna, ats, crossref, euraxess, orcid, rss_nature
+from .adapters import adzuna, ats, crossref, euraxess, jobs_ac_uk, orcid, rss_nature
 from .professors import merge_professors
 from .curated import load_all as load_curated
 from .eligibility import load_overrides, status_for
@@ -36,6 +36,7 @@ ADAPTERS = {
     "adzuna": adzuna.search,
     "ats": ats.search,
     "euraxess": euraxess.search,
+    "jobsacuk": jobs_ac_uk.search,
 }
 
 
