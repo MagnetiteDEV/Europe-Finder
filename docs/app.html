@@ -153,7 +153,7 @@ body.lock{overflow:hidden;position:fixed;left:0;right:0;width:100%}
 </style>
 </head>
 <body>
-<header class="topbar"><div><h1>Europe Opportunity Finder</h1><p id="metaLine" class="meta"></p></div><span class="badge">v2.6 • اتصال زنده</span></header>
+<header class="topbar"><div><h1>Europe Opportunity Finder</h1><p id="metaLine" class="meta"></p></div><span class="badge">v2.7 • اتصال زنده</span></header>
 <div id="digestBar" class="digest hidden"></div>
 <nav class="tabs" id="tabs" role="tablist">
 <button data-tab="phd" class="active" role="tab" aria-controls="results">🎓 دکتری <span class="tcount" id="cPhd"></span></button>
@@ -177,7 +177,7 @@ body.lock{overflow:hidden;position:fixed;left:0;right:0;width:100%}
 <label><input type="checkbox" id="cDeadline"> فقط دارای ددلاین</label>
 <label><input type="checkbox" id="cDigest"> فقط برترین پیشنهادها</label>
 <label><input type="checkbox" id="cSaved"> فقط ذخیره‌شده‌ها</label>
-<label><input type="checkbox" id="cExcluded"> نمایش حذف‌شده‌های مهندسی‌محور</label>
+<label><input type="checkbox" id="cExcluded"> نمایش حذف‌شده‌ها</label>
 <label><input type="checkbox" id="cExpired"> نمایش ددلاین‌گذشته‌ها</label>
 </div>
 </section>
@@ -430,7 +430,7 @@ setMeta();
 function coverage() {
   const inst = D.institutions || {}, num = (v) => Number(v) || 0;
   const rows = (inst.connected || []).map((c) => { const u = safeUrl(c.careers_url); return `<li><b>${esc(c.name)}</b> <span class="meta">${esc(ccName(c.country))} • ${esc(c.ats)}${u ? ` • <a href="${esc(u)}" target="_blank" rel="noopener noreferrer">صفحه فرصت‌ها ↗</a>` : ""}</span></li>`; }).join("");
-  $("coverageBody").innerHTML = `<p>📡 <b>${num(inst.connected_count)} دانشگاه</b> با اتصال زنده تأییدشده، از میان ${num(inst.prospect_count)} مؤسسهٔ هدف در فهرست اکتشافی.</p><ul class="instlist">${rows}</ul><p class="meta">سیاست‌ها: فیلتر پیش‌فرض فقط «استخدام دکتری با حقوق» یا «بورسیه کامل تأییدشده» را نشان می‌دهد • آگهی‌های مهندسی‌محور به‌صورت خودکار حذف می‌شوند • وضعیت واجد شرایط بودن هرگز حدس زده نمی‌شود • کشورهای اولویت‌دار: ${esc((D.priority_countries || []).map(ccName).join("، "))}</p>`;
+  $("coverageBody").innerHTML = `<p>📡 <b>${num(inst.connected_count)} دانشگاه</b> با اتصال زنده تأییدشده، از میان ${num(inst.prospect_count)} مؤسسهٔ هدف در فهرست اکتشافی.</p><ul class="instlist">${rows}</ul><p class="meta">سیاست‌ها: فیلتر پیش‌فرض فقط «استخدام دکتری با حقوق» یا «بورسیه کامل تأییدشده» را نشان می‌دهد • آگهی‌های مهندسی‌محور و دیزاین دیجیتال به‌صورت خودکار حذف می‌شوند • وضعیت واجد شرایط بودن هرگز حدس زده نمی‌شود • کشورهای اولویت‌دار: ${esc((D.priority_countries || []).map(ccName).join("، "))}</p>`;
 }
 coverage();
 
