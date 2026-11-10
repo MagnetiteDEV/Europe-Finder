@@ -89,6 +89,36 @@ CONTEXT_TERMS = [
     "vêtement", "kunst", "kleidung", "moda", "abito", "ontwerp",
 ]
 
+# Design jury: terms that mean the posting is about digital/tech design
+# (UI/UX, web, software, games, industrial, graphic, interior...), not
+# artistic / fashion / costume design. Mirrors HARD_EXCLUSIONS: a title
+# hit vetoes outright; body hits need >=2 AND no fashion/art context,
+# so a fashion posting that merely mentions "user experience" once
+# (e.g. Design for Recycling) survives.
+DESIGN_VETO = [
+    "ux", "ui", "user interface", "user experience", "user centred design",
+    "user-centered design", "human computer interaction",
+    "human-computer interaction", "web designer", "web design",
+    "software designer", "app designer", "mobile app", "game designer",
+    "game design", "video game", "industrial design", "industrial designer",
+    "product designer", "graphic designer", "graphic design",
+    "interior designer", "interior design", "automotive design",
+    "mechanical design", "usability", "figma", "wireframe", "wireframes",
+    "user research", "ux research", "ui designer", "ux designer",
+]
+
+# Fashion/art context that saves a posting from the design veto.
+# Deliberately specific: bare "design"/"art"/"visual"/"culture" are too
+# broad ("state of the art", "visual" in tech copy).
+FASHION_ART_CONTEXT = [
+    "fashion", "dress", "garment", "costume", "couture", "textile",
+    "art history", "history of art", "curatorial", "curator", "museum",
+    "heritage", "craft", "visual culture", "contemporary art",
+    "fashion design", "mode", "kunst", "moda", "vêtement",
+    "costume design", "textile design", "artistic research",
+    "design studies",
+]
+
 # generic sustainability language that only counts WITH context
 GENERIC_SUSTAINABILITY = [
     "sustainability", "sustainable", "circular economy", "climate transition",

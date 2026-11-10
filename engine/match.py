@@ -5,6 +5,11 @@ the two guardrails from the candidate's search constraints:
   1. engineering-led postings are excluded (title hit, or >=2 body
      hits without an arts/design/fashion context);
   2. generic sustainability language alone never scores above 25.
+  3. the design jury: digital/tech design (UI/UX, web, software,
+     games, industrial, graphic, interior...) is vetoed even when it
+     matches the "interaction design" / "design research" phrases or
+     the "designer" anchor — title hit vetoes outright, body hits
+     need >=2 AND no fashion/art context.
 
 Bands follow the profile doc: Strong / Moderate / Weak / Exclude.
 """
@@ -19,6 +24,8 @@ from .vocab import (
     ANCHOR_TITLE_BONUS,
     ANCHORS,
     CONTEXT_TERMS,
+    DESIGN_VETO,
+    FASHION_ART_CONTEXT,
     FIELD_GROUPS,
     GENERIC_SUSTAINABILITY,
     HARD_EXCLUSIONS,
@@ -99,15 +106,28 @@ def score_posting(p) -> None:
     generic_sust = (any(contains_term(all_n, t) for t in GENERIC_SUSTAINABILITY)
                     and not contextual)
 
+    # Design jury: a posting about digital/tech design (UI/UX, web,
+    # software, games, industrial, graphic, interior...) is not artistic
+    # / fashion design, even when it matches the "interaction design" /
+    # "design research" phrases or the "designer" anchor. Title hit
+    # vetoes outright; body hits need >=2 AND no fashion/art context.
+    design_title = [t for t in DESIGN_VETO if contains_term(title_n, t)]
+    design_body = [t for t in DESIGN_VETO if contains_term(body_n, t)]
+    design_terms = list(dict.fromkeys(design_title + design_body))
+    fashion_art = any(contains_term(all_n, t) for t in FASHION_ART_CONTEXT)
+    design_led = bool(design_title) or (len(design_body) >= 2 and not fashion_art)
+
     score = round(best_saturation * 100)
     if generic_sust:
         score = min(score, 25)
     if engineering_led:
         score = min(score, 15)
+    if design_led:
+        score = min(score, 15)
 
-    p.excluded = engineering_led
+    p.excluded = engineering_led or design_led
     p.fit_score = int(score)
-    if engineering_led:
+    if engineering_led or design_led:
         p.fit_band = "حذف‌شده"
     elif score >= STRONG_MIN:
         p.fit_band = "تناسب قوی"
@@ -119,6 +139,8 @@ def score_posting(p) -> None:
     reasons: list[str] = []
     if engineering_led:
         reasons.append("حذف مهندسی‌محور: " + ", ".join(excl_terms[:3]))
+    if design_led:
+        reasons.append("حذف دیزاین دیجیتال/فناورانه: " + ", ".join(design_terms[:3]))
     reasons.extend((title_hits + body_hits)[:5])
     if not reasons:
         reasons.append("تطابق قوی با واژگان فشن، هنر، دیزاین یا علوم انسانی پیدا نشد.")
