@@ -50,12 +50,24 @@ def contains_term(text: str, term: str) -> bool:
     return f" {needle} " in text
 
 
+def _strip_false_friends(text: str) -> str:
+    """v2.8: remove jobs.ac.uk boilerplate and idioms before scoring, so
+    neither "mode" nor "fashion" fires on them:
+    - "Mode of study Full-time / Part-time" (vacancy-template boilerplate)
+    - "in a ... fashion" (idiom, e.g. "in a highly symmetric fashion")
+    Text is already normalized (lowercase, punctuation stripped, padded
+    with spaces), so the patterns match on word boundaries."""
+    text = text.replace(" mode of study ", " ")
+    text = re.sub(r" in a (?:[a-z]+ ){1,3}fashion ", " ", text)
+    return text
+
+
 def score_posting(p) -> None:
     """Mutates the FoundPosting in place. Sets fit_score, fit_band
     (تناسب قوی/متوسط/ضعیف/حذف‌شده), fit_reasons, red_flags, groups
     (Persian labels), subfields (matched terms) and excluded."""
-    title_n = normalize_text(p.title)
-    body_n = normalize_text(p.description or "")
+    title_n = _strip_false_friends(normalize_text(p.title))
+    body_n = _strip_false_friends(normalize_text(p.description or ""))
     all_n = title_n + " " + body_n
 
     weighted = 0.0

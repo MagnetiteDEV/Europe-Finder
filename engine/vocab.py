@@ -8,11 +8,15 @@ sustainability language counts.
 """
 from __future__ import annotations
 
+# v2.8: bare "mode" is deliberately absent from the three lists below
+# (fashion terms, CONTEXT_TERMS, FASHION_ART_CONTEXT) — it fired on
+# jobs.ac.uk boilerplate "Mode of study Full-time" and on "deformation
+# mode". Multi-word phrases ("histoire de la mode", "mode durable") stay.
 # group_id -> (persian label, weight, terms)
 FIELD_GROUPS: dict[str, tuple[str, float, list[str]]] = {    "fashion_and_dress": ("فشن و لباس", 1.25, [
         "fashion studies", "fashion history", "fashion design", "dress studies",
         "dress history", "fashion culture", "fashion theory", "fashion communication",
-        "mode", "histoire de la mode", "études de la mode", "design de mode",
+        "histoire de la mode", "études de la mode", "design de mode",
         "mode durable", "kleidungsgeschichte", "modegeschichte", "modedesign",
         "modewissenschaft", "storia della moda", "studi sulla moda",
         "design della moda", "moda sostenibile", "modegeschiedenis",
@@ -85,7 +89,7 @@ HARD_EXCLUSIONS = [
 
 CONTEXT_TERMS = [
     "fashion", "dress", "garment", "costume", "design", "art", "visual",
-    "culture", "heritage", "craft", "museum", "textile history", "mode",
+    "culture", "heritage", "craft", "museum", "textile history",
     "vêtement", "kunst", "kleidung", "moda", "abito", "ontwerp",
 ]
 
@@ -114,7 +118,7 @@ FASHION_ART_CONTEXT = [
     "fashion", "dress", "garment", "costume", "couture", "textile",
     "art history", "history of art", "curatorial", "curator", "museum",
     "heritage", "craft", "visual culture", "contemporary art",
-    "fashion design", "mode", "kunst", "moda", "vêtement",
+    "fashion design", "kunst", "moda", "vêtement",
     "costume design", "textile design", "artistic research",
     "design studies",
 ]
