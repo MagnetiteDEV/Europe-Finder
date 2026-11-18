@@ -135,6 +135,45 @@ def collect_professors(session, cfg: dict) -> list:
     return kept
 
 
+def _ats_from_payload(payload: dict) -> list[dict]:
+    postings = payload.get("postings", [])
+    return [p for p in postings
+            if isinstance(p, dict) and p.get("source", "").startswith("ats:")]
+
+
+def _previous_ats_postings() -> tuple[list[dict], str]:
+    """ATS postings from the previous run, for the degraded-run guard.
+
+    Tries data/postings.json first (present on local runs), then the
+    previously published live bundle docs/eof-live.js (the only copy of
+    previous data on a fresh runner checkout, where postings.json is
+    generated, never committed). Returns ([], "") when neither holds
+    ATS postings.
+    """
+    prev_file = DATA / "postings.json"
+    if prev_file.exists():
+        try:
+            found = _ats_from_payload(json.loads(
+                prev_file.read_text(encoding="utf-8")))
+            if found:
+                return found, "data/postings.json"
+        except Exception:
+            pass
+    bundle = ROOT / "docs" / "eof-live.js"
+    if bundle.exists():
+        try:
+            raw = bundle.read_text(encoding="utf-8")
+            prefix = "window.__EOF_LIVE__ = "
+            if raw.startswith(prefix):
+                found = _ats_from_payload(json.loads(
+                    raw[len(prefix):].rstrip().rstrip(";")))
+                if found:
+                    return found, "docs/eof-live.js"
+        except Exception:
+            pass
+    return [], ""
+
+
 def main() -> None:
     t0 = time.time()
     cfg = json.loads((ROOT / "config.json").read_text(encoding="utf-8"))
@@ -186,21 +225,15 @@ def main() -> None:
                                   p.deadline or "9999"))
 
     # Degraded-run guard: if ATS was enabled but this run fetched nothing
-    # (e.g. the run context has no egress to university endpoints) while the
-    # previous postings.json still holds ATS postings, keep those instead of
+    # (e.g. the run context has no egress to university endpoints) while a
+    # previous run's data still holds ATS postings, keep those instead of
     # wiping the app's data. Stale data beats an empty app; the warning stays
-    # loud so a monitoring cron can report it.
+    # loud so a monitoring cron can report it. On a fresh runner checkout
+    # data/postings.json does not exist (it is generated, never committed),
+    # so the guard also consults the previously published docs/eof-live.js.
     ats_enabled = cfg.get("sources", {}).get("ats", {}).get("enabled")
     if ats_enabled and not any(p.source.startswith("ats:") for p in posts):
-        prev_file = DATA / "postings.json"
-        prev_ats: list[dict] = []
-        if prev_file.exists():
-            try:
-                prev_ats = [p for p in json.loads(
-                    prev_file.read_text(encoding="utf-8")).get("postings", [])
-                    if p.get("source", "").startswith("ats:")]
-            except Exception:
-                prev_ats = []
+        prev_ats, prev_origin = _previous_ats_postings()
         if prev_ats:
             from dataclasses import fields as dc_fields
             fnames = {f.name for f in dc_fields(FoundPosting)}
@@ -216,7 +249,8 @@ def main() -> None:
             posts.sort(key=lambda p: (p.excluded, -p.fit_score,
                                       p.deadline or "9999"))
             print(f"[ats] WARNING: fetch returned 0 postings; kept "
-                  f"{merged} previous ATS postings (data may be stale)")
+                  f"{merged} previous ATS postings from {prev_origin} "
+                  f"(data may be stale)")
 
     save_sqlite(posts)
     payload = {
