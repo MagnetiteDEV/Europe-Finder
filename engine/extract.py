@@ -10,12 +10,17 @@ _MONTHS = {
     "december": 12,
     "jan": 1, "feb": 2, "mar": 3, "apr": 4, "jun": 6, "jul": 7, "aug": 8,
     "sep": 9, "sept": 9, "oct": 10, "nov": 11, "dec": 12,
+    # German months (ArtHist.net announcements, DAAD texts)
+    "januar": 1, "februar": 2, "märz": 3, "marz": 3, "mai": 5,
+    "juni": 6, "juli": 7, "oktober": 10, "dezember": 12,
 }
 
 _DEADLINE_HINT = re.compile(
     r"(deadline|closing date|apply by|applications? (?:close|due)|"
-    r"deadline for application|submission deadline)", re.I)
+    r"deadline for application|submission deadline|"
+    r"bewerbungsschluss|bewerbungsfrist|einsendeschluss)", re.I)
 _DATE1 = re.compile(r"(\d{1,2})\s+([A-Za-z]+)\s+(\d{4})")
+_DATE1B = re.compile(r"(\d{1,2})\.\s+([A-Za-zäöüÄÖÜ]+)\s+(\d{4})")
 _DATE2 = re.compile(r"(\d{4})-(\d{2})-(\d{2})")
 _DATE3 = re.compile(r"(\d{1,2})[./](\d{1,2})[./](\d{2,4})")
 
@@ -41,6 +46,13 @@ def extract_deadline(text: str) -> str:
             mon = _MONTHS.get(d1.group(2).lower().rstrip("."))
             if mon:
                 iso = _valid(int(d1.group(3)), mon, int(d1.group(1)))
+                if iso:
+                    return iso
+        d1b = _DATE1B.search(window)
+        if d1b:
+            mon = _MONTHS.get(d1b.group(2).lower().rstrip("."))
+            if mon:
+                iso = _valid(int(d1b.group(3)), mon, int(d1b.group(1)))
                 if iso:
                     return iso
         d2 = _DATE2.search(window)
@@ -76,6 +88,38 @@ _COUNTRIES = {
     "hungary": "HU", "budapest": "HU", "greece": "GR", "athens": "GR",
     "croatia": "HR", "romania": "RO", "bulgaria": "BG", "estonia": "EE",
     "latvia": "LV", "lithuania": "LT", "slovenia": "SI", "slovakia": "SK",
+    # v2.9: Australia (Workday/PageUp tenants) + art-school cities.
+    # Order matters: dict iteration is first-match, so "scotland"
+    # (above) still wins for "Perth, Scotland" over "perth" -> AU.
+    # Bare "newcastle" is deliberately absent (UK/AU ambiguity); use
+    # the "newcastle nsw" form. "victoria" is absent for the same reason.
+    "australia": "AU", "melbourne": "AU", "sydney": "AU", "brisbane": "AU",
+    "perth": "AU", "adelaide": "AU", "canberra": "AU", "hobart": "AU",
+    "geelong": "AU", "wollongong": "AU", "gold coast": "AU",
+    "queensland": "AU", "new south wales": "AU", "nsw": "AU",
+    "western australia": "AU", "south australia": "AU", "tasmania": "AU",
+    "australian capital territory": "AU", "newcastle nsw": "AU",
+    "clayton": "AU", "caulfield": "AU", "parkville": "AU",
+    "burwood": "AU", "waurn ponds": "AU", "warrnambool": "AU",
+    "st lucia campus": "AU", "st kilda road": "AU", "peninsula campus": "AU",
+    "espoo": "FI", "hanoi": "VN", "ho chi minh": "VN",
+    "glasgow": "GB", "edinburgh": "GB", "dublin": "IE",
+    "florence": "IT", "florenz": "IT", "rome": "IT", "roma": "IT",
+    "turin": "IT", "torino": "IT", "naples": "IT", "napoli": "IT",
+    "rotterdam": "NL", "eindhoven": "NL", "utrecht": "NL",
+    "ghent": "BE", "gent": "BE", "antwerp": "BE", "leuven": "BE",
+    "oslo": "NO", "bergen": "NO", "trondheim": "NO",
+    "gothenburg": "SE", "göteborg": "SE", "aarhus": "DK", "odense": "DK",
+    "hamburg": "DE", "munich": "DE", "münchen": "DE", "cologne": "DE",
+    "köln": "DE", "stuttgart": "DE", "dresden": "DE", "leipzig": "DE",
+    "barcelona": "ES", "madrid": "ES", "valencia": "ES", "porto": "PT",
+    "lyon": "FR", "marseille": "FR", "bordeaux": "FR", "lille": "FR",
+    "nantes": "FR", "strasbourg": "FR",
+    "geneva": "CH", "genève": "CH", "lausanne": "CH", "basel": "CH",
+    "bern": "CH", "innsbruck": "AT", "graz": "AT", "salzburg": "AT",
+    "krakow": "PL", "kraków": "PL", "warsaw": "PL", "warszawa": "PL",
+    "brno": "CZ", "ljubljana": "SI", "zagreb": "HR", "tallinn": "EE",
+    "riga": "LV", "vilnius": "LT", "reykjavik": "IS",
 }
 _CC_RE = re.compile(r"\(([A-Z]{2})\)")
 _ISO2 = {

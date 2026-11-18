@@ -1,8 +1,8 @@
 {
  "meta": {
-  "connected_count": 6,
+  "connected_count": 14,
   "prospect_count": 178,
-  "total": 184
+  "total": 192
  },
  "connected": [
   {
@@ -64,6 +64,86 @@
    "endpoint": "https://icts-p-fii-toep-component-filter2.cloud.icts.kuleuven.be/api/projects/Jobsite_academic/search",
    "checked_at": "2026-10-31",
    "register_match": true
+  },
+  {
+   "name": "University of Melbourne",
+   "country": "AU",
+   "city": "Melbourne",
+   "ats": "workday",
+   "careers_url": "https://unimelb.wd105.myworkdayjobs.com/en-US/UoM_External_Career",
+   "endpoint": "https://unimelb.wd105.myworkdayjobs.com/wday/cxs/unimelb/UoM_External_Career/jobs",
+   "checked_at": "2026-11-18",
+   "register_match": false
+  },
+  {
+   "name": "RMIT University",
+   "country": "AU",
+   "city": "Melbourne",
+   "ats": "workday",
+   "careers_url": "https://rmit.wd3.myworkdayjobs.com/en-US/RMIT_Careers",
+   "endpoint": "https://rmit.wd3.myworkdayjobs.com/wday/cxs/rmit/RMIT_Careers/jobs",
+   "checked_at": "2026-11-18",
+   "register_match": false
+  },
+  {
+   "name": "University of Sydney",
+   "country": "AU",
+   "city": "Sydney",
+   "ats": "workday",
+   "careers_url": "https://usyd.wd105.myworkdayjobs.com/en-US/USYD_EXTERNAL_CAREER_SITE",
+   "endpoint": "https://usyd.wd105.myworkdayjobs.com/wday/cxs/usyd/USYD_EXTERNAL_CAREER_SITE/jobs",
+   "checked_at": "2026-11-18",
+   "register_match": false
+  },
+  {
+   "name": "University of Queensland",
+   "country": "AU",
+   "city": "Brisbane",
+   "ats": "workday",
+   "careers_url": "https://uq.wd3.myworkdayjobs.com/en-US/uqcareers",
+   "endpoint": "https://uq.wd3.myworkdayjobs.com/wday/cxs/uq/uqcareers/jobs",
+   "checked_at": "2026-11-18",
+   "register_match": false
+  },
+  {
+   "name": "UNSW Sydney",
+   "country": "AU",
+   "city": "Sydney",
+   "ats": "pageup",
+   "careers_url": "https://careers.pageuppeople.com/841/cw/en/listing/",
+   "endpoint": "https://careers.pageuppeople.com/841/cw/en/listing/",
+   "checked_at": "2026-11-18",
+   "register_match": false
+  },
+  {
+   "name": "Monash University",
+   "country": "AU",
+   "city": "Melbourne",
+   "ats": "pageup",
+   "careers_url": "https://careers.pageuppeople.com/513/cw/en/listing/",
+   "endpoint": "https://careers.pageuppeople.com/513/cw/en/listing/",
+   "checked_at": "2026-11-18",
+   "register_match": false
+  },
+  {
+   "name": "University of Adelaide",
+   "country": "AU",
+   "city": "Adelaide",
+   "ats": "pageup",
+   "careers_url": "https://careers.pageuppeople.com/1220/cw/en/listing/",
+   "endpoint": "https://careers.pageuppeople.com/1220/cw/en/listing/",
+   "checked_at": "2026-11-18",
+   "register_match": false
+  },
+  {
+   "name": "Deakin University",
+   "country": "AU",
+   "city": "Geelong",
+   "ats": "pageup",
+   "careers_url": "https://careers.deakin.edu.au/cw/en/listing/",
+   "endpoint": "https://careers.deakin.edu.au/cw/en/listing/",
+   "checked_at": "2026-11-18",
+   "register_match": false
   }
  ],
  "prospects": [

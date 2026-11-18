@@ -153,12 +153,12 @@ body.lock{overflow:hidden;position:fixed;left:0;right:0;width:100%}
 </style>
 </head>
 <body>
-<header class="topbar"><div><h1>Europe Opportunity Finder</h1><p id="metaLine" class="meta"></p></div><span class="badge">v2.8 • اتصال زنده</span></header>
+<header class="topbar"><div><h1>Europe Opportunity Finder</h1><p id="metaLine" class="meta"></p></div><span class="badge">v2.9 • اتصال زنده</span></header>
 <div id="digestBar" class="digest hidden"></div>
 <nav class="tabs" id="tabs" role="tablist">
 <button data-tab="phd" class="active" role="tab" aria-controls="results">🎓 دکتری <span class="tcount" id="cPhd"></span></button>
 <button data-tab="job" role="tab" aria-controls="results">💼 فرصت‌های شغلی <span class="tcount" id="cJob"></span></button>
-<button data-tab="master" role="tab" aria-controls="results">📚 مستر با فاند <span class="tcount" id="cMaster"></span></button>
+<button data-tab="master" role="tab" aria-controls="results">📚 مستر <span class="tcount" id="cMaster"></span></button>
 <button data-tab="scholarship" role="tab" aria-controls="results">🏛️ بورس‌های دولتی و منطقه‌ای <span class="tcount" id="cSch"></span></button>
 <button data-tab="professor" role="tab" aria-controls="results">👨‍🏫 اساتید <span class="tcount" id="cProf"></span></button>
 </nav>
@@ -187,7 +187,7 @@ body.lock{overflow:hidden;position:fixed;left:0;right:0;width:100%}
 <div id="modal" class="modal hidden" role="dialog" aria-modal="true" aria-label="جزئیات آگهی"><div class="sheet"><button id="mClose" class="x" aria-label="بستن">✕</button><div id="mBody"></div></div></div>
 <footer><p>آگهی‌ها مستقیماً از منابع رسمی خوانده می‌شوند؛ همیشه متن اصلی را در سایت منتشرکننده بررسی کنید.</p><p id="footMeta" class="meta"></p></footer>
 <script>
-window.EOF_DATA = {"version": "v2.5", "meta": {}, "groups": [], "funding_labels": {}, "funding_accepted": [], "priority_countries": [], "eligibility_labels": {}, "institutions": {"connected_count": 0, "prospect_count": 0, "connected": []}, "postings": [], "professors": [], "digest": {"picks": []}};
+window.EOF_DATA = {"version": "v2.9", "meta": {}, "groups": [], "funding_labels": {}, "funding_accepted": [], "priority_countries": [], "eligibility_labels": {}, "institutions": {"connected_count": 0, "prospect_count": 0, "connected": []}, "postings": [], "professors": [], "digest": {"picks": []}};
 </script>
 <script>
 /* Europe Opportunity Finder v2.4 — offline PWA frontend. Data: window.EOF_DATA (data/data.js)
@@ -325,7 +325,7 @@ function faDate(iso) { if (!iso) return ""; const d = parseDay(iso); if (!d) ret
 // FIX-9: whole calendar days (deadline noon vs. today's midnight). The old ceil() version kept
 // yesterday's deadline "alive" (0 days left) until noon of the following day.
 function daysLeft(iso) { if (!iso) return null; const d = parseDay(iso); if (!d) return null; const t = new Date(); t.setHours(0, 0, 0, 0); return Math.floor((d - t) / 864e5); }
-const SRC_FA = { nature: "Nature Careers", adzuna: "Adzuna" };
+const SRC_FA = { nature: "Nature Careers", adzuna: "Adzuna", cumulus: "Cumulus", arthist: "ArtHist.net", daad: "DAAD", phdgermany: "PhD Germany (DAAD)", campusfrance: "Campus France", fashionunited: "FashionUnited", pageup: "PageUp" };
 const ATS_FA = { workday:"Workday", varbi:"Varbi", wp:"سایت دانشگاه", volcanic:"Volcanic", kuleuven:"KU Leuven", greenhouse:"Greenhouse", lever:"Lever", ashby:"Ashby" };
 const srcName = (s) => SRC_FA[s] || (s === "curated:master" || s === "curated:scholarship" ? "مسیر منتخب" : (String(s).startsWith("ats:") ? ATS_FA[s.slice(4)] || s.slice(4) : s));
 // FIX-13: search normalises Arabic/Persian letter + digit variants and also looks at city, country (fa),
@@ -362,6 +362,13 @@ const f = () => ({
 });
 function fundedPass(p) {
   if (p.kind === "other") return false;
+  // v2.9: master programmes and scholarship routes are not positions
+  // claiming funding — the funding filter is a PhD rule (per its own
+  // label) and never hides them; their funding status still shows on
+  // the card. Without this, live DAAD/Campus France items (whose
+  // funding is unconfirmed by the strict classifier) would be
+  // invisible by default on their own tabs.
+  if (p.kind === "master" || p.kind === "scholarship") return true;
   if (FUND_OK.has(p.funding_category)) return true;
   return p.kind === "job" && p.funding_category !== "unfunded";
 }
@@ -430,7 +437,7 @@ setMeta();
 function coverage() {
   const inst = D.institutions || {}, num = (v) => Number(v) || 0;
   const rows = (inst.connected || []).map((c) => { const u = safeUrl(c.careers_url); return `<li><b>${esc(c.name)}</b> <span class="meta">${esc(ccName(c.country))} • ${esc(c.ats)}${u ? ` • <a href="${esc(u)}" target="_blank" rel="noopener noreferrer">صفحه فرصت‌ها ↗</a>` : ""}</span></li>`; }).join("");
-  $("coverageBody").innerHTML = `<p>📡 <b>${num(inst.connected_count)} دانشگاه</b> با اتصال زنده تأییدشده، از میان ${num(inst.prospect_count)} مؤسسهٔ هدف در فهرست اکتشافی.</p><ul class="instlist">${rows}</ul><p class="meta">سیاست‌ها: فیلتر پیش‌فرض فقط «استخدام دکتری با حقوق» یا «بورسیه کامل تأییدشده» را نشان می‌دهد • آگهی‌های مهندسی‌محور و دیزاین دیجیتال به‌صورت خودکار حذف می‌شوند • وضعیت واجد شرایط بودن هرگز حدس زده نمی‌شود • کشورهای اولویت‌دار: ${esc((D.priority_countries || []).map(ccName).join("، "))}</p>`;
+  $("coverageBody").innerHTML = `<p>📡 <b>${num(inst.connected_count)} دانشگاه</b> با اتصال زنده تأییدشده، از میان ${num(inst.prospect_count)} مؤسسهٔ هدف در فهرست اکتشافی.</p><ul class="instlist">${rows}</ul><p class="meta">سیاست‌ها: فیلتر پیش‌فرض در تب دکتری فقط «استخدام دکتری با حقوق» یا «بورسیه کامل تأییدشده» را نشان می‌دهد • آگهی‌های مهندسی‌محور و دیزاین دیجیتال به‌صورت خودکار حذف می‌شوند • وضعیت واجد شرایط بودن هرگز حدس زده نمی‌شود • کشورهای اولویت‌دار: ${esc((D.priority_countries || []).map(ccName).join("، "))}</p>`;
 }
 coverage();
 
@@ -448,8 +455,12 @@ function deadlinePill(p) {
 }
 function kindPill(p) {
   if (p.kind === "phd") return pill("kind", "🎓 دکتری");
+  // v2.9: live master/scholarship items (Campus France, DAAD, ArtHist
+  // fellowships) used to fall through to the "💼 شغلی" pill
+  if (p.kind === "master") return pill("kind", "📚 مستر");
+  if (p.kind === "scholarship") return pill("kind", p.curated ? "📋 مسیر بورسیه" : "🏛️ بورسیه");
   if (p.kind === "other") return pill("kind", "🧪 سایر");
-  return pill("kind", p.curated ? "📋 مسیر بورسیه" : "💼 شغلی");
+  return pill("kind", "💼 شغلی");
 }
 const trackOf = (k) => (isObj(track[k]) ? track[k] : {});
 const trackPill = (k) => (trackOf(k).s ? pill("kind", "📌 " + esc(TRACK_ST[trackOf(k).s] || "")) : "");

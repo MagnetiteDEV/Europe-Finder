@@ -29,6 +29,9 @@ from .vocab import (
     FIELD_GROUPS,
     GENERIC_SUSTAINABILITY,
     HARD_EXCLUSIONS,
+    SUPPLY_CHAIN_CONTEXT,
+    SUPPLY_CHAIN_GENERIC,
+    SUSTAINABILITY_CONTEXT,
 )
 
 STRONG_MIN = 70
@@ -81,6 +84,16 @@ def score_posting(p) -> None:
     for gid, (fa_label, weight, terms) in FIELD_GROUPS.items():
         uniq = list(dict.fromkeys(terms))
         hits = [t for t in uniq if contains_term(all_n, t)]
+        # v2.9 supply-chain gate: generic "supply chain"/"value chain"
+        # phrases only count with fashion/textile/material context, so
+        # a pure logistics postings never scores via this group. The
+        # specific phrases ("sustainable supply chain", "fashion
+        # management", ...) always count.
+        if gid == "fashion_management_supply_chain":
+            sc_context = any(contains_term(all_n, c)
+                             for c in SUPPLY_CHAIN_CONTEXT)
+            if not sc_context:
+                hits = [t for t in hits if t not in SUPPLY_CHAIN_GENERIC]
         # anchor layer: single high-signal words for short vacancy texts
         anchor_hits = [a for a in ANCHORS.get(gid, [])
                        if contains_term(all_n, a)]
@@ -115,8 +128,14 @@ def score_posting(p) -> None:
     contextual = any(contains_term(all_n, t) for t in CONTEXT_TERMS)
     engineering_led = bool(title_excl) or (len(body_excl) >= 2 and not contextual)
 
+    # v2.9: the sustainability cap uses SUSTAINABILITY_CONTEXT (which
+    # includes bare "textile"/"apparel"), NOT CONTEXT_TERMS — a textile
+    # + circular-economy posting must not be capped for never saying
+    # "fashion". The engineering exclusion above keeps CONTEXT_TERMS.
+    sust_contextual = any(contains_term(all_n, t)
+                          for t in SUSTAINABILITY_CONTEXT)
     generic_sust = (any(contains_term(all_n, t) for t in GENERIC_SUSTAINABILITY)
-                    and not contextual)
+                    and not sust_contextual)
 
     # Design jury: a posting about digital/tech design (UI/UX, web,
     # software, games, industrial, graphic, interior...) is not artistic

@@ -31,6 +31,10 @@ FIELD_GROUPS: dict[str, tuple[str, float, list[str]]] = {    "fashion_and_dress"
         "storia dell'arte", "arti visive", "cultura visuale", "kunstgeschiedenis",
         "beeldcultuur", "kunsthistorie", "visuell kultur", "historia del arte",
         "cultura visual", "história da arte",
+        # v2.9: practice-based art terms (PageUp/Cumulus titles are often
+        # "Lecturer in Fine Art / Visual Arts" with no "art history" phrase)
+        "fine art", "fine arts", "visual arts", "visual art",
+        "art practice", "studio art", "art education", "beaux-arts",
     ]),
     "design_and_artistic_research": ("دیزاین و پژوهش هنری", 1.2, [
         "design studies", "design research", "artistic research", "design history",
@@ -41,6 +45,8 @@ FIELD_GROUPS: dict[str, tuple[str, float, list[str]]] = {    "fashion_and_dress"
         "artistiek onderzoek", "designforskning", "kunstnerisk forskning",
         "investigación en diseño", "investigación artística", "pesquisa em design",
         "pesquisa artística",
+        # v2.9: design pedagogy (common in university vacancy titles)
+        "design education", "design teaching",
     ]),
     "costume_performance": ("کاستوم و اجرا", 1.15, [
         "costume studies", "costume design", "theatre design", "performance studies",
@@ -73,7 +79,53 @@ FIELD_GROUPS: dict[str, tuple[str, float, list[str]]] = {    "fashion_and_dress"
         "hållbart mode", "cirkulär ekonomi", "moda sostenible",
         "economía circular", "moda sustentável", "economia circular",
     ]),
+    # v2.9: fashion management + (sustainable) supply chain. The brief
+    # covers fashion management and sustainable supply chains, but bare
+    # "supply chain" / "value chain" must NOT score on their own — a
+    # logistics-optimisation PhD is not in scope. The specific phrases
+    # below are self-contextualising and always count; the generic ones
+    # in SUPPLY_CHAIN_GENERIC only count when a SUPPLY_CHAIN_CONTEXT
+    # term is also present (gate applied in match.score_posting).
+    # Deliberately NOT included: bare "logistics", "procurement",
+    # "operations management", "brand management" (too generic).
+    "fashion_management_supply_chain": ("مدیریت فشن و زنجیره تأمین", 1.1, [
+        "sustainable supply chain", "sustainable supply chains",
+        "fashion supply chain", "textile supply chain",
+        "apparel supply chain", "garment supply chain",
+        "circular supply chain", "fashion value chain",
+        "textile value chain", "supply chain transparency",
+        "supply chain sustainability", "responsible sourcing",
+        "ethical sourcing", "sustainable sourcing", "fashion sourcing",
+        "apparel sourcing",
+        "fashion management", "fashion business", "fashion marketing",
+        "fashion merchandising", "fashion buying",
+        "fashion retail management", "luxury brand management",
+        "luxury management", "fashion entrepreneurship",
+        "fashion industry management", "apparel management",
+        "textile management", "fashion operations",
+        "management de la mode", "gestion de la mode", "modemanagement",
+        "textilmanagement", "nachhaltige lieferkette",
+        # generic phrases: gated by SUPPLY_CHAIN_CONTEXT in match.py
+        "supply chain", "supply chains", "value chain", "value chains",
+    ]),
 }
+
+# Generic supply/value-chain phrases: only score with fashion, textile
+# or material context. "sustainable"/"sustainability" are deliberately
+# NOT context terms here — university boilerplate ("committed to
+# sustainability") would otherwise open the gate for pure logistics
+# postings; genuinely sustainable postings carry the specific phrase
+# "sustainable supply chain", which always counts.
+SUPPLY_CHAIN_GENERIC = [
+    "supply chain", "supply chains", "value chain", "value chains",
+]
+
+SUPPLY_CHAIN_CONTEXT = [
+    "fashion", "textile", "textiles", "garment", "garments", "apparel",
+    "couture", "circular", "circularity", "cotton", "leather",
+    "footwear", "luxury", "upcycling", "upcycle", "denim",
+    "moda", "kleidung", "vêtement", "dress",
+]
 
 HARD_EXCLUSIONS = [
     "textile engineering", "textile chemistry", "textile chemical engineering",
@@ -121,6 +173,17 @@ FASHION_ART_CONTEXT = [
     "fashion design", "kunst", "moda", "vêtement",
     "costume design", "textile design", "artistic research",
     "design studies",
+]
+
+# Context that makes generic sustainability language count. Extends
+# CONTEXT_TERMS with bare textile/apparel words: a posting about
+# textile supply chains + circular economy must not be capped as
+# "generic sustainability" just because it never says "fashion".
+# Kept SEPARATE from CONTEXT_TERMS on purpose: bare "textile" must
+# not rescue engineering-led postings from the exclusion, because
+# "textile engineering" itself contains the word "textile".
+SUSTAINABILITY_CONTEXT = CONTEXT_TERMS + [
+    "textile", "textiles", "apparel", "couture",
 ]
 
 # generic sustainability language that only counts WITH context

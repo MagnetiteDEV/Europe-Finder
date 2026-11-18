@@ -1,1 +1,161 @@
-{"politeness":{"delay_seconds":1.5},"professors":{"crossref":{"enabled":true,"keywords":["fashion","textile","design","art history","visual culture","costume","museum","cultural heritage","curatorial","material culture"],"rows":10,"since":"2023-01-01"},"orcid":{"enabled":true,"keywords":["fashion","textile","design","art history","visual culture","costume","museum","cultural heritage","curatorial","material culture"],"rows":5}},"sources":{"adzuna":{"app_id":"","app_key":"","countries":["gb","de","fr","nl","se","it","es"],"enabled":false,"what":"phd fashion design art history"},"ats":{"delay_seconds":1.5,"enabled":true,"tenants_file":"tenants.json"},"euraxess":{"enabled":true,"pages":2},"nature":{"enabled":true,"keywords":["fashion","textile","design","art history","visual culture","sustainability","costume","museum","cultural heritage","craft","curatorial","material culture"]}}}
+{
+  "politeness": {
+    "delay_seconds": 1.5
+  },
+  "professors": {
+    "crossref": {
+      "enabled": true,
+      "keywords": [
+        "fashion",
+        "textile",
+        "design",
+        "art history",
+        "visual culture",
+        "costume",
+        "museum",
+        "cultural heritage",
+        "curatorial",
+        "material culture"
+      ],
+      "rows": 10,
+      "since": "2023-01-01"
+    },
+    "orcid": {
+      "enabled": true,
+      "keywords": [
+        "fashion",
+        "textile",
+        "design",
+        "art history",
+        "visual culture",
+        "costume",
+        "museum",
+        "cultural heritage",
+        "curatorial",
+        "material culture"
+      ],
+      "rows": 5
+    }
+  },
+  "sources": {
+    "adzuna": {
+      "app_id": "",
+      "app_key": "",
+      "countries": [
+        "gb",
+        "de",
+        "fr",
+        "nl",
+        "se",
+        "it",
+        "es"
+      ],
+      "enabled": false,
+      "what": "phd fashion design art history"
+    },
+    "ats": {
+      "delay_seconds": 1.5,
+      "enabled": true,
+      "tenants_file": "tenants.json"
+    },
+    "euraxess": {
+      "enabled": true,
+      "pages": 5
+    },
+    "nature": {
+      "enabled": true,
+      "keywords": [
+        "fashion",
+        "textile",
+        "design",
+        "art history",
+        "visual culture",
+        "sustainability",
+        "costume",
+        "museum",
+        "cultural heritage",
+        "craft",
+        "curatorial",
+        "material culture"
+      ]
+    },
+    "jobsacuk": {
+      "enabled": true,
+      "max_details": 30,
+      "keywords": [
+        "fashion",
+        "textile",
+        "design",
+        "art history",
+        "visual culture",
+        "sustainability",
+        "costume",
+        "museum",
+        "cultural heritage",
+        "craft",
+        "curatorial",
+        "material culture"
+      ]
+    },
+    "cumulus": {
+      "enabled": true,
+      "delay_seconds": 1.5,
+      "max_items": 10
+    },
+    "arthist": {
+      "enabled": true,
+      "delay_seconds": 10
+    },
+    "daad": {
+      "enabled": true,
+      "delay_seconds": 2
+    },
+    "phdgermany": {
+      "enabled": true
+    },
+    "campusfrance": {
+      "enabled": true,
+      "delay_seconds": 1.5,
+      "max_details": 60,
+      "keywords": [
+        "fashion",
+        "textile",
+        "luxury",
+        "costume",
+        "art history"
+      ]
+    },
+    "fashionunited": {
+      "enabled": true,
+      "delay_seconds": 1.5,
+      "max_details": 25
+    },
+    "pageup": {
+      "enabled": true,
+      "delay_seconds": 1.5,
+      "max_pages": 25,
+      "tenants": [
+        {
+          "code": "unsw",
+          "name": "UNSW Sydney",
+          "base": "https://careers.pageuppeople.com/841/cw/en"
+        },
+        {
+          "code": "monash",
+          "name": "Monash University",
+          "base": "https://careers.pageuppeople.com/513/cw/en"
+        },
+        {
+          "code": "adelaide",
+          "name": "University of Adelaide",
+          "base": "https://careers.pageuppeople.com/1220/cw/en"
+        },
+        {
+          "code": "deakin",
+          "name": "Deakin University",
+          "base": "https://careers.deakin.edu.au/cw/en"
+        }
+      ]
+    }
+  }
+}

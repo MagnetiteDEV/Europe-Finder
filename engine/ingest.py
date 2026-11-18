@@ -17,7 +17,7 @@ from datetime import datetime, timezone
 from pathlib import Path
 
 from .adapters import FoundPosting
-from .adapters import adzuna, ats, crossref, euraxess, jobs_ac_uk, orcid, rss_nature
+from .adapters import adzuna, ats, campusfrance, crossref, daad, euraxess, fashionunited, feeds, jobs_ac_uk, orcid, pageup, rss_nature
 from .professors import merge_professors
 from .curated import load_all as load_curated
 from .eligibility import load_overrides, status_for
@@ -37,6 +37,15 @@ ADAPTERS = {
     "ats": ats.search,
     "euraxess": euraxess.search,
     "jobsacuk": jobs_ac_uk.search,
+    # v2.9: design/art-history feeds, DAAD, Campus France,
+    # FashionUnited, Australian PageUp universities
+    "cumulus": feeds.search_cumulus,
+    "arthist": feeds.search_arthist,
+    "daad": daad.search,
+    "phdgermany": daad.search_phd,
+    "campusfrance": campusfrance.search,
+    "fashionunited": fashionunited.search,
+    "pageup": pageup.search,
 }
 
 
@@ -62,7 +71,10 @@ def apply_policy(p: FoundPosting, policy: dict, elig_overrides: dict) -> None:
     p.eligibility = status
     p.eligibility_note = note
     p.priority_country = p.country in policy.get("priorityCountries", [])
-    if not getattr(p, "curated", False):
+    if not getattr(p, "curated", False) and not getattr(p, "_kind_fixed", False):
+        # adapters that know the kind (DAAD scholarships, Campus France
+        # masters, ArtHist fellowships) set _kind_fixed; the rest go
+        # through kind detection as before
         p.kind = detect_kind(p.title, p.description)
 
 
