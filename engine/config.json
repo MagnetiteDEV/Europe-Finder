@@ -170,7 +170,7 @@
       ]
     },
     "myscience": {
-      "enabled": true,
+      "enabled": false,
       "delay_seconds": 2.0,
       "keywords": [
         "PhD art",

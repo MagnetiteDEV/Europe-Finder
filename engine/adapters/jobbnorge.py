@@ -3,33 +3,43 @@
 Covers Norwegian universities and art academies (KHiO Oslo, KMD Bergen,
 AHO, NTNU, UiO, UiB). All Norwegian PhD Research Fellow (Stipendiat)
 positions are 3-4 year salaried public-sector employment contracts.
+
+v2.9.4: the old /en/available-jobs HTML listing is gone (404 — the site
+moved to a JS app at jobbnorge.no/search). This adapter now uses the
+site's own public JSON API (https://publicapi.jobbnorge.no/v3/jobs,
+found in the site's search bundle): one call returns the full job list
+(the `search` query param is ignored server-side — filtering happens
+client-side, same as the site itself), so this adapter filters in Python:
+title must carry a PhD marker (PhD / Stipendiat / doktorgrad) and the
+title+summary must carry an arts signal (config keywords or Norwegian
+arts terms); the engine matcher applies the final arts lens.
 """
 from __future__ import annotations
 
-import json
 import re
 import time
-from html import unescape
-from urllib.parse import urljoin
+from datetime import datetime
 
 from requests.exceptions import ConnectionError, Timeout
 
-from ..extract import clean_plain_text, extract_deadline
 from ..http import SourceBlocked, polite_get
 from . import FoundPosting
-from .ats import strip_html
 
-BASE = "https://www.jobbnorge.no"
-SEARCH_URL = BASE + "/en/available-jobs"
+API_URL = "https://publicapi.jobbnorge.no/v3/jobs"
 SOURCE = "jobbnorge"
 
-_JOB_LINK_RE = re.compile(
-    r'<a[^>]+href=["\'](/en/available-jobs/job/(\d+)/[^"\']*)["\'][^>]*>(.*?)</a>',
-    re.S | re.I)
-_LD_RE = re.compile(
-    r'<script[^>]*type=["\']application/ld\+json["\'][^>]*>(.*?)</script>',
-    re.S | re.I)
-_PHD_RE = re.compile(r"\b(ph\.?\s*d\.?|doctoral|stipendiat|research\s+fellow)\b", re.I)
+_PHD_RE = re.compile(r"\b(ph\.?\s*d\.?|doctoral|stipendiat|doktorgrad)\b", re.I)
+
+# Arts signal: English tokens from the config keywords + Norwegian arts terms.
+_ARTS_EN = ("art", "design", "fashion", "museum", "heritage", "visual",
+            "costume", "artistic", "textile", "curatorial", "culture")
+_ARTS_NO = ("kunst", "mote", "design", "museum", "kulturarv", "visuell",
+            "tekstil", "kostyme", "arkitektur", "dans", "teater", "musikk",
+            "film", "foto", "grafisk", "illustrasjon", "keramikk",
+            "scenografi", "kunstnerisk", "kultur", "historie", "arkeologi",
+            "litteratur", "filosofi")
+_ARTS_RE = re.compile(
+    r"\b(" + "|".join(_ARTS_EN + _ARTS_NO) + r")\b", re.I)
 
 DEFAULT_KEYWORDS = [
     "PhD art", "PhD design", "PhD fashion", "PhD museum",
@@ -37,61 +47,63 @@ DEFAULT_KEYWORDS = [
 ]
 
 
-def _parse_listing(html_text: str) -> list[FoundPosting]:
+def _parse_deadline(raw: str) -> str:
+    """Jobbnorge deadlines are 'DD.MM.YYYY' or 'Løpende' (rolling)."""
+    raw = (raw or "").strip()
+    if not raw or raw.lower().startswith("l"):
+        return ""
+    for fmt in ("%d.%m.%Y", "%Y-%m-%d"):
+        try:
+            return datetime.strptime(raw, fmt).date().isoformat()
+        except ValueError:
+            continue
+    return ""
+
+
+def _parse_api(payload: dict) -> list[FoundPosting]:
+    """Filter the public API's full job list down to artistic PhD roles."""
     out: list[FoundPosting] = []
     seen: set[str] = set()
-    for m in _LD_RE.finditer(html_text):
-        try:
-            d = json.loads(m.group(1))
-        except Exception:
-            continue
-        blocks = d if isinstance(d, list) else [d]
-        for b in blocks:
-            if not isinstance(b, dict) or b.get("@type") != "JobPosting":
-                continue
-            title = clean_plain_text(b.get("title") or "")
-            url = str(b.get("url") or "")
-            idm = re.search(r"/job/(\d+)/", url)
-            jid = idm.group(1) if idm else str(b.get("identifier") or "")
-            if not jid or not title or jid in seen:
-                continue
-            seen.add(jid)
-            hiring = b.get("hiringOrganization") or {}
-            org = hiring.get("name", "") if isinstance(hiring, dict) else ""
-            desc = strip_html(b.get("description") or "")
-            p = FoundPosting(
-                source=SOURCE,
-                external_id=jid,
-                title=title,
-                organization=clean_plain_text(org),
-                country="NO",
-                url=urljoin(BASE, url) if url.startswith("/") else url,
-                description=desc,
-                posted_date=str(b.get("datePosted") or "")[:10],
-                deadline=str(b.get("validThrough") or "")[:10] or extract_deadline(desc),
-            )
-            if _PHD_RE.search(title):
-                p.kind = "phd"
-                p._kind_fixed = True
-            out.append(p)
-    if out:
+    jobs = payload.get("jobs") if isinstance(payload, dict) else None
+    if not isinstance(jobs, list):
         return out
-    for m in _JOB_LINK_RE.finditer(html_text):
-        href, jid, raw_title = m.group(1), m.group(2), m.group(3)
-        if jid in seen:
+    for j in jobs:
+        if not isinstance(j, dict):
             continue
-        title = clean_plain_text(strip_html(unescape(raw_title)))
-        if len(title) < 6 or not _PHD_RE.search(title):
+        jid = str(j.get("id") or "").strip()
+        title = (j.get("title") or "").strip()
+        if not jid or not title or jid in seen:
+            continue
+        summary = (j.get("summary") or "").strip()
+        if not _PHD_RE.search(title):
+            continue
+        if not _ARTS_RE.search(title + " " + summary):
             continue
         seen.add(jid)
+        locs = j.get("locations") or []
+        primary = next((x for x in locs if isinstance(x, dict) and x.get("isPrimary")),
+                       locs[0] if locs else {})
+        city = (primary.get("municipality") or primary.get("area") or "").strip()
+        dept = (j.get("department") or "").strip()
+        desc = summary
+        if dept:
+            desc = f"{desc} ({dept})".strip()
+        posted = str(j.get("publicationDate") or "")
+        if re.match(r"^\d{2}\.\d{2}\.\d{4}", posted):
+            posted = _parse_deadline(posted[:10])
+        else:
+            posted = posted[:10]
         p = FoundPosting(
             source=SOURCE,
             external_id=jid,
             title=title,
-            organization="Norwegian Institution (Jobbnorge)",
+            organization=(j.get("employer") or "Norwegian Institution (Jobbnorge)").strip(),
             country="NO",
-            url=urljoin(BASE, href),
-            description=f"{title}. Salaried PhD Research Fellowship in Norway (Jobbnorge).",
+            city=city,
+            url=str(j.get("link") or f"https://www.jobbnorge.no/ledige-stillinger/stilling/{jid}"),
+            description=desc,
+            posted_date=posted,
+            deadline=_parse_deadline(str(j.get("deadline") or "")),
         )
         p.kind = "phd"
         p._kind_fixed = True
@@ -100,23 +112,19 @@ def _parse_listing(html_text: str) -> list[FoundPosting]:
 
 
 def search(session, cfg: dict) -> list[FoundPosting]:
-    out: list[FoundPosting] = []
-    seen: set[str] = set()
-    delay = float(cfg.get("delay_seconds", 1.5))
-    for kw in cfg.get("keywords", DEFAULT_KEYWORDS):
-        try:
-            r = polite_get(session, SEARCH_URL, params={"q": kw}, timeout=20)
-        except SourceBlocked:
-            break
-        except (Timeout, ConnectionError):
-            time.sleep(delay)
-            continue
-        except Exception:
-            time.sleep(delay)
-            continue
-        for p in _parse_listing(r.text):
-            if p.key() not in seen:
-                seen.add(p.key())
-                out.append(p)
-        time.sleep(delay)
+    """One API call for the full list; filtering happens here, not per keyword."""
+    try:
+        r = polite_get(session, API_URL, params={"language": 1}, timeout=30)
+    except SourceBlocked:
+        return []
+    except (Timeout, ConnectionError):
+        return []
+    except Exception:
+        return []
+    try:
+        payload = r.json()
+    except Exception:
+        return []
+    out = _parse_api(payload)
+    time.sleep(float(cfg.get("delay_seconds", 1.5)))
     return out

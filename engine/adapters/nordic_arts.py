@@ -1,7 +1,11 @@
 """Swiss (myScience.ch) and Danish (University of Copenhagen PhD) adapters.
 
 - myScience.ch: public Swiss academic job portal (salaried PhDs across
-  Swiss universities and art/design academies).
+  Swiss universities and art/design academies). DISABLED in config since
+  v2.9.4 (2026-11-24): the site sits behind a verify-wall and every
+  request from a plain HTTP client times out (even /verify) — the adapter
+  would burn ~90s per keyword in polite_get retries and return 0. Re-enable
+  only with a browser/API route; the manual hub link stays.
 - KU PhD (employment.ku.dk/phd/): University of Copenhagen official PhD
   vacancies portal (priority country DK — all Danish PhDs are salaried
   3-year university employment contracts).

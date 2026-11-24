@@ -25,6 +25,9 @@ FIELD_GROUPS: dict[str, tuple[str, float, list[str]]] = {
         "modeonderzoek", "modestudier", "motestudier", "motehistorie",
         "motedesign", "moda", "historia de la moda", "diseño de moda",
         "história da moda", "design de moda",
+        # v2.9.4: standalone Norwegian terms (Jobbnorge titles are often
+        # bare nouns: "Stipendiat i mote", "kostyme", "tekstil")
+        "mote", "kostyme", "tekstil",
     ]),
     "art_and_visual_culture": ("هنر و فرهنگ بصری", 1.15, [
         "art history", "visual culture", "contemporary art", "art theory",
@@ -41,6 +44,8 @@ FIELD_GROUPS: dict[str, tuple[str, float, list[str]]] = {
         "academy of art", "school of arts", "creative writing",
         "arts and culture", "school of communication and arts",
         "art conservation",
+        # v2.9.4: standalone Norwegian terms (bare "kunst" in Jobbnorge titles)
+        "kunst", "kunst og kultur", "kurator",
     ]),
     "design_and_artistic_research": ("دیزاین و پژوهش هنری", 1.2, [
         "design studies", "design research", "artistic research", "design history",
@@ -57,6 +62,8 @@ FIELD_GROUPS: dict[str, tuple[str, float, list[str]]] = {
         "speculative design", "practice-based research", "practice based research",
         "practice-led research", "artistic practice", "digital spaces",
         "school of design", "design lab", "postdoctoral design researcher",
+        # v2.9.4: standalone Norwegian terms
+        "kunstnerisk", "kunstnerisk utviklingsarbeid", "arkitektur",
     ]),
     "costume_performance": ("کاستوم و اجرا", 1.15, [
         "costume studies", "costume design", "theatre design", "performance studies",
@@ -67,6 +74,8 @@ FIELD_GROUPS: dict[str, tuple[str, float, list[str]]] = {
         "scenografia", "kostuumontwerp", "kostuumgeschiedenis", "kostymdesign",
         "scenografi", "diseño de vestuario", "historia del traje", "figurino",
         "cenografia",
+        # v2.9.4: standalone Norwegian terms (theatre / dance / music / film)
+        "teater", "dans", "musikk", "film", "foto", "fotografi", "drama",
     ]),
     "humanities_and_material_culture": ("علوم انسانی و فرهنگ مادی", 1.0, [
         "material culture", "cultural studies", "heritage studies",
@@ -80,6 +89,8 @@ FIELD_GROUPS: dict[str, tuple[str, float, list[str]]] = {
         "studi culturali", "patrimonio culturale", "studi museali",
         "materiële cultuur", "cultureel erfgoed", "kulturarv", "materiell kultur",
         "estudios culturales", "patrimonio cultural", "cultura material",
+        # v2.9.4: standalone Norwegian terms
+        "arkeologi", "historie", "litteratur", "filosofi",
     ]),
     "sustainability_in_design": ("پایداری در طراحی", 1.0, [
         "sustainable fashion", "circular fashion", "circular design",

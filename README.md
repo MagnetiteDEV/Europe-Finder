@@ -15,6 +15,11 @@ Live data feed for **Europe Opportunity Finder** (single-file iOS-friendly app).
 
 No personal data is published here — only public job/scholarship postings.
 
+## v2.9.4 Engine Fixes
+- Jobbnorge rewritten on the site's public JSON API (`publicapi.jobbnorge.no/v3/jobs`): the old `/en/available-jobs` HTML listing 404s after the site moved to a JS app. One call returns the full list; the adapter filters PhD-marker titles with an arts signal (English + Norwegian terms) and parses `DD.MM.YYYY` deadlines.
+- myScience.ch disabled in config: the site sits behind a verify-wall and every request times out from a plain HTTP client (even `/verify`) — it would burn ~90s per keyword in retries and return 0. The manual hub link stays; re-enable only with a browser/API route.
+- Bundle version `v2.9.4` (`engine/export_web.py`).
+
 ## v2.9.3 Engine Highlights
 - Expanded salaried/funded European PhD adapters: AcademicTransfer (NL), Jobbnorge (NO), Campus France Doctorat (FR), myScience.ch (CH), University of Copenhagen PhD (DK), plus targeted R1/Arts EURAXESS & PhD-first jobs.ac.uk queries and 14 curated European PhD routes (`data/phds.json`).
 - Hardened artistic precision matcher (`engine/vocab.py`, `engine/match.py`, `engine/extract.py`) with STEM/engineering exclusions and false-friend guards.

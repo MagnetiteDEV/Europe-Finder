@@ -138,6 +138,27 @@ class TestArtisticMatcher(unittest.TestCase):
         score_posting(p)
         return p
 
+    def test_norwegian_artistic_titles_score(self):
+        # v2.9.4: Jobbnorge titles are Norwegian bare nouns — the matcher
+        # must see "kunst", "musikk", "teater" as artistic, not score 0.
+        p_kunst = self._score("Stipendiat i kunst og kultur i skolen, med fokus på drama og teater",
+                              "Universitetet i Stavanger", source="jobbnorge")
+        self.assertFalse(p_kunst.excluded)
+        self.assertGreaterEqual(p_kunst.fit_score, 45)
+
+        p_musikk = self._score("Stipendiat i musikk", "NTNU", source="jobbnorge")
+        self.assertFalse(p_musikk.excluded)
+        self.assertGreaterEqual(p_musikk.fit_score, 45)
+
+        p_ark = self._score("Stipendiat i forhistorisk arkeologi",
+                            "Universitetet i Stavanger", source="jobbnorge")
+        self.assertFalse(p_ark.excluded)
+
+        # ...while a Norwegian engineering PhD still scores 0
+        p_solar = self._score("PhD Research Fellow in Design and Analysis of Floating Solar Arrays",
+                              "Universitetet i Agder", source="jobbnorge")
+        self.assertEqual(p_solar.fit_score, 0)
+
     def test_stem_and_false_positives_rejected(self):
         # Chemistry / Food LCA without artistic context must NOT score Strong
         p_food = self._score(
@@ -240,19 +261,46 @@ class TestNewAndUpgradedAdapters(unittest.TestCase):
         self.assertEqual(posts_html[0].external_id, "88202")
         self.assertEqual(posts_html[0].kind, "phd")
 
-    def test_jobbnorge_parser_and_block(self):
-        html = '<a href="/en/available-jobs/job/271234/phd-artistic-research">PhD Research Fellow in Artistic Research &amp; Costume Design</a>'
-        posts = jobbnorge._parse_listing(html)
-        self.assertEqual(len(posts), 1)
+    def test_jobbnorge_api_parser_and_block(self):
+        payload = {"jobs": [
+            {"id": 311685, "title": "PhD Research Fellow in maps and models for nature in land-use planning",
+             "employer": "Høgskulen på Vestlandet", "department": "Faculty of Art",
+             "deadline": "03.01.2027", "link": "https://www.jobbnorge.no/ledige-stillinger/stilling/311685",
+             "summary": "PhD Research Fellow in Artistic Research and visual culture.",
+             "publicationDate": "2026-11-20",
+             "locations": [{"municipality": "Bergen", "area": "Bergen", "isPrimary": True}]},
+            {"id": 308700, "title": "Sykepleier til Gatehospitalet",
+             "employer": "Frelsesarmeen", "deadline": "Løpende",
+             "link": "https://www.jobbnorge.no/ledige-stillinger/stilling/308700",
+             "summary": "søker sykepleier", "publicationDate": "2026-11-19",
+             "locations": [{"municipality": "Bergen", "isPrimary": True}]},
+            {"id": 310606, "title": "Stipendiat i forhistorisk arkeologi",
+             "employer": "Universitetet i Stavanger", "deadline": "23.12.2026",
+             "link": "https://www.jobbnorge.no/ledige-stillinger/stilling/310606",
+             "summary": "Stipendiat i arkeologi og kulturarv.",
+             "publicationDate": "2026-11-18",
+             "locations": [{"municipality": "Stavanger", "isPrimary": True}]},
+        ]}
+        posts = jobbnorge._parse_api(payload)
+        self.assertEqual(len(posts), 2)
         self.assertEqual(posts[0].country, "NO")
         self.assertEqual(posts[0].kind, "phd")
+        self.assertEqual(posts[0].deadline, "2027-01-03")
+        self.assertEqual(posts[1].deadline, "2026-12-23")
+        self.assertEqual(jobbnorge._parse_deadline("Løpende"), "")
 
-        # Verify SourceBlocked (429) stops immediately
+        # Verify SourceBlocked (429) stops immediately with a single call
         sess = mock.MagicMock()
         sess.get.return_value = _FakeResp(status_code=429)
         posts_blocked = jobbnorge.search(sess, {"keywords": ["PhD art", "PhD design"], "delay_seconds": 0})
         self.assertEqual(posts_blocked, [])
         self.assertEqual(sess.get.call_count, 1)
+
+    def test_myscience_disabled_in_config(self):
+        # myScience.ch is behind a verify-wall (all requests time out);
+        # the source stays disabled until a browser/API route exists.
+        cfg = json.loads((ROOT / "config.json").read_text(encoding="utf-8"))
+        self.assertFalse(cfg["sources"]["myscience"]["enabled"])
 
     def test_campusfrance_phd_parser(self):
         html = '<div class="card"><a href="/phd/offers/45123">Thèse en histoire de la mode et culture visuelle</a><span>Contrat doctoral — Date limite: 30 mars 2027</span></div>'
