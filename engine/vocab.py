@@ -1,28 +1,30 @@
 """Multilingual field vocabulary — ported from EuropeFinder's
-src/lib/masters/fields.ts.
+src/lib/masters/fields.ts and hardened in v2.9.3 for artistic precision.
 
 Positive terms are grouped by real subject fit (not generic word
-overlap) and weighted. HARD_EXCLUSIONS apply only when the posting
-itself is engineering-led. CONTEXT_TERMS decide whether generic
-sustainability language counts.
+overlap) and weighted. HARD_EXCLUSIONS apply when the posting itself
+is engineering/STEM-led. SUSTAINABILITY_GENERIC terms only count when
+an explicit artistic/fashion/textile context is present (never bare
+"design" in chemistry/food-modelling postings).
 """
 from __future__ import annotations
 
-# v2.8: bare "mode" is deliberately absent from the three lists below
-# (fashion terms, CONTEXT_TERMS, FASHION_ART_CONTEXT) — it fired on
-# jobs.ac.uk boilerplate "Mode of study Full-time" and on "deformation
-# mode". Multi-word phrases ("histoire de la mode", "mode durable") stay.
-# group_id -> (persian label, weight, terms)
-FIELD_GROUPS: dict[str, tuple[str, float, list[str]]] = {    "fashion_and_dress": ("فشن و لباس", 1.25, [
+FIELD_GROUPS: dict[str, tuple[str, float, list[str]]] = {
+    "fashion_and_dress": ("فشن و لباس", 1.25, [
         "fashion studies", "fashion history", "fashion design", "dress studies",
         "dress history", "fashion culture", "fashion theory", "fashion communication",
+        "fashion styling", "fashion photography", "fashion film",
+        "fashion promotion", "fashion media", "digital fashion",
+        "visual merchandising", "textile design", "designer textile",
+        "garment design", "woven textiles", "knitted textiles",
+        "surface design", "print design", "fashion curation",
         "histoire de la mode", "études de la mode", "design de mode",
         "mode durable", "kleidungsgeschichte", "modegeschichte", "modedesign",
         "modewissenschaft", "storia della moda", "studi sulla moda",
         "design della moda", "moda sostenibile", "modegeschiedenis",
         "modeonderzoek", "modestudier", "motestudier", "motehistorie",
         "motedesign", "moda", "historia de la moda", "diseño de moda",
-        "moda sostenible", "história da moda", "design de moda",
+        "história da moda", "design de moda",
     ]),
     "art_and_visual_culture": ("هنر و فرهنگ بصری", 1.15, [
         "art history", "visual culture", "contemporary art", "art theory",
@@ -31,10 +33,14 @@ FIELD_GROUPS: dict[str, tuple[str, float, list[str]]] = {    "fashion_and_dress"
         "storia dell'arte", "arti visive", "cultura visuale", "kunstgeschiedenis",
         "beeldcultuur", "kunsthistorie", "visuell kultur", "historia del arte",
         "cultura visual", "história da arte",
-        # v2.9: practice-based art terms (PageUp/Cumulus titles are often
-        # "Lecturer in Fine Art / Visual Arts" with no "art history" phrase)
         "fine art", "fine arts", "visual arts", "visual art",
         "art practice", "studio art", "art education", "beaux-arts",
+        # v2.9.3: artistic studio & institutional terms
+        "illustration", "character animation", "printmaking",
+        "art and design", "arts and humanities", "kunsthistorisches",
+        "academy of art", "school of arts", "creative writing",
+        "arts and culture", "school of communication and arts",
+        "art conservation",
     ]),
     "design_and_artistic_research": ("دیزاین و پژوهش هنری", 1.2, [
         "design studies", "design research", "artistic research", "design history",
@@ -45,12 +51,17 @@ FIELD_GROUPS: dict[str, tuple[str, float, list[str]]] = {    "fashion_and_dress"
         "artistiek onderzoek", "designforskning", "kunstnerisk forskning",
         "investigación en diseño", "investigación artística", "pesquisa em design",
         "pesquisa artística",
-        # v2.9: design pedagogy (common in university vacancy titles)
         "design education", "design teaching",
+        # v2.9.3: artistic spatial/exhibition & practice-based design terms
+        "exhibition design", "spatial design", "narrative environments",
+        "speculative design", "practice-based research", "practice based research",
+        "practice-led research", "artistic practice", "digital spaces",
+        "school of design", "design lab", "postdoctoral design researcher",
     ]),
     "costume_performance": ("کاستوم و اجرا", 1.15, [
         "costume studies", "costume design", "theatre design", "performance studies",
         "film costume", "scenography", "stage design", "costume history",
+        "performing arts", "performance art", "set design",
         "études de costume", "costume de théâtre", "kostümdesign",
         "theaterwissenschaft", "storia del costume", "costume per lo spettacolo",
         "scenografia", "kostuumontwerp", "kostuumgeschiedenis", "kostymdesign",
@@ -61,7 +72,9 @@ FIELD_GROUPS: dict[str, tuple[str, float, list[str]]] = {    "fashion_and_dress"
         "material culture", "cultural studies", "heritage studies",
         "cultural heritage", "museum studies", "museum curation",
         "fashion anthropology", "visual anthropology", "social history",
-        "memory studies", "culture matérielle", "études culturelles",
+        "memory studies", "critical bibliography", "material objects",
+        "archival studies", "special collections", "klassik stiftung weimar",
+        "culture matérielle", "études culturelles",
         "patrimoine culturel", "museologie", "materielle kultur",
         "kulturwissenschaft", "kulturerbe", "museumsstudien", "cultura materiale",
         "studi culturali", "patrimonio culturale", "studi museali",
@@ -70,24 +83,17 @@ FIELD_GROUPS: dict[str, tuple[str, float, list[str]]] = {    "fashion_and_dress"
     ]),
     "sustainability_in_design": ("پایداری در طراحی", 1.0, [
         "sustainable fashion", "circular fashion", "circular design",
-        "fashion sustainability", "life cycle assessment", "lca",
-        "circular economy", "sustainable design", "textile heritage",
-        "sustainable costume", "mode durable", "économie circulaire",
-        "design durable", "nachhaltige mode", "kreislaufwirtschaft",
-        "nachhaltiges design", "moda sostenibile", "economia circolare",
-        "design sostenibile", "duurzame mode", "circulaire economie",
-        "hållbart mode", "cirkulär ekonomi", "moda sostenible",
-        "economía circular", "moda sustentável", "economia circular",
+        "fashion sustainability", "sustainable design", "textile heritage",
+        "sustainable costume", "mode durable", "design durable",
+        "nachhaltige mode", "nachhaltiges design", "moda sostenibile",
+        "design sostenibile", "duurzame mode", "hållbart mode",
+        "moda sustentável",
+        # Generic sustainability terms: gated by SUSTAINABILITY_CONTEXT in match.py
+        "life cycle assessment", "lca", "circular economy",
+        "économie circulaire", "kreislaufwirtschaft",
+        "economia circolare", "circulaire economie", "cirkulär ekonomi",
+        "economía circular", "economia circular",
     ]),
-    # v2.9: fashion management + (sustainable) supply chain. The brief
-    # covers fashion management and sustainable supply chains, but bare
-    # "supply chain" / "value chain" must NOT score on their own — a
-    # logistics-optimisation PhD is not in scope. The specific phrases
-    # below are self-contextualising and always count; the generic ones
-    # in SUPPLY_CHAIN_GENERIC only count when a SUPPLY_CHAIN_CONTEXT
-    # term is also present (gate applied in match.score_posting).
-    # Deliberately NOT included: bare "logistics", "procurement",
-    # "operations management", "brand management" (too generic).
     "fashion_management_supply_chain": ("مدیریت فشن و زنجیره تأمین", 1.1, [
         "sustainable supply chain", "sustainable supply chains",
         "fashion supply chain", "textile supply chain",
@@ -110,12 +116,6 @@ FIELD_GROUPS: dict[str, tuple[str, float, list[str]]] = {    "fashion_and_dress"
     ]),
 }
 
-# Generic supply/value-chain phrases: only score with fashion, textile
-# or material context. "sustainable"/"sustainability" are deliberately
-# NOT context terms here — university boilerplate ("committed to
-# sustainability") would otherwise open the gate for pure logistics
-# postings; genuinely sustainable postings carry the specific phrase
-# "sustainable supply chain", which always counts.
 SUPPLY_CHAIN_GENERIC = [
     "supply chain", "supply chains", "value chain", "value chains",
 ]
@@ -127,6 +127,15 @@ SUPPLY_CHAIN_CONTEXT = [
     "moda", "kleidung", "vêtement", "dress",
 ]
 
+# Generic sustainability terms that ONLY count in fashion/art/design context
+# (prevents chemistry photocatalysts or food-process LCA from scoring Strong!)
+SUSTAINABILITY_GATED = {
+    "life cycle assessment", "lca", "circular economy",
+    "économie circulaire", "kreislaufwirtschaft",
+    "economia circolare", "circulaire economie", "cirkulär ekonomi",
+    "economía circular", "economia circular",
+}
+
 HARD_EXCLUSIONS = [
     "textile engineering", "textile chemistry", "textile chemical engineering",
     "polymer engineering", "mechanical engineering", "chemical engineering",
@@ -137,20 +146,33 @@ HARD_EXCLUSIONS = [
     "ingegneria tessile", "ingegneria meccanica", "ingegneria chimica",
     "ingenieria textil", "ingeniería química", "ingeniería mecánica",
     "génie textile", "génie mécanique",
+    # v2.9.3: French engineering degrees + STEM hard-science exclusions
+    "diplome d ingenieur", "ingenierie textile", "ecole d ingenieurs",
+    "ecole nationale superieure d ingenieurs",
+    "photocatalyst", "photocatalysts", "photocatalytic",
+    "aeronautics", "food process modelling", "protein biochemistry",
+    "enzymatic recycling of polyester plastics", "heated garments for patients",
+    "protein nanocages", "dna amplification", "brushless doubly fed",
+    "bayesian experimental design", "computational chemistry",
+    "synthetic proteins", "plant gene expression", "semiconductor",
+    "wireless communications", "electric composites", "spatial multi-omics",
+    "spatial biology", "protein biofilm", "molecular genetics",
+    "nanofiltration", "electrodialysis", "bioinformatics",
+    "quantum materials", "nuclear physics", "solid state physics",
+    "experimental physics", "fluid mechanics", "automatic control",
+    "biophysics", "biotechnology", "neuroscience", "immunology",
+    "virology", "parasitology", "zinc-ion batteries", "battery recycling",
+    "laser ablation", "hormone sensing",
 ]
 
 CONTEXT_TERMS = [
-    "fashion", "dress", "garment", "costume", "design", "art", "visual",
-    "culture", "heritage", "craft", "museum", "textile history",
+    "fashion", "dress", "garment", "costume", "art history", "history of art",
+    "fine art", "visual culture", "material culture", "heritage", "craft",
+    "museum", "textile history", "textile design", "school of design",
+    "art and design", "artistic research", "curatorial", "curator",
     "vêtement", "kunst", "kleidung", "moda", "abito", "ontwerp",
 ]
 
-# Design jury: terms that mean the posting is about digital/tech design
-# (UI/UX, web, software, games, industrial, graphic, interior...), not
-# artistic / fashion / costume design. Mirrors HARD_EXCLUSIONS: a title
-# hit vetoes outright; body hits need >=2 AND no fashion/art context,
-# so a fashion posting that merely mentions "user experience" once
-# (e.g. Design for Recycling) survives.
 DESIGN_VETO = [
     "ux", "ui", "user interface", "user experience", "user centred design",
     "user-centered design", "human computer interaction",
@@ -163,39 +185,34 @@ DESIGN_VETO = [
     "user research", "ux research", "ui designer", "ux designer",
 ]
 
-# Fashion/art context that saves a posting from the design veto.
-# Deliberately specific: bare "design"/"art"/"visual"/"culture" are too
-# broad ("state of the art", "visual" in tech copy).
 FASHION_ART_CONTEXT = [
     "fashion", "dress", "garment", "costume", "couture", "textile",
     "art history", "history of art", "curatorial", "curator", "museum",
     "heritage", "craft", "visual culture", "contemporary art",
     "fashion design", "kunst", "moda", "vêtement",
     "costume design", "textile design", "artistic research",
-    "design studies",
+    "design studies", "fine art", "illustration", "school of design",
+    "art and design", "performing arts", "narrative environments",
 ]
 
-# Context that makes generic sustainability language count. Extends
-# CONTEXT_TERMS with bare textile/apparel words: a posting about
-# textile supply chains + circular economy must not be capped as
-# "generic sustainability" just because it never says "fashion".
-# Kept SEPARATE from CONTEXT_TERMS on purpose: bare "textile" must
-# not rescue engineering-led postings from the exclusion, because
-# "textile engineering" itself contains the word "textile".
-SUSTAINABILITY_CONTEXT = CONTEXT_TERMS + [
-    "textile", "textiles", "apparel", "couture",
+# Strict artistic/fashion/textile context required for LCA / circular economy
+SUSTAINABILITY_CONTEXT = FASHION_ART_CONTEXT + [
+    "textiles", "apparel", "garments", "fashion design", "circular fashion",
+    "sustainable fashion", "design school",
 ]
 
-# generic sustainability language that only counts WITH context
 GENERIC_SUSTAINABILITY = [
     "sustainability", "sustainable", "circular economy", "climate transition",
+    "lca", "life cycle assessment",
 ]
 
-# Single-word anchors per group: high-signal words for short vacancy
-# texts where full phrases rarely appear verbatim. Each distinct anchor
-# hit adds a small fraction of group points (capped), so anchors alone
-# can lift a posting to Moderate but never to Strong by themselves.
-# Deliberately NOT included: "design", "art", "culture" (too generic).
+# Retail / legal / groundskeeping titles that must not score via generic anchors
+RETAIL_LEGAL_TITLES = [
+    "sales associate", "sales assistant", "seasonal sales", "senior sales",
+    "distribution centre operative", "grounds operative", "counsel",
+    "accountant", "impact officer", "sales team member",
+]
+
 ANCHORS: dict[str, list[str]] = {
     "fashion_and_dress": [
         "fashion", "textile", "textiles", "garment", "garments", "dress",
@@ -203,7 +220,7 @@ ANCHORS: dict[str, list[str]] = {
     ],
     "art_and_visual_culture": [
         "curatorial", "curator", "museology", "biennale", "arthistory",
-        "history", "histoire", "geschichte", "historia",
+        "history", "histoire", "geschichte", "historia", "animation",
     ],
     "design_and_artistic_research": [
         "designer", "craft", "crafts",

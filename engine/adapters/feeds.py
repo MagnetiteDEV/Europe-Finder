@@ -28,7 +28,7 @@ from html.parser import HTMLParser
 import feedparser
 from requests.exceptions import ConnectionError, Timeout
 
-from ..extract import extract_deadline
+from ..extract import clean_plain_text, extract_deadline
 from ..http import SourceBlocked, polite_get
 from . import FoundPosting
 from .ats import strip_html
@@ -116,7 +116,7 @@ class _BodyParser(HTMLParser):
 def search_cumulus(session, cfg: dict) -> list[FoundPosting]:
     out: list[FoundPosting] = []
     delay = float(cfg.get("delay_seconds", 1.5))
-    cap = int(cfg.get("max_items", 10))
+    cap = int(cfg.get("max_items", 20))
     try:
         r = polite_get(session, CUMULUS_FEED)
     except SourceBlocked:
@@ -177,7 +177,7 @@ def search_arthist(session, cfg: dict) -> list[FoundPosting]:
             dr = polite_get(session, link)
             p = _BodyParser()
             p.feed(dr.text)
-            body = p.text()[:8000]
+            body = clean_plain_text(p.text())[:8000]
             deadline = extract_deadline(body)
         except SourceBlocked:
             break

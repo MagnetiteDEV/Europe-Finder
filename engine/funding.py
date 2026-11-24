@@ -9,7 +9,7 @@ Rules enforced:
   - "scholarship", "stipend" or "funded" ALONE never proves full funding
     -> funding_unconfirmed.
   - Only explicit "fully funded" / "full funding" -> fully_funded_scholarship.
-  - Explicit employment language -> salaried_doctoral_employment.
+  - Explicit employment language / statutory salary scales -> salaried_doctoral_employment.
   - Negative signals -> unfunded (+ red flag).
   - Nothing at all -> funding_information_unavailable.
 """
@@ -18,8 +18,13 @@ from __future__ import annotations
 import re
 
 SALARIED = [
-    "salaried", "employment contract", "employed as", "monthly salary",
-    "annual salary", "gross salary", "tv-l", "tvöd", "tv-l e13",
+    "salaried", "salaried phd", "salaried doctoral",
+    "employment contract", "employed as", "monthly salary",
+    "annual salary", "gross salary",
+    "tv-l", "tvl-e13", "tv-l e13", "tv-l e 13", "e13 tv-l", "tvöd",
+    "contrat doctoral", "prae-doc", "praedoc", "cao nu",
+    "marie skłodowska-curie", "marie sklodowska-curie",
+    "msca doctoral network",
 ]
 FULLY_FUNDED = [
     "fully funded", "full funding", "fully-funded",
@@ -60,16 +65,16 @@ def classify_funding(title: str, description: str) -> tuple[str, list[str], list
     if neg:
         return ("unfunded", [],
                 [f"هشدار: بدون تأمین مالی ({', '.join(neg[:2])})"])
-    if _has(text, SALARIED):
-        ev = _has(text, SALARIED)
+    ev = _has(text, SALARIED)
+    if ev:
         return ("salaried_doctoral_employment",
                 [f"شواهد استخدام: {', '.join(ev[:2])}"], [])
     if _has(text, FULLY_FUNDED):
         return ("fully_funded_scholarship", ["«fully funded» صراحتاً ذکر شده"], [])
     if _has(text, PARTIAL):
         return ("partially_funded", [], [])
-    if _has(text, UNCONFIRMED_HINTS):
-        hints = _has(text, UNCONFIRMED_HINTS)
+    hints = _has(text, UNCONFIRMED_HINTS)
+    if hints:
         return ("funding_unconfirmed",
                 [f"اشاره بدون جزئیات کافی: {', '.join(hints[:2])} — به‌تنهایی «fully funded» محسوب نمی‌شود"],
                 [])

@@ -1,4 +1,4 @@
-"""Curated funding routes (masters + government/regional scholarships).
+"""Curated funding routes (PhDs + masters + government/regional scholarships).
 
 These are NOT scraped: each entry is a verified official funding route
 (URL checked live, see last_checked). They go through the same
@@ -15,10 +15,17 @@ from .funding import FA_LABEL
 
 ROOT = Path(__file__).resolve().parent.parent
 
+_FILES = {
+    "phd": "phds.json",
+    "master": "masters.json",
+    "scholarship": "scholarships.json",
+}
+
 
 def _load(kind: str) -> list[FoundPosting]:
-    path = ROOT / "data" / ("masters.json" if kind == "master"
-                            else "scholarships.json")
+    path = ROOT / "data" / _FILES[kind]
+    if not path.exists():
+        return []
     entries = json.loads(path.read_text(encoding="utf-8"))
     out: list[FoundPosting] = []
     for e in entries:
@@ -38,15 +45,16 @@ def _load(kind: str) -> list[FoundPosting]:
         )
         p.kind = kind
         p.curated = True
+        p._kind_fixed = True
         cat = e.get("funding_category", "funding_unconfirmed")
         p._funding_preset = (cat, FA_LABEL.get(cat, cat), [])
         p.coverage_fa = e.get("coverage_fa", "")
         p.deadline_note = e.get("deadline_fa", "")
         p.curated_eligibility = e.get("eligibility_fa", "")
-        p.level = e.get("level", "")
+        p.level = e.get("level", kind)
         out.append(p)
     return out
 
 
 def load_all() -> list[FoundPosting]:
-    return _load("master") + _load("scholarship")
+    return _load("phd") + _load("master") + _load("scholarship")

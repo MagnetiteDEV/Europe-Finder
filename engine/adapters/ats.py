@@ -35,8 +35,10 @@ class _Stripper(HTMLParser):
 
 
 def strip_html(s: str) -> str:
-    if not s or "<" not in s:
-        return (s or "").strip()
+    if not s:
+        return ""
+    if "<" not in s:
+        return " ".join(html.unescape(html.unescape(s)).replace("\xa0", " ").split())
     st = _Stripper()
     try:
         st.feed(s)
@@ -73,6 +75,7 @@ def fetch_workday(session, tenant: dict) -> list[FoundPosting]:
                 external_id=re.sub(r"\D", "", jp.get("jobReqId", "") or ext) or ext,
                 title=jp.get("title", ""),
                 organization=tenant.get("name", ""),
+                country=tenant.get("country", ""),
                 city=loc.split(",")[0].strip() if loc else "",
                 url=f"{base}/{site}{ext}" if ext.startswith("/") else f"{base}/{site}/{ext}",
                 description=bullet,
@@ -246,8 +249,7 @@ def fetch_volcanic(session, tenant: dict) -> list[FoundPosting]:
                               timeout=45).json()
         jobs = data.get("jobs", [])
         for j in jobs:
-            desc = j.get("clean_description") or strip_html(
-                j.get("description", ""))
+            desc = strip_html(j.get("clean_description") or j.get("description", ""))
             end = _volcanic_date(j.get("end_date", ""))
             start = (j.get("start_date", "") or "")[:10]
             # per-posting URL: cached_slug already ends with the job id
@@ -291,14 +293,20 @@ def fetch_kuleuven(session, tenant: dict) -> list[FoundPosting]:
         raw_dl = src.get("applyBefore", "") or ""
         deadline = (f"{raw_dl[:4]}-{raw_dl[4:6]}-{raw_dl[6:8]}"
                     if len(raw_dl) == 8 and raw_dl.isdigit() else "")
+        ext_id = str(src.get("id", h.get("_id", ""))).strip()
+        unit = (src.get("orgUnitDescription", "") or "").split(",")[0].strip()
+        org_name = (f"KU Leuven — {unit}" if unit and "ku leuven" not in unit.lower()
+                    else (unit or "KU Leuven"))
+        job_url = (f"https://www.kuleuven.be/personeel/jobsite/jobs/{ext_id}?lang=en"
+                   if ext_id.isdigit() else tenant.get("careers_url", ""))
         out.append(FoundPosting(
             source="ats:kuleuven",
-            external_id=str(src.get("id", h.get("_id", ""))),
+            external_id=ext_id,
             title=post.get("title", ""),
-            organization=(src.get("orgUnitDescription", "") or "").split(",")[0],
-            country=tenant.get("country", ""),
+            organization=org_name,
+            country=tenant.get("country", "BE"),
             city=src.get("city", ""),
-            url=tenant.get("careers_url", ""),
+            url=job_url,
             description=" ".join(filter(None, [
                 post.get("teaser", ""), src.get("occupation", "")])),
             deadline=deadline,

@@ -1,16 +1,13 @@
 """Crossref works adapter (keyless public API).
 
 Discovers researchers by their recent publications in the
-candidate's fields:
-  GET https://api.crossref.org/works?query=<kw>
-      &filter=from-pub-date:<since>,type:journal-article
-      &rows=N&select=DOI,title,author,published
-Authors are aggregated across works; an author is kept when at
-least one matched work carries their name. Affiliation and ORCID
-come from the author record when the publisher supplied them
-(Crossref coverage is partial — missing values stay empty).
+candidate's fields with polite pacing between queries.
 """
 from __future__ import annotations
+
+import time
+
+from requests.exceptions import ConnectionError, Timeout
 
 from ..http import SourceBlocked, polite_get
 from ..professors import Professor
@@ -30,6 +27,7 @@ def search(session, cfg: dict) -> list[Professor]:
     by_key: dict[str, Professor] = {}
     rows = int(cfg.get("rows", 20))
     since = cfg.get("since", "2023-01-01")
+    delay = float(cfg.get("delay_seconds", 1.2))
     for kw in cfg.get("keywords", []):
         try:
             r = polite_get(session, WORKS_URL, params={
@@ -40,6 +38,9 @@ def search(session, cfg: dict) -> list[Professor]:
             })
         except SourceBlocked:
             break
+        except (Timeout, ConnectionError):
+            time.sleep(delay)
+            continue
         for item in r.json().get("message", {}).get("items", []):
             title = (item.get("title") or [""])[0]
             if not title:
@@ -73,4 +74,5 @@ def search(session, cfg: dict) -> list[Professor]:
                     p.works.append(work)
                 if not p.affiliation and affs:
                     p.affiliation = affs[0]
+        time.sleep(delay)
     return list(by_key.values())

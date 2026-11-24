@@ -1,24 +1,19 @@
-"""jobs.ac.uk adapter (UK academic jobs, HTML listing + JSON-LD detail).
+"""jobs.ac.uk adapter (UK academic jobs & PhD studentships).
 
-Source: https://www.jobs.ac.uk/search/?keywords=<kw>
-- robots.txt allows the search listing (only /job/feedback/ and
-  /enhanced/fp/ are disallowed), so a polite read is allowed.
-- There is no public API or RSS. The listing is server-rendered
-  HTML; each card carries the advert id, title, employer, location
-  and an "Expires <day> <Mon>" date. The detail page carries a
-  complete JSON-LD block (title, description, datePosted,
-  validThrough, hiringOrganization, jobLocation) — the adapter
-  reads that instead of scraping description HTML.
-- Two-stage fetch: search cards are pre-filtered by title (any
-  vocab anchor/phrase, or phd/doctoral/studentship) and only the
-  survivors get a detail fetch, capped per run so the source stays
-  polite. The engine matcher does the final scoring on the full
-  description.
+Upgraded in v2.9.3:
+- Adds polite `delay_seconds` between every search page AND every detail
+  fetch (prevents 429/403 rate-limiting that dropped jobsacuk to 0).
+- Runs dedicated PhD/Studentship artistic queries FIRST (with its own
+  detail quota), before general academic jobs, and pre-rejects obvious
+  engineering/STEM titles before spending detail fetches.
+- Parses JSON-LD robustly (including extra script tag attributes and
+  @graph arrays) and strips HTML cleanly.
 """
 from __future__ import annotations
 
 import json
 import re
+import time
 from datetime import date
 from html import unescape
 from html.parser import HTMLParser
@@ -27,8 +22,9 @@ from requests.exceptions import ConnectionError, Timeout
 
 from ..http import SourceBlocked, polite_get
 from ..match import contains_term, normalize_text
-from ..vocab import ANCHORS, FIELD_GROUPS
+from ..vocab import ANCHORS, DESIGN_VETO, FIELD_GROUPS, HARD_EXCLUSIONS
 from . import FoundPosting
+from .ats import strip_html
 
 BASE = "https://www.jobs.ac.uk"
 SEARCH_URL = BASE + "/search/"
@@ -41,20 +37,40 @@ _MONTHS = {m: i + 1 for i, m in enumerate(
 _COUNTRY = {"United Kingdom": "GB", "UK": "GB", "England": "GB",
             "Scotland": "GB", "Wales": "GB", "Ireland": "IE"}
 
-# permissive title pre-filter: any vocab anchor/phrase, or a PhD word
 _ANCHOR_WORDS: set[str] = set()
 for _terms in ANCHORS.values():
     _ANCHOR_WORDS.update(_terms)
 for _fa, _w, _terms in FIELD_GROUPS.values():
     _ANCHOR_WORDS.update(_terms)
-_PHDRX = re.compile(r"\b(phd|doctoral|doctorate|studentship)\b", re.I)
+_PHDRX = re.compile(r"\b(phd|doctoral|doctorate|studentship|mphil/phd)\b", re.I)
+
+DEFAULT_PHD_KEYWORDS = [
+    "phd fashion",
+    "phd art history",
+    "phd visual culture",
+    "phd design",
+    "phd museum",
+    "phd cultural heritage",
+    "phd costume",
+    "phd material culture",
+    "phd fine art",
+    "phd curatorial",
+    "phd textile",
+]
 
 
-def _title_matches(title: str) -> bool:
-    if _PHDRX.search(title):
-        return True
+def _title_matches(title: str, phd_mode: bool = False) -> bool:
     t = normalize_text(title)
-    return any(contains_term(t, w) for w in _ANCHOR_WORDS)
+    # Pre-reject obvious STEM/engineering & digital-UX titles before spending a detail fetch
+    if any(contains_term(t, ex) for ex in HARD_EXCLUSIONS):
+        return False
+    if any(contains_term(t, dv) for dv in DESIGN_VETO):
+        return False
+    if any(contains_term(t, w) for w in _ANCHOR_WORDS):
+        return True
+    if phd_mode and _PHDRX.search(title):
+        return True
+    return False
 
 
 class _CardParser(HTMLParser):
@@ -135,7 +151,6 @@ class _CardParser(HTMLParser):
 
 
 def _next_occurrence(day_month: str) -> str:
-    """'15 Jan' -> next occurrence as ISO date (search cards lack a year)."""
     m = re.match(r"(\d{1,2})\s+([A-Za-z]{3})", day_month or "")
     if not m or m.group(2) not in _MONTHS:
         return ""
@@ -150,23 +165,31 @@ def _next_occurrence(day_month: str) -> str:
     return d.isoformat()
 
 
-def _parse_detail(html: str) -> dict | None:
-    m = re.search(r'<script type="application/ld\+json">(.*?)</script>',
-                  html, re.S)
-    if not m:
-        return None
-    try:
-        d = json.loads(m.group(1))
-    except Exception:
-        return None
-    if not isinstance(d, dict) or not d.get("title"):
-        return None
-    return d
+_LD_RE = re.compile(
+    r'<script[^>]*type=["\']application/ld\+json["\'][^>]*>(.*?)</script>',
+    re.S | re.I)
+
+
+def _parse_detail(html_text: str) -> dict | None:
+    for m in _LD_RE.finditer(html_text):
+        try:
+            d = json.loads(m.group(1))
+        except Exception:
+            continue
+        if isinstance(d, dict) and d.get("@graph"):
+            for item in d["@graph"]:
+                if isinstance(item, dict) and item.get("@type") == "JobPosting" and item.get("title"):
+                    return item
+        if isinstance(d, dict) and d.get("title"):
+            return d
+    return None
 
 
 def _from_detail(card: dict, d: dict) -> FoundPosting:
-    desc = re.sub(r"<[^>]+>", " ", d.get("description") or "")
+    desc = strip_html(d.get("description") or "")
     locs = d.get("jobLocation") or []
+    if isinstance(locs, dict):
+        locs = [locs]
     city, country = "", ""
     if locs and isinstance(locs, list):
         addr = (locs[0] or {}).get("address") or {}
@@ -186,45 +209,72 @@ def _from_detail(card: dict, d: dict) -> FoundPosting:
         country=country,
         city=" ".join(unescape(city).split()),
         url=BASE + card["slug"],
-        description=" ".join(unescape(desc).split()),
+        description=desc,
         posted_date=posted,
         deadline=valid or _next_occurrence(card["expires"]),
     )
 
 
-def search(session, cfg: dict) -> list[FoundPosting]:
-    out: list[FoundPosting] = []
-    seen: set[str] = set()
-    max_details = int(cfg.get("max_details", 30))
+def _run_stage(session, keywords: list[str], seen: set[str],
+               out: list[FoundPosting], quota: int, delay: float,
+               category: str = "0", phd_mode: bool = False) -> bool:
+    """Returns False if SourceBlocked was hit."""
     details = 0
-    for kw in cfg.get("keywords", []):
-        if details >= max_details:
+    for kw in keywords:
+        if details >= quota:
             break
         try:
             r = polite_get(session, SEARCH_URL, params={
                 "keywords": kw, "location": "", "distance": "0",
-                "category": "0"})
+                "category": category})
         except SourceBlocked:
-            break
+            return False
+        except (Timeout, ConnectionError):
+            time.sleep(delay)
+            continue
+        time.sleep(delay)
         p = _CardParser()
         p.feed(r.text)
         for card in p.cards:
             if card["id"] in seen:
                 continue
             seen.add(card["id"])
-            if not _title_matches(card["title"] + " " + card["dept"]):
+            if not _title_matches(card["title"] + " " + card["dept"], phd_mode=phd_mode):
                 continue
-            if details >= max_details:
+            if details >= quota:
                 break
             try:
                 dr = polite_get(session, BASE + card["slug"])
             except SourceBlocked:
-                return out
+                return False
             except (Timeout, ConnectionError):
-                # one slow detail page must not kill the source
+                time.sleep(delay)
                 continue
             details += 1
             d = _parse_detail(dr.text)
             if d:
                 out.append(_from_detail(card, d))
+            time.sleep(delay)
+    return True
+
+
+def search(session, cfg: dict) -> list[FoundPosting]:
+    out: list[FoundPosting] = []
+    seen: set[str] = set()
+    delay = float(cfg.get("delay_seconds", 1.5))
+    max_details = int(cfg.get("max_details", 50))
+    phd_quota = int(cfg.get("phd_quota", max(20, max_details // 2)))
+    gen_quota = max(10, max_details - phd_quota)
+
+    phd_kws = cfg.get("phd_keywords", DEFAULT_PHD_KEYWORDS)
+    gen_kws = cfg.get("keywords", [])
+
+    # Stage 1: Arts & Humanities PhD studentships first (category 0700 + all categories)
+    ok = _run_stage(session, phd_kws, seen, out, phd_quota, delay,
+                    category="0", phd_mode=True)
+    if not ok:
+        return out
+    # Stage 2: General artistic academic vacancies
+    _run_stage(session, gen_kws, seen, out, gen_quota, delay,
+               category="0", phd_mode=False)
     return out

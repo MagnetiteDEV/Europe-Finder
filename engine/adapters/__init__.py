@@ -34,12 +34,14 @@ class FoundPosting:
     eligibility_note: str = ""
     priority_country: bool = False
     kind: str = "job"  # phd | job | other | master | scholarship
-    # curated funding routes (masters / government scholarships):
+    # curated funding routes (masters / government scholarships / phds):
     curated: bool = False
     coverage_fa: str = ""
     deadline_note: str = ""
     curated_eligibility: str = ""
     level: str = ""  # master | phd | both
+    # cross-source deduplication provenance:
+    also_in: list = field(default_factory=list)
 
     def key(self) -> str:
         return f"{self.source}::{self.external_id}"

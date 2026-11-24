@@ -70,6 +70,10 @@ def _from_detail(url: str, ext_id: str, d: dict) -> FoundPosting | None:
     org = hiring.get("name", "") if isinstance(hiring, dict) else ""
     desc = strip_html(d.get("description") or "")
     if not country:
+        country = extract_country(city, "")
+    if not country and "fashionunited.uk/" in url and "£" in desc:
+        country = "GB"
+    if not country:
         country = extract_country(f"{city} {desc}", "")
     return FoundPosting(
         source=SOURCE,

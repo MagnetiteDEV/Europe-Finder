@@ -14,3 +14,8 @@ Live data feed for **Europe Opportunity Finder** (single-file iOS-friendly app).
   the app falls back to its embedded snapshot.
 
 No personal data is published here — only public job/scholarship postings.
+
+## v2.9.3 Engine Highlights
+- Expanded salaried/funded European PhD adapters: AcademicTransfer (NL), Jobbnorge (NO), Campus France Doctorat (FR), myScience.ch (CH), University of Copenhagen PhD (DK), plus targeted R1/Arts EURAXESS & PhD-first jobs.ac.uk queries and 14 curated European PhD routes (`data/phds.json`).
+- Hardened artistic precision matcher (`engine/vocab.py`, `engine/match.py`, `engine/extract.py`) with STEM/engineering exclusions and false-friend guards.
+- Universal per-source degraded-run guard + professor guard (`engine/ingest.py`) and polite delays across all adapters.

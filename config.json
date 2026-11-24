@@ -5,6 +5,7 @@
   "professors": {
     "crossref": {
       "enabled": true,
+      "delay_seconds": 1.2,
       "keywords": [
         "fashion",
         "textile",
@@ -22,6 +23,7 @@
     },
     "orcid": {
       "enabled": true,
+      "delay_seconds": 1.2,
       "keywords": [
         "fashion",
         "textile",
@@ -60,7 +62,129 @@
     },
     "euraxess": {
       "enabled": true,
-      "pages": 5
+      "delay_seconds": 1.5,
+      "pages": 3,
+      "phd_queries": [
+        {
+          "keywords": "fashion OR textile OR costume",
+          "f[0]": "job_research_profile:1044"
+        },
+        {
+          "keywords": "art history OR visual culture OR curatorial",
+          "f[0]": "job_research_profile:1044"
+        },
+        {
+          "keywords": "design research OR artistic research",
+          "f[0]": "job_research_profile:1044"
+        },
+        {
+          "keywords": "museum OR cultural heritage OR material culture",
+          "f[0]": "job_research_profile:1044"
+        },
+        {
+          "f[0]": "job_research_field:373",
+          "f[1]": "job_research_profile:1044"
+        },
+        {
+          "f[0]": "job_research_field:373"
+        }
+      ]
+    },
+    "jobsacuk": {
+      "enabled": true,
+      "delay_seconds": 1.5,
+      "max_details": 50,
+      "phd_quota": 28,
+      "phd_keywords": [
+        "phd fashion",
+        "phd art history",
+        "phd visual culture",
+        "phd museum",
+        "phd cultural heritage",
+        "phd costume",
+        "phd material culture",
+        "phd curatorial",
+        "phd fine art",
+        "phd textile",
+        "phd design"
+      ],
+      "keywords": [
+        "fashion",
+        "art history",
+        "visual culture",
+        "costume",
+        "curatorial",
+        "material culture",
+        "cultural heritage",
+        "museum",
+        "textile",
+        "craft",
+        "design",
+        "sustainability"
+      ]
+    },
+    "academictransfer": {
+      "enabled": true,
+      "delay_seconds": 1.5,
+      "keywords": [
+        "fashion",
+        "art history",
+        "visual culture",
+        "design",
+        "museum",
+        "cultural heritage",
+        "material culture",
+        "curatorial",
+        "textile",
+        "costume",
+        "artistic research"
+      ]
+    },
+    "jobbnorge": {
+      "enabled": true,
+      "delay_seconds": 1.5,
+      "keywords": [
+        "PhD art",
+        "PhD design",
+        "PhD fashion",
+        "PhD museum",
+        "PhD heritage",
+        "PhD visual",
+        "PhD costume",
+        "artistic research"
+      ]
+    },
+    "campusfrance_phd": {
+      "enabled": true,
+      "delay_seconds": 1.5,
+      "keywords": [
+        "fashion",
+        "mode",
+        "art",
+        "design",
+        "histoire de l'art",
+        "textile",
+        "costume",
+        "patrimoine",
+        "culture visuelle"
+      ]
+    },
+    "myscience": {
+      "enabled": true,
+      "delay_seconds": 2.0,
+      "keywords": [
+        "PhD art",
+        "PhD design",
+        "PhD fashion",
+        "PhD museum",
+        "PhD visual culture",
+        "PhD heritage",
+        "PhD history of art"
+      ]
+    },
+    "ku_phd": {
+      "enabled": true,
+      "delay_seconds": 1.5
     },
     "nature": {
       "enabled": true,
@@ -79,28 +203,10 @@
         "material culture"
       ]
     },
-    "jobsacuk": {
-      "enabled": true,
-      "max_details": 30,
-      "keywords": [
-        "fashion",
-        "textile",
-        "design",
-        "art history",
-        "visual culture",
-        "sustainability",
-        "costume",
-        "museum",
-        "cultural heritage",
-        "craft",
-        "curatorial",
-        "material culture"
-      ]
-    },
     "cumulus": {
       "enabled": true,
       "delay_seconds": 1.5,
-      "max_items": 10
+      "max_items": 20
     },
     "arthist": {
       "enabled": true,
@@ -138,21 +244,25 @@
         {
           "code": "unsw",
           "name": "UNSW Sydney",
+          "country": "AU",
           "base": "https://careers.pageuppeople.com/841/cw/en"
         },
         {
           "code": "monash",
           "name": "Monash University",
+          "country": "AU",
           "base": "https://careers.pageuppeople.com/513/cw/en"
         },
         {
           "code": "adelaide",
           "name": "University of Adelaide",
+          "country": "AU",
           "base": "https://careers.pageuppeople.com/1220/cw/en"
         },
         {
           "code": "deakin",
           "name": "Deakin University",
+          "country": "AU",
           "base": "https://careers.deakin.edu.au/cw/en"
         }
       ]

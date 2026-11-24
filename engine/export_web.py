@@ -17,7 +17,7 @@ from .vocab import FIELD_GROUPS
 ROOT = Path(__file__).resolve().parent.parent
 DATA = ROOT / "data"
 APP_DATA = ROOT / "app" / "data"
-VERSION = "v2.1"
+VERSION = "v2.9.3"
 
 
 def build_bundle() -> dict:

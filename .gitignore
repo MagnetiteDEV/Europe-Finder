@@ -2,6 +2,8 @@
 data/postings.json
 data/postings.db
 data/digest.json
+data/seen.json
+data/professors.json
 __pycache__/
 *.pyc
 # personal — must never leave the author's machine

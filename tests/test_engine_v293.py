@@ -1,0 +1,404 @@
+"""Comprehensive offline test suite for Europe-Finder engine v2.9.3."""
+from __future__ import annotations
+
+import json
+import sys
+import tempfile
+import types
+import unittest
+from pathlib import Path
+from unittest import mock
+
+# Provide a minimal feedparser stub only if running in an environment
+# without feedparser installed (e.g. air-gapped CI/sandbox).
+if "feedparser" not in sys.modules:
+    try:
+        import feedparser  # noqa: F401
+    except ImportError:
+        _fp = types.ModuleType("feedparser")
+        _fp.parse = lambda raw: types.SimpleNamespace(entries=[])
+        sys.modules["feedparser"] = _fp
+
+ROOT = Path(__file__).resolve().parent.parent
+if str(ROOT) not in sys.path:
+    sys.path.insert(0, str(ROOT))
+
+from engine.adapters import FoundPosting
+from engine.adapters import (
+    academictransfer,
+    ats,
+    campusfrance_phd,
+    crossref,
+    daad,
+    euraxess,
+    fashionunited,
+    jobbnorge,
+    jobs_ac_uk,
+    nordic_arts,
+    orcid,
+    pageup,
+)
+from engine.curated import load_all as load_curated
+from engine.extract import clean_plain_text, detect_kind, extract_country, extract_deadline
+from engine.funding import classify_funding
+from engine.http import SourceBlocked
+from engine.ingest import apply_policy, cross_source_dedupe, normalize
+from engine.match import score_posting
+
+
+class _FakeResp:
+    def __init__(self, text="", json_data=None, status_code=200, headers=None):
+        self.text = text
+        self.content = text.encode("utf-8")
+        self._json = json_data
+        self.status_code = status_code
+        self.headers = headers or {}
+
+    def json(self):
+        if self._json is not None:
+            return self._json
+        return json.loads(self.text)
+
+    def raise_for_status(self):
+        if self.status_code >= 400:
+            raise RuntimeError(f"HTTP {self.status_code}")
+
+
+class TestExtractAndFunding(unittest.TestCase):
+    def test_clean_plain_text_arthist_and_html(self):
+        raw = "Apply &nbsp; at info document.write(String.fromCharCode(32 + 32)) [at] darthist.at<br/>Line 2 &amp; more"
+        cleaned = clean_plain_text(raw)
+        self.assertNotIn("document.write", cleaned)
+        self.assertNotIn("&nbsp;", cleaned)
+        self.assertNotIn("<br", cleaned)
+        self.assertIn("info@darthist.at", cleaned)
+        self.assertIn("Line 2 & more", cleaned)
+
+    def test_extract_deadlines_multilingual(self):
+        self.assertEqual(extract_deadline("Application deadline: 15 December 2026."), "2026-12-15")
+        self.assertEqual(extract_deadline("Bewerbungsschluss: 3. Januar 2027"), "2027-01-03")
+        self.assertEqual(extract_deadline("Date limite: 20 février 2027"), "2027-02-20")
+
+    def test_detect_kind_title_first(self):
+        # Faculty jobs that require a PhD in description must stay 'job'
+        self.assertEqual(
+            detect_kind("Lecturer in Creative Writing", "Candidates should have a PhD in Creative Writing."),
+            "job",
+        )
+        self.assertEqual(
+            detect_kind("Stage Leader MA Character Animation", "Lead an animation stage."),
+            "job",
+        )
+        # Real PhD offers (including German Dissertation positions) must be 'phd'
+        self.assertEqual(
+            detect_kind("History of Art MPhil/PhD", "Undertake original doctoral research."),
+            "phd",
+        )
+        self.assertEqual(
+            detect_kind(
+                "2 Stellen als Wissenschaftliche*r Mitarbeiter*in (TV-L E13)",
+                "Aufgaben: Verfassen einer Dissertation im Bereich Kulturwissenschaft.",
+            ),
+            "phd",
+        )
+        # Mentioning 'internships' in application requirements must NOT turn a PhD into 'other'
+        self.assertEqual(
+            detect_kind("Doctoral Researcher in Art History", "Include certificates from internships."),
+            "phd",
+        )
+        # Actual internship title -> 'other'
+        self.assertEqual(detect_kind("Museum Curatorial Internship", "6 months"), "other")
+
+    def test_strict_funding_rules(self):
+        # Strict rule: bare scholarship/stipend/funded -> funding_unconfirmed
+        cat, _, _ = classify_funding("PhD Fellowship", "Includes scholarship and monthly stipend.")
+        self.assertEqual(cat, "funding_unconfirmed")
+
+        cat, _, _ = classify_funding("PhD in Fashion Studies", "Fully funded 3-year studentship.")
+        self.assertEqual(cat, "fully_funded_scholarship")
+
+        for phrase in ["TV-L E13", "Contrat Doctoral", "CAO NU", "MSCA Doctoral Network", "employment contract"]:
+            cat, _, _ = classify_funding("PhD Position", f"Funded under {phrase}.")
+            self.assertEqual(cat, "salaried_doctoral_employment", msg=phrase)
+
+        cat, _, flags = classify_funding("Visiting Researcher (unfunded position)", "No funding provided.")
+        self.assertEqual(cat, "unfunded")
+        self.assertTrue(flags)
+
+    def test_extract_country_cities(self):
+        self.assertEqual(extract_country("Birmingham"), "GB")
+        self.assertEqual(extract_country("Camperdown Campus"), "AU")
+        self.assertEqual(extract_country("Freiburg"), "DE")
+        self.assertEqual(extract_country("Roubaix"), "FR")
+
+
+class TestArtisticMatcher(unittest.TestCase):
+    def _score(self, title, desc="", org="", source="jobsacuk"):
+        p = FoundPosting(source=source, external_id="1", title=title, organization=org, description=desc)
+        score_posting(p)
+        return p
+
+    def test_stem_and_false_positives_rejected(self):
+        # Chemistry / Food LCA without artistic context must NOT score Strong
+        p_food = self._score(
+            "Casual Research Officer (Food Process Modelling and Consequential LCA)",
+            "Qld Alliance for Agriculture and Food Innovation",
+            source="ats:workday",
+        )
+        self.assertTrue(p_food.excluded)
+        self.assertLessEqual(p_food.fit_score, 15)
+
+        p_photo = self._score(
+            "Doctoral Researcher in Photocatalysts for Circular Economy",
+            "Photocatalytic water splitting and life cycle assessment.",
+            source="phdgermany",
+        )
+        self.assertTrue(p_photo.excluded)
+        self.assertLessEqual(p_photo.fit_score, 15)
+
+        # French engineering degrees in textile chemistry/engineering excluded
+        p_ing = self._score(
+            "Diplôme d'ingénieur de l'Institut textile et chimique de Lyon",
+            "Level: M2 Field: Chemistry, Fashion",
+            source="campusfrance",
+        )
+        self.assertTrue(p_ing.excluded)
+
+        # Full-stack software role stating fashion/textile is not essential -> excluded
+        p_dev = self._score(
+            "Innovation Associate – Design For Recycling Project",
+            "Full-stack experience in TypeScript, Node.js and PostgreSQL. "
+            "Experience in fashion, textiles, sustainability would be beneficial but is not essential.",
+            org="University of the Arts London",
+            source="ats:wp",
+        )
+        self.assertTrue(p_dev.excluded)
+
+        # False friends: Grounds Operative ("craft practices"), Impact Officer ("tailoring messages"), Retail sales
+        p_grounds = self._score("Grounds Operative", "Learn new techniques and craft practices on grass pitches.")
+        self.assertEqual(p_grounds.fit_score, 0)
+
+        p_impact = self._score("Impact Officer: Policy Modelling for Health", "Tailoring messages to audiences.")
+        self.assertEqual(p_impact.fit_score, 0)
+
+        p_sales = self._score("Seasonal Sales Associate", "Work in a luxury fashion store. Value chain goals.")
+        self.assertLessEqual(p_sales.fit_score, 15)
+
+    def test_authentic_artistic_postings_score_high(self):
+        p_art = self._score("History of Art MPhil/PhD", "Doctoral research in History of Art.", org="University of Warwick")
+        self.assertFalse(p_art.excluded)
+        self.assertGreaterEqual(p_art.fit_score, 70)
+
+        p_ual = self._score("Senior Lecturer and Course Leader MA Illustration", "Camberwell College of Arts.", org="University of the Arts London", source="ats:wp")
+        self.assertFalse(p_ual.excluded)
+        self.assertGreaterEqual(p_ual.fit_score, 70)
+
+        p_cumulus = self._score("Associate Professor in Design", "Northumbria University School of Design", org="Northumbria University", source="cumulus")
+        self.assertFalse(p_cumulus.excluded)
+        self.assertGreaterEqual(p_cumulus.fit_score, 70)
+
+        p_ensci = self._score("designer textile", "Level: M2 Field: Design", org="ENSCI Les Ateliers", source="campusfrance")
+        self.assertFalse(p_ensci.excluded)
+        self.assertGreaterEqual(p_ensci.fit_score, 70)
+
+        p_freiburg = self._score(
+            "2 Stellen (TV-L E13) in Literatur- und Kulturwissenschaft",
+            "Verfassen einer Dissertation im Bereich Kulturwissenschaft.",
+            org="Universität Freiburg",
+            source="phdgermany",
+        )
+        self.assertFalse(p_freiburg.excluded)
+        self.assertGreaterEqual(p_freiburg.fit_score, 70)
+
+
+class TestNewAndUpgradedAdapters(unittest.TestCase):
+    def test_academictransfer_api_and_html_fallback(self):
+        api_json = {
+            "results": [{
+                "id": 99101,
+                "title": "PhD Position in Fashion Studies and Visual Culture",
+                "organisation": {"name": "University of Amsterdam"},
+                "city": "Amsterdam",
+                "url": "/en/jobs/99101/phd-fashion/",
+                "description": "<p>4-year salaried PhD under CAO NU.</p>",
+                "end_date": "2027-02-15",
+            }]
+        }
+        sess = mock.MagicMock()
+        sess.get.return_value = _FakeResp(json_data=api_json)
+        with mock.patch("time.sleep"):
+            posts = academictransfer.search(sess, {"keywords": ["fashion"], "delay_seconds": 0})
+        self.assertEqual(len(posts), 1)
+        self.assertEqual(posts[0].country, "NL")
+        self.assertEqual(posts[0].kind, "phd")
+        self.assertEqual(posts[0].deadline, "2027-02-15")
+
+        # HTML fallback when API returns non-JSON
+        html = '<a href="/en/jobs/88202/phd-art-history/">PhD Candidate in Art History &amp; Museum Studies</a>'
+        posts_html = academictransfer._parse_html_page(html)
+        self.assertEqual(len(posts_html), 1)
+        self.assertEqual(posts_html[0].external_id, "88202")
+        self.assertEqual(posts_html[0].kind, "phd")
+
+    def test_jobbnorge_parser_and_block(self):
+        html = '<a href="/en/available-jobs/job/271234/phd-artistic-research">PhD Research Fellow in Artistic Research &amp; Costume Design</a>'
+        posts = jobbnorge._parse_listing(html)
+        self.assertEqual(len(posts), 1)
+        self.assertEqual(posts[0].country, "NO")
+        self.assertEqual(posts[0].kind, "phd")
+
+        # Verify SourceBlocked (429) stops immediately
+        sess = mock.MagicMock()
+        sess.get.return_value = _FakeResp(status_code=429)
+        posts_blocked = jobbnorge.search(sess, {"keywords": ["PhD art", "PhD design"], "delay_seconds": 0})
+        self.assertEqual(posts_blocked, [])
+        self.assertEqual(sess.get.call_count, 1)
+
+    def test_campusfrance_phd_parser(self):
+        html = '<div class="card"><a href="/phd/offers/45123">Thèse en histoire de la mode et culture visuelle</a><span>Contrat doctoral — Date limite: 30 mars 2027</span></div>'
+        posts = campusfrance_phd._parse_offers(html)
+        self.assertEqual(len(posts), 1)
+        self.assertEqual(posts[0].country, "FR")
+        self.assertEqual(posts[0].kind, "phd")
+        self.assertEqual(posts[0].deadline, "2027-03-30")
+
+    def test_nordic_arts_myscience_and_ku_phd(self):
+        mysci_html = '<a href="/jobs/id65432-phd_art_history">PhD Position in Art History and Curatorial Studies</a>'
+        m_posts = nordic_arts._parse_myscience(mysci_html)
+        self.assertEqual(len(m_posts), 1)
+        self.assertEqual(m_posts[0].country, "CH")
+        self.assertEqual(m_posts[0].kind, "phd")
+
+        ku_html = '<a href="/phd/?show=162345">PhD Fellowship in Visual Culture and Fashion History</a><td>Deadline: 15 January 2027</td>'
+        k_posts = nordic_arts._parse_ku_phd(ku_html)
+        self.assertEqual(len(k_posts), 1)
+        self.assertEqual(k_posts[0].country, "DK")
+        self.assertEqual(k_posts[0].kind, "phd")
+        self.assertEqual(k_posts[0].deadline, "2027-01-15")
+
+    def test_euraxess_r1_parser(self):
+        html = """
+        <article class="ecl-content-item">
+          <ul class="ecl-content-block__primary-meta-container">
+            <li class="ecl-content-block__primary-meta-item">University of Copenhagen</li>
+            <li class="ecl-content-block__primary-meta-item">Posted on: 20 November 2026</li>
+            <li class="ecl-content-block__secondary-meta-item">Application Deadline: 15 January 2027</li>
+            <li class="ecl-content-block__secondary-meta-item">Denmark</li>
+          </ul>
+          <a class="ecl-link--standalone" href="/jobs/399999"><span>PhD Fellowship in Fashion Sustainability</span></a>
+          <div class="ecl-content-block__description"><p>Salaried doctoral employment in Copenhagen.</p></div>
+        </article>
+        """
+        posts = euraxess._parse_page(html, force_phd=True)
+        self.assertEqual(len(posts), 1)
+        self.assertEqual(posts[0].country, "DK")
+        self.assertEqual(posts[0].deadline, "2027-01-15")
+        self.assertEqual(posts[0].kind, "phd")
+
+    def test_jobs_ac_uk_stem_prereject_and_polite_delay(self):
+        self.assertFalse(jobs_ac_uk._title_matches("PhD in Mechanical Engineering", phd_mode=True))
+        self.assertFalse(jobs_ac_uk._title_matches("UX Designer", phd_mode=False))
+        self.assertTrue(jobs_ac_uk._title_matches("PhD Studentship in Fashion Studies", phd_mode=True))
+
+    def test_ats_workday_country_and_kuleuven_direct_url(self):
+        sess = mock.MagicMock()
+        sess.post.return_value = _FakeResp(json_data={
+            "total": 1,
+            "jobPostings": [{
+                "title": "Doctoral Researcher in Fashion Design",
+                "externalPath": "/job/Otaniemi/Doctoral-Researcher_R99999",
+                "locationsText": "Otaniemi",
+                "bulletFields": ["R99999"],
+            }],
+        })
+        w = ats.fetch_workday(sess, {
+            "name": "Aalto University",
+            "country": "FI",
+            "endpoint": "https://aalto.wd3.myworkdayjobs.com/wday/cxs/aalto/aalto/jobs",
+        })
+        self.assertEqual(w[0].country, "FI")
+
+        sess.post.return_value = _FakeResp(json_data={
+            "hits": [{
+                "_source": {
+                    "id": "60785545",
+                    "orgUnitDescription": "History, Faculty of Arts",
+                    "city": "Gent",
+                    "applyBefore": "20270115",
+                    "posting": {"title": "PhD in Art History", "teaser": "Doctoral position."},
+                }
+            }]
+        })
+        ku = ats.fetch_kuleuven(sess, {"country": "BE", "careers_url": "https://example.org", "endpoint": "https://example.org/search"})
+        self.assertEqual(ku[0].url, "https://www.kuleuven.be/personeel/jobsite/jobs/60785545?lang=en")
+        self.assertTrue(ku[0].organization.startswith("KU Leuven"))
+
+    def test_fashionunited_uk_city_overrides_company_hq(self):
+        d = {
+            "title": "Seasonal Sales Assistant",
+            "hiringOrganization": {"name": "PANDORA"},
+            "jobLocation": {"address": {"addressLocality": "Birmingham", "addressCountry": ""}},
+            "description": "Rate £13.25. Headquartered in Copenhagen, Denmark.",
+        }
+        p = fashionunited._from_detail("https://fashionunited.uk/fashion-jobs/x-123", "123", d)
+        self.assertEqual(p.country, "GB")
+
+
+class TestCuratedAndPipeline(unittest.TestCase):
+    def test_curated_loads_all_three_kinds(self):
+        items = load_curated()
+        by_kind = {}
+        for it in items:
+            by_kind[it.kind] = by_kind.get(it.kind, 0) + 1
+            self.assertTrue(it.url.startswith("https://"), msg=it.external_id)
+            self.assertTrue(it.curated)
+        self.assertEqual(by_kind.get("phd"), 14)
+        self.assertEqual(by_kind.get("master"), 7)
+        self.assertEqual(by_kind.get("scholarship"), 9)
+
+    def test_cross_source_dedupe(self):
+        p1 = FoundPosting(source="jobsacuk", external_id="1", title="Lecturer in Visual Culture",
+                          organization="University of the Arts London, LCF", description="Long desc " * 20, deadline="2026-12-01")
+        p2 = FoundPosting(source="ats:wp", external_id="2", title="Lecturer in Visual Culture",
+                          organization="University of the Arts London", description="Short", deadline="")
+        deduped = cross_source_dedupe([p1, p2])
+        self.assertEqual(len(deduped), 1)
+        self.assertEqual(deduped[0].also_in, ["ats:wp"])
+
+
+    def test_degraded_run_guard_and_hollow_bundle_guard(self):
+        from engine import export_live, ingest
+        # Test _is_not_expired
+        self.assertTrue(ingest._is_not_expired({"deadline": "2099-01-01"}))
+        self.assertTrue(ingest._is_not_expired({"deadline": ""}))
+        self.assertFalse(ingest._is_not_expired({"deadline": "2020-01-01"}))
+
+        # Test professor degraded-run guard preserves previous 15 profs when live returns 2
+        prev_profs = [{"name": f"Prof {i}", "fit_score": 70, "sources": ["crossref"]} for i in range(15)]
+        with tempfile.TemporaryDirectory() as td:
+            old_data = ingest.DATA
+            ingest.DATA = Path(td)
+            try:
+                sess = mock.MagicMock()
+                cfg = {"politeness": {"delay_seconds": 0}, "professors": {"orcid": {"enabled": False}, "crossref": {"enabled": False}}}
+                kept = ingest.collect_professors(sess, cfg, prev_profs=prev_profs)
+                self.assertEqual(len(kept), 15)
+            finally:
+                ingest.DATA = old_data
+
+        # Test hollow-bundle guard in export_live refuses >50% drop
+        with tempfile.TemporaryDirectory() as td:
+            out_js = Path(td) / "eof-live.js"
+            prev_bundle = {"postings": [{"id": i} for i in range(100)]}
+            out_js.write_text("window.__EOF_LIVE__ = " + json.dumps(prev_bundle) + ";\n", encoding="utf-8")
+            with mock.patch.object(export_live, "build_bundle", return_value={"postings": [{"id": 1}]}), \
+                 mock.patch.object(sys, "argv", ["export_live", str(out_js)]):
+                with self.assertRaises(SystemExit) as ctx:
+                    export_live.main()
+                self.assertEqual(ctx.exception.code, 1)
+            # Previous healthy bundle untouched
+            self.assertEqual(export_live._previous_count(out_js), 100)
+
+
+if __name__ == "__main__":
+    unittest.main(verbosity=2)

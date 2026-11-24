@@ -1,31 +1,52 @@
-"""Ingestion run: adapters -> normalize -> policy engine -> dedupe
--> SQLite + JSON.
+"""Ingestion run: adapters -> normalize -> policy engine -> cross-source dedupe
+-> universal degraded-run guard -> SQLite + JSON.
 
-The policy engine applies the candidate's search constraints:
-multilingual subject match with engineering exclusions, strict
-funding classification, recorded (never inferred) Iranian
-eligibility, and priority-country flagging.
-
-Usage:  .venv/bin/python -m engine.ingest   (from project root)
+Upgraded in v2.9.3:
+- Adds European salaried/funded PhD adapters: AcademicTransfer (NL),
+  Jobbnorge (NO), Campus France Doctorat (FR), myScience.ch (CH),
+  University of Copenhagen PhD (DK), plus curated:phd routes.
+- Universal per-source degraded-run guard (covers ALL enabled sources,
+  not just ATS, preventing single-source outages like 23 Nov from wiping
+  DAAD, PhD Germany, jobs.ac.uk or professors).
+- Cross-source deduplication with `also_in` provenance.
 """
 from __future__ import annotations
 
 import json
+import re
 import sqlite3
 import time
-from datetime import datetime, timezone
+from dataclasses import fields as dc_fields
+from datetime import date, datetime, timezone
 from pathlib import Path
 
 from .adapters import FoundPosting
-from .adapters import adzuna, ats, campusfrance, crossref, daad, euraxess, fashionunited, feeds, jobs_ac_uk, orcid, pageup, rss_nature
-from .professors import merge_professors
+from .adapters import (
+    academictransfer,
+    adzuna,
+    ats,
+    campusfrance,
+    campusfrance_phd,
+    crossref,
+    daad,
+    euraxess,
+    fashionunited,
+    feeds,
+    jobbnorge,
+    jobs_ac_uk,
+    nordic_arts,
+    orcid,
+    pageup,
+    rss_nature,
+)
 from .curated import load_all as load_curated
 from .eligibility import load_overrides, status_for
-from .extract import detect_kind, extract_country, extract_deadline
+from .extract import clean_plain_text, detect_kind, extract_country, extract_deadline
 from .funding import FA_LABEL as FUNDING_FA
 from .funding import classify_funding
 from .http import SourceBlocked, make_session
 from .match import score_posting
+from .professors import merge_professors
 from .vocab import FIELD_GROUPS
 
 ROOT = Path(__file__).resolve().parent.parent
@@ -37,8 +58,6 @@ ADAPTERS = {
     "ats": ats.search,
     "euraxess": euraxess.search,
     "jobsacuk": jobs_ac_uk.search,
-    # v2.9: design/art-history feeds, DAAD, Campus France,
-    # FashionUnited, Australian PageUp universities
     "cumulus": feeds.search_cumulus,
     "arthist": feeds.search_arthist,
     "daad": daad.search,
@@ -46,14 +65,21 @@ ADAPTERS = {
     "campusfrance": campusfrance.search,
     "fashionunited": fashionunited.search,
     "pageup": pageup.search,
+    # v2.9.3: expanded European salaried/funded PhD adapters
+    "academictransfer": academictransfer.search,
+    "jobbnorge": jobbnorge.search,
+    "campusfrance_phd": campusfrance_phd.search,
+    "myscience": nordic_arts.search_myscience,
+    "ku_phd": nordic_arts.search_ku_phd,
 }
 
 
 def normalize(p: FoundPosting) -> FoundPosting:
-    p.title = " ".join((p.title or "").split())
-    p.description = " ".join((p.description or "").split())
+    p.title = clean_plain_text(p.title or "")
+    p.description = clean_plain_text(p.description or "")
+    p.organization = clean_plain_text(p.organization or "")
     if not p.country:
-        p.country = extract_country(p.city + " " + p.description, "")
+        p.country = extract_country(p.city + " " + p.organization + " " + p.description, "")
     if not p.deadline:
         p.deadline = extract_deadline(p.description)
     return p
@@ -72,10 +98,47 @@ def apply_policy(p: FoundPosting, policy: dict, elig_overrides: dict) -> None:
     p.eligibility_note = note
     p.priority_country = p.country in policy.get("priorityCountries", [])
     if not getattr(p, "curated", False) and not getattr(p, "_kind_fixed", False):
-        # adapters that know the kind (DAAD scholarships, Campus France
-        # masters, ArtHist fellowships) set _kind_fixed; the rest go
-        # through kind detection as before
         p.kind = detect_kind(p.title, p.description)
+
+
+def _norm_key_part(s: str) -> str:
+    return re.sub(r"[^a-z0-9]+", " ", (s or "").lower()).strip()
+
+
+def _org_base(org: str) -> str:
+    o = (org or "").lower().strip().split(",")[0].strip()
+    o = re.sub(r"^the\s+", "", o)
+    return _norm_key_part(o)
+
+
+def cross_source_dedupe(posts: list[FoundPosting]) -> list[FoundPosting]:
+    """Merge identical postings fetched from two different sources (e.g.
+    jobs.ac.uk + university ATS) and record the secondary source in also_in."""
+    out: list[FoundPosting] = []
+    seen: dict[tuple[str, str, str], FoundPosting] = {}
+    for p in posts:
+        if getattr(p, "curated", False):
+            out.append(p)
+            continue
+        nt = _norm_key_part(p.title)
+        no = _org_base(p.organization)
+        dk = (nt, no, p.kind) if (nt and no) else None
+        if dk and dk in seen:
+            ex = seen[dk]
+            if ex.source != p.source:
+                also = list(ex.also_in or [])
+                if p.source not in also:
+                    also.append(p.source)
+                ex.also_in = also
+                if not ex.deadline and p.deadline:
+                    ex.deadline = p.deadline
+                if len(p.description or "") > len(ex.description or ""):
+                    ex.description = p.description
+                continue
+        if dk and dk not in seen:
+            seen[dk] = p
+        out.append(p)
+    return out
 
 
 def save_sqlite(posts: list[FoundPosting]) -> None:
@@ -90,15 +153,62 @@ def save_sqlite(posts: list[FoundPosting]) -> None:
     con.close()
 
 
+def _load_previous_bundle() -> tuple[dict, str]:
+    """Load previous postings/professors from data/postings.json or docs/eof-live.js."""
+    prev_file = DATA / "postings.json"
+    if prev_file.exists():
+        try:
+            payload = json.loads(prev_file.read_text(encoding="utf-8"))
+            if isinstance(payload, dict) and payload.get("postings"):
+                profs_file = DATA / "professors.json"
+                if profs_file.exists():
+                    try:
+                        payload["professors"] = json.loads(
+                            profs_file.read_text(encoding="utf-8")
+                        ).get("professors", [])
+                    except Exception:
+                        pass
+                return payload, "data/postings.json"
+        except Exception:
+            pass
+    bundle = ROOT / "docs" / "eof-live.js"
+    if bundle.exists():
+        try:
+            raw = bundle.read_text(encoding="utf-8")
+            prefix = "window.__EOF_LIVE__ = "
+            if raw.startswith(prefix):
+                payload = json.loads(raw[len(prefix):].rstrip().rstrip(";"))
+                if isinstance(payload, dict) and payload.get("postings"):
+                    return payload, "docs/eof-live.js"
+        except Exception:
+            pass
+    return {}, ""
+
+
+def _is_not_expired(d: dict) -> bool:
+    dl = (d.get("deadline") or "").strip()
+    if not dl:
+        return True
+    try:
+        return dl >= date.today().isoformat()
+    except Exception:
+        return True
+
+
+def _source_matches_adapter(src: str, adapter_name: str) -> bool:
+    if adapter_name == "ats":
+        return src.startswith("ats:")
+    return src == adapter_name
+
+
 PROFESSOR_ADAPTERS = {
     "orcid": orcid.search,
     "crossref": crossref.search,
 }
 
 
-def collect_professors(session, cfg: dict) -> list:
-    """Professor discovery (ORCID + Crossref). Never raises: a
-    professors failure must not kill the postings run."""
+def collect_professors(session, cfg: dict, prev_profs: list[dict] | None = None) -> list:
+    """Professor discovery (ORCID + Crossref) with degraded-run guard."""
     pcfg = cfg.get("professors", {})
     collected = []
     for name, fn in PROFESSOR_ADAPTERS.items():
@@ -118,60 +228,33 @@ def collect_professors(session, cfg: dict) -> list:
         collected.extend(profs)
         time.sleep(float(cfg.get("politeness", {}).get("delay_seconds", 1.5)))
     merged = merge_professors(collected)
-    # keep only professors with a real field match
-    kept = [p for p in merged if p.fit_score >= 45][:60]
+    kept_dicts = [p.to_dict() for p in merged if p.fit_score >= 45][:60]
+
+    # Professor degraded-run guard: never drop >50% of professors on an API rate-limit day
+    if prev_profs and len(prev_profs) >= 10 and len(kept_dicts) < len(prev_profs) // 2:
+        seen_names = {(x.get("name") or "").lower() for x in kept_dicts}
+        restored = 0
+        for old in prev_profs:
+            nm = (old.get("name") or "").lower()
+            if nm and nm not in seen_names:
+                kept_dicts.append(old)
+                seen_names.add(nm)
+                restored += 1
+        print(f"[prof] WARNING: degraded fetch ({len(kept_dicts)-restored} vs "
+              f"prev {len(prev_profs)}); preserved {restored} previous professors")
+
     payload = {
         "meta": {
             "generated_at": datetime.now(timezone.utc).isoformat(),
-            "count": len(kept),
-            "sources": sorted({s for p in kept for s in p.sources}),
+            "count": len(kept_dicts),
+            "sources": sorted({s for p in kept_dicts for s in (p.get("sources") or [])}),
         },
-        "professors": [p.to_dict() for p in kept],
+        "professors": kept_dicts,
     }
     (DATA / "professors.json").write_text(
         json.dumps(payload, ensure_ascii=False, indent=1), encoding="utf-8")
-    print(f"[prof] {len(kept)} professors kept "
-          f"(from {len(merged)} merged)")
-    return kept
-
-
-def _ats_from_payload(payload: dict) -> list[dict]:
-    postings = payload.get("postings", [])
-    return [p for p in postings
-            if isinstance(p, dict) and p.get("source", "").startswith("ats:")]
-
-
-def _previous_ats_postings() -> tuple[list[dict], str]:
-    """ATS postings from the previous run, for the degraded-run guard.
-
-    Tries data/postings.json first (present on local runs), then the
-    previously published live bundle docs/eof-live.js (the only copy of
-    previous data on a fresh runner checkout, where postings.json is
-    generated, never committed). Returns ([], "") when neither holds
-    ATS postings.
-    """
-    prev_file = DATA / "postings.json"
-    if prev_file.exists():
-        try:
-            found = _ats_from_payload(json.loads(
-                prev_file.read_text(encoding="utf-8")))
-            if found:
-                return found, "data/postings.json"
-        except Exception:
-            pass
-    bundle = ROOT / "docs" / "eof-live.js"
-    if bundle.exists():
-        try:
-            raw = bundle.read_text(encoding="utf-8")
-            prefix = "window.__EOF_LIVE__ = "
-            if raw.startswith(prefix):
-                found = _ats_from_payload(json.loads(
-                    raw[len(prefix):].rstrip().rstrip(";")))
-                if found:
-                    return found, "docs/eof-live.js"
-        except Exception:
-            pass
-    return [], ""
+    print(f"[prof] {len(kept_dicts)} professors kept (from {len(merged)} merged)")
+    return kept_dicts
 
 
 def main() -> None:
@@ -181,25 +264,36 @@ def main() -> None:
     elig_overrides = load_overrides(ROOT)
     session = make_session()
 
+    prev_bundle, prev_origin = _load_previous_bundle()
+    prev_postings: list[dict] = prev_bundle.get("postings", []) if isinstance(prev_bundle, dict) else []
+    prev_profs: list[dict] = prev_bundle.get("professors", []) if isinstance(prev_bundle, dict) else []
+
     collected: list[FoundPosting] = []
+    enabled_adapters: list[str] = []
+    fetched_counts: dict[str, int] = {}
+
     for name, fn in ADAPTERS.items():
         scfg = cfg.get("sources", {}).get(name, {})
         if not scfg.get("enabled"):
             print(f"[{name}] disabled, skipping")
             continue
+        enabled_adapters.append(name)
         try:
             posts = fn(session, scfg)
         except SourceBlocked as e:
             print(f"[{name}] blocked ({e}), skipping rest of source")
+            fetched_counts[name] = 0
             continue
-        except Exception as e:  # one source must not kill the run
+        except Exception as e:
             print(f"[{name}] error: {e}")
+            fetched_counts[name] = 0
             continue
+        fetched_counts[name] = len(posts)
         print(f"[{name}] {len(posts)} raw postings")
         collected.extend(posts)
         time.sleep(float(cfg.get("politeness", {}).get("delay_seconds", 1.5)))
 
-    # curated funding routes: verified official entries, no HTTP needed
+    # curated funding routes (PhDs + Masters + Scholarships): verified official entries
     try:
         curated = load_curated()
         print(f"[curated] {len(curated)} funding routes")
@@ -207,50 +301,54 @@ def main() -> None:
     except Exception as e:
         print(f"[curated] error: {e}")
 
-    # normalize + policy + dedupe (keep highest score per key)
+    # normalize + policy + key dedupe
     best: dict[str, FoundPosting] = {}
     for p in collected:
         normalize(p)
         apply_policy(p, policy, elig_overrides)
         if getattr(p, "curated", False) and getattr(p, "_funding_preset", None):
-            # curated entries carry their verified funding classification
             cat, fa, notes = p._funding_preset
             p.funding_category, p.funding_fa, p.funding_notes = cat, fa, notes
         k = p.key()
         if k not in best or p.fit_score > best[k].fit_score:
             best[k] = p
-    # excluded postings sink to the bottom of the default view
-    posts = sorted(best.values(),
-                   key=lambda p: (p.excluded, -p.fit_score,
-                                  p.deadline or "9999"))
 
-    # Degraded-run guard: if ATS was enabled but this run fetched nothing
-    # (e.g. the run context has no egress to university endpoints) while a
-    # previous run's data still holds ATS postings, keep those instead of
-    # wiping the app's data. Stale data beats an empty app; the warning stays
-    # loud so a monitoring cron can report it. On a fresh runner checkout
-    # data/postings.json does not exist (it is generated, never committed),
-    # so the guard also consults the previously published docs/eof-live.js.
-    ats_enabled = cfg.get("sources", {}).get("ats", {}).get("enabled")
-    if ats_enabled and not any(p.source.startswith("ats:") for p in posts):
-        prev_ats, prev_origin = _previous_ats_postings()
-        if prev_ats:
-            from dataclasses import fields as dc_fields
-            fnames = {f.name for f in dc_fields(FoundPosting)}
-            have = {p.key() for p in posts}
+    posts = sorted(best.values(),
+                   key=lambda p: (p.excluded, -p.fit_score, p.deadline or "9999"))
+    posts = cross_source_dedupe(posts)
+
+    # Universal per-source degraded-run guard: for ANY enabled adapter that
+    # returned 0 postings this run, retain non-expired postings from the
+    # previous healthy bundle instead of wiping that source to 0.
+    health_warnings: list[str] = []
+    if prev_postings:
+        fnames = {f.name for f in dc_fields(FoundPosting)}
+        have = {p.key() for p in posts}
+        for name in enabled_adapters:
+            if fetched_counts.get(name, 0) > 0:
+                continue
+            prev_for_src = [
+                d for d in prev_postings
+                if isinstance(d, dict)
+                and _source_matches_adapter(d.get("source", ""), name)
+                and _is_not_expired(d)
+            ]
+            if not prev_for_src:
+                continue
             merged = 0
-            for d in prev_ats:
-                fp = FoundPosting(
-                    **{k: v for k, v in d.items() if k in fnames})
+            for d in prev_for_src:
+                fp = FoundPosting(**{k: v for k, v in d.items() if k in fnames})
                 if fp.key() not in have:
                     posts.append(fp)
                     have.add(fp.key())
                     merged += 1
-            posts.sort(key=lambda p: (p.excluded, -p.fit_score,
-                                      p.deadline or "9999"))
-            print(f"[ats] WARNING: fetch returned 0 postings; kept "
-                  f"{merged} previous ATS postings from {prev_origin} "
-                  f"(data may be stale)")
+            if merged:
+                msg = f"منبع {name} امروز ۰ مورد برگرداند — {merged} آگهی منقضی‌نشده از اجرای قبلی حفظ شد"
+                health_warnings.append(msg)
+                print(f"[{name}] WARNING: fetch returned 0 postings; kept "
+                      f"{merged} previous postings from {prev_origin}")
+
+    posts.sort(key=lambda p: (p.excluded, -p.fit_score, p.deadline or "9999"))
 
     save_sqlite(posts)
     payload = {
@@ -261,6 +359,7 @@ def main() -> None:
             "count": len(posts),
             "groups": [fa for fa, _, _ in FIELD_GROUPS.values()],
             "priority_countries": policy.get("priorityCountries", []),
+            "health": {"warnings": health_warnings},
         },
         "postings": [p.to_dict() for p in posts],
     }
@@ -268,16 +367,18 @@ def main() -> None:
         json.dumps(payload, ensure_ascii=False, indent=1), encoding="utf-8")
     bands: dict[str, int] = {}
     funding: dict[str, int] = {}
+    kinds: dict[str, int] = {}
     for p in posts:
         bands[p.fit_band] = bands.get(p.fit_band, 0) + 1
         funding[p.funding_category] = funding.get(p.funding_category, 0) + 1
+        kinds[p.kind] = kinds.get(p.kind, 0) + 1
     print(f"done: {len(posts)} postings in {time.time()-t0:.1f}s")
+    print(f"  kinds: {kinds}")
     print(f"  bands: {bands}")
     print(f"  funding: {funding}")
 
-    # professors layer: independent of postings, never blocks them
     try:
-        collect_professors(session, cfg)
+        collect_professors(session, cfg, prev_profs=prev_profs)
     except Exception as e:
         print(f"[prof] error: {e}")
 

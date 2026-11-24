@@ -166,7 +166,7 @@ def search(session, cfg: dict) -> list[FoundPosting]:
                  if isinstance(d, dict)}
     for rec in scholarships:
         name = (rec.get("programmnameEn") or rec.get("nameEn") or "").strip()
-        intro = ((rec.get("introduction") or {}).get("en") or "").strip()
+        intro = strip_html((rec.get("introduction") or {}).get("en") or "")
         if not name or not _relevant(name, intro):
             continue
         dl_rec = deadlines.get(rec.get("sapProgid"), {})
@@ -206,10 +206,37 @@ def _parse_phd_date(text: str) -> str:
         return ""
 
 
+_PHD_ORG_PATTERNS = [
+    re.compile(r"(Universität\s+[A-ZÄÖÜ][a-zäöüß\-]+(?:\s+[A-ZÄÖÜ][a-zäöüß\-]+)?)"),
+    re.compile(r"(Technische\s+Universität\s+[A-ZÄÖÜ][a-zäöüß\-]+)"),
+    re.compile(r"(TUD\s+Dresden\s+University\s+of\s+Technology)"),
+    re.compile(r"(Clausthal\s+University\s+of\s+Technology)"),
+    re.compile(r"(University\s+of\s+[A-ZÄÖÜ][a-zäöüß\-]+)"),
+    re.compile(r"(Karlsruhe\s+Institute\s+of\s+Technology(?:\s*\(KIT\))?)"),
+    re.compile(r"(Friedrich-Alexander-Universität\s+Erlangen[–\-]Nürnberg(?:\s*\(FAU\))?)"),
+    re.compile(r"(Max\s+Planck\s+(?:Institute|School)\s+(?:for|of)\s+[A-Za-z\s&\-]+?)(?=\s+(?:is|in|and|offers|\(|,|—|\.))"),
+    re.compile(r"(International\s+Max\s+Planck\s+Research\s+School\s+(?:for|of)\s+[A-Za-z\s&\-]+?)(?=\s+(?:is|invites|\(|,|\.))"),
+    re.compile(r"(Center\s+for\s+the\s+Transformation\s+of\s+Chemistry\s*\(CTC\))"),
+    re.compile(r"(LMU\s+Munich)"),
+    re.compile(r"(Helmholtz[A-Za-z\-\s]+?(?:Dresden|Munich|Berlin|Center|Zentrum)[A-Za-z\-\s]*)"),
+]
+
+
+def _extract_phd_org(title: str, desc: str, city: str) -> str:
+    text = f"{title} {desc}"
+    for pat in _PHD_ORG_PATTERNS:
+        m = pat.search(text)
+        if m:
+            org = m.group(1).strip(" ,.-—")
+            if 3 <= len(org) <= 80:
+                return org
+    return f"PhD Germany ({city})" if city else "PhD Germany (DAAD)"
+
+
 def search_phd(session, cfg: dict) -> list[FoundPosting]:
     out: list[FoundPosting] = []
     try:
-        r = polite_get(session, PHD_FEED)
+        r = polite_get(session, PHD_FEED, timeout=30)
     except SourceBlocked:
         return out
     feed = feedparser.parse(r.content)
@@ -217,15 +244,22 @@ def search_phd(session, cfg: dict) -> list[FoundPosting]:
         ext_id = str(e.get("id", "")).strip()
         if not ext_id:
             continue
-        out.append(FoundPosting(
+        title = " ".join((e.get("title") or "").split())
+        city = " ".join((e.get("location") or "").split())
+        desc = strip_html(e.get("summary", ""))
+        post = FoundPosting(
             source="phdgermany",
             external_id=ext_id,
-            title=" ".join((e.get("title") or "").split()),
+            title=title,
+            organization=_extract_phd_org(title, desc, city),
             country="DE",
-            city=" ".join((e.get("location") or "").split()),
+            city=city,
             url=e.get("link", ""),
-            description=strip_html(e.get("summary", "")),
+            description=desc,
             posted_date=_parse_phd_date(e.get("published", "")),
             deadline=_parse_phd_date(e.get("applicationdeadline", "")),
-        ))
+        )
+        post.kind = "phd"
+        post._kind_fixed = True
+        out.append(post)
     return out

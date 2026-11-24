@@ -7,6 +7,10 @@ call — no per-record fetch needed:
 """
 from __future__ import annotations
 
+import time
+
+from requests.exceptions import ConnectionError, Timeout
+
 from ..http import SourceBlocked, polite_get
 from ..professors import Professor
 
@@ -17,6 +21,7 @@ SOURCE = "orcid"
 def search(session, cfg: dict) -> list[Professor]:
     out: list[Professor] = []
     rows = int(cfg.get("rows", 10))
+    delay = float(cfg.get("delay_seconds", 1.2))
     headers = {"Accept": "application/json"}
     for kw in cfg.get("keywords", []):
         try:
@@ -24,6 +29,9 @@ def search(session, cfg: dict) -> list[Professor]:
                            params={"q": kw, "rows": rows})
         except SourceBlocked:
             break
+        except (Timeout, ConnectionError):
+            time.sleep(delay)
+            continue
         data = r.json()
         for e in data.get("expanded-result") or []:
             orcid = (e.get("orcid-id") or "").strip()
@@ -40,4 +48,5 @@ def search(session, cfg: dict) -> list[Professor]:
                 profile_url=f"https://orcid.org/{orcid}" if orcid else "",
                 sources=[SOURCE],
             ))
+        time.sleep(delay)
     return out
