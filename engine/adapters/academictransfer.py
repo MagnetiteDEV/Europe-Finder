@@ -31,8 +31,12 @@ _LD_RE = re.compile(
     r'<script[^>]*type=["\']application/ld\+json["\'][^>]*>(.*?)</script>',
     re.S | re.I)
 _JOB_LINK_RE = re.compile(
-    r'<a[^>]+href=["\'](/en/jobs/(\d+)/[^"\']*)["\'][^>]*>(.*?)</a>',
+    r'<a[^>]+href=["\'](?:https://www\.academictransfer\.com)?(/en/jobs/(\d+)/[^"\']*)["\'][^>]*>(.*?)</a>',
     re.S | re.I)
+# v2.9.4: the job link is an EMPTY overlay anchor; the title lives in the
+# <h3> and the summary in the <p> that follow it inside the same card.
+_H3_RE = re.compile(r'<h3[^>]*>(.*?)</h3>', re.S | re.I)
+_P_RE = re.compile(r'<p[^>]*>(.*?)</p>', re.S | re.I)
 
 DEFAULT_KEYWORDS = [
     "fashion", "art history", "visual culture", "design",
@@ -113,15 +117,26 @@ def _parse_html_page(html_text: str) -> list[FoundPosting]:
             out.append(post)
     if out:
         return out
-    # 2) Fallback: parse vacancy links on /en/jobs/?function_types=1
+    # 2) Fallback: parse vacancy cards on /en/jobs/?function_types=1.
+    # The <a> is an empty overlay; title/description sit in the <h3>/<p>
+    # that follow it inside the same card.
     for m in _JOB_LINK_RE.finditer(html_text):
         href, vid, raw_title = m.group(1), m.group(2), m.group(3)
         if vid in seen:
             continue
         title = clean_plain_text(strip_html(unescape(raw_title)))
+        tail = html_text[m.end():m.end() + 2500]
+        if len(title) < 6:
+            hm = _H3_RE.search(tail)
+            if hm:
+                title = clean_plain_text(strip_html(unescape(hm.group(1))))
         if len(title) < 6:
             continue
         seen.add(vid)
+        desc = ""
+        pm = _P_RE.search(tail)
+        if pm:
+            desc = clean_plain_text(strip_html(unescape(pm.group(1))))
         post = FoundPosting(
             source=SOURCE,
             external_id=vid,
@@ -129,7 +144,8 @@ def _parse_html_page(html_text: str) -> list[FoundPosting]:
             organization="Dutch Research University (AcademicTransfer)",
             country="NL",
             url=urljoin(BASE, href),
-            description=f"{title}. AcademicTransfer Netherlands PhD vacancy (CAO NU salaried doctoral employment).",
+            description=(f"{title}. {desc}".strip() if desc else
+                         f"{title}. AcademicTransfer Netherlands PhD vacancy (CAO NU salaried doctoral employment)."),
         )
         post.kind = "phd"
         post._kind_fixed = True

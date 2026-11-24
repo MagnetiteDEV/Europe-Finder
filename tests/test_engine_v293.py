@@ -261,6 +261,17 @@ class TestNewAndUpgradedAdapters(unittest.TestCase):
         self.assertEqual(posts_html[0].external_id, "88202")
         self.assertEqual(posts_html[0].kind, "phd")
 
+        # v2.9.4: real cards use an EMPTY overlay anchor; the title lives in
+        # the <h3> and the summary in the <p> that follow it in the card.
+        card = ('<article><a href="/en/jobs/365814/phd-position-in-applied-topology/" '
+                'class="absolute inset-0"><!--[--><!--]--></a><div><h3>PhD Position In Applied Topology</h3>'
+                '<p>Do you have an inquisitive mind and a passion for Mathematics?</p></div></article>')
+        posts_card = academictransfer._parse_html_page(card)
+        self.assertEqual(len(posts_card), 1)
+        self.assertEqual(posts_card[0].external_id, "365814")
+        self.assertEqual(posts_card[0].title, "PhD Position In Applied Topology")
+        self.assertIn("Mathematics", posts_card[0].description)
+
     def test_jobbnorge_api_parser_and_block(self):
         payload = {"jobs": [
             {"id": 311685, "title": "PhD Research Fellow in maps and models for nature in land-use planning",
