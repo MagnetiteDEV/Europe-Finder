@@ -310,8 +310,11 @@ class TestNewAndUpgradedAdapters(unittest.TestCase):
     def test_myscience_disabled_in_config(self):
         # myScience.ch is behind a verify-wall (all requests time out);
         # the source stays disabled until a browser/API route exists.
+        # Campus France Doctorat likewise has no public API (session-driven
+        # listing, verified 2026-11-25) and stays disabled.
         cfg = json.loads((ROOT / "config.json").read_text(encoding="utf-8"))
         self.assertFalse(cfg["sources"]["myscience"]["enabled"])
+        self.assertFalse(cfg["sources"]["campusfrance_phd"]["enabled"])
 
     def test_campusfrance_phd_parser(self):
         html = '<div class="card"><a href="/phd/offers/45123">Thèse en histoire de la mode et culture visuelle</a><span>Contrat doctoral — Date limite: 30 mars 2027</span></div>'
@@ -328,12 +331,23 @@ class TestNewAndUpgradedAdapters(unittest.TestCase):
         self.assertEqual(m_posts[0].country, "CH")
         self.assertEqual(m_posts[0].kind, "phd")
 
-        ku_html = '<a href="/phd/?show=162345">PhD Fellowship in Visual Culture and Fashion History</a><td>Deadline: 15 January 2027</td>'
+        # all-vacancies table rows: bare DD-MM-YYYY deadline cell, and a
+        # Research Assistant row whose PhD marker must not classify it.
+        ku_html = (
+            '<a href="/all-vacancies/?show=171284">PhD position in Geoscience '
+            'Education Research</a></td><td>Faculty of Science</td>'
+            '<td>Department of Science Education</td><td>29-11-2026</td>'
+            '<a href="/all-vacancies/?show=171285">Research Assistant with '
+            'opportunity for PhD-fellowship continuation</a></td>'
+            '<td>Faculty of Health and Medical Sciences</td>'
+            '<td>Department of Biomedical Sciences</td><td>29-11-2026</td>'
+        )
         k_posts = nordic_arts._parse_ku_phd(ku_html)
         self.assertEqual(len(k_posts), 1)
         self.assertEqual(k_posts[0].country, "DK")
         self.assertEqual(k_posts[0].kind, "phd")
-        self.assertEqual(k_posts[0].deadline, "2027-01-15")
+        self.assertEqual(k_posts[0].deadline, "2026-11-29")
+        self.assertTrue(nordic_arts.KU_PHD_URL.endswith("/all-vacancies/"))
 
     def test_euraxess_r1_parser(self):
         html = """
@@ -391,6 +405,30 @@ class TestNewAndUpgradedAdapters(unittest.TestCase):
         ku = ats.fetch_kuleuven(sess, {"country": "BE", "careers_url": "https://example.org", "endpoint": "https://example.org/search"})
         self.assertEqual(ku[0].url, "https://www.kuleuven.be/personeel/jobsite/jobs/60785545?lang=en")
         self.assertTrue(ku[0].organization.startswith("KU Leuven"))
+
+    def test_ats_blocked_tenant_does_not_stop_other_tenants(self):
+        def blocked(session, tenant):
+            raise SourceBlocked("403 from blocked tenant")
+
+        def ok(session, tenant):
+            return [FoundPosting(source="ats:varbi", external_id="v1",
+                                 title="PhD in Visual Culture",
+                                 organization="Lund University")]
+
+        tenants = [
+            {"ats": "workday", "name": "Blocked University", "verified": True,
+             "endpoint": "https://example.org/wday/cxs/x/x/jobs"},
+            {"ats": "varbi", "name": "Lund University", "verified": True,
+             "endpoint": "https://example.org/varbi"},
+        ]
+        with tempfile.TemporaryDirectory() as td:
+            tenants_file = Path(td) / "tenants.json"
+            tenants_file.write_text(json.dumps(tenants), encoding="utf-8")
+            with mock.patch.dict(ats.FETCHERS, {"workday": blocked, "varbi": ok}):
+                posts = ats.search(mock.MagicMock(),
+                                   {"tenants_file": str(tenants_file),
+                                    "delay_seconds": 0})
+        self.assertEqual([p.source for p in posts], ["ats:varbi"])
 
     def test_fashionunited_uk_city_overrides_company_hq(self):
         d = {
@@ -457,6 +495,27 @@ class TestCuratedAndPipeline(unittest.TestCase):
                 self.assertEqual(ctx.exception.code, 1)
             # Previous healthy bundle untouched
             self.assertEqual(export_live._previous_count(out_js), 100)
+
+    def test_ats_subtype_degraded_guard_restores_missing_subtype(self):
+        from engine import ingest
+        posts = [FoundPosting(source="ats:varbi", external_id="v1",
+                              title="Fresh Varbi PhD", organization="Lund University",
+                              deadline="2099-01-01")]
+        prev = [
+            {"source": "ats:workday", "external_id": "w1", "title": "Old Workday PhD",
+             "organization": "Aalto University", "deadline": "2099-01-01"},
+            {"source": "ats:workday", "external_id": "w-expired", "title": "Expired Workday PhD",
+             "organization": "Aalto University", "deadline": "2020-01-01"},
+            {"source": "ats:varbi", "external_id": "v0", "title": "Old Varbi PhD",
+             "organization": "Lund University", "deadline": "2099-01-01"},
+        ]
+        warnings = ingest._apply_degraded_guards(
+            posts, prev, ["ats"], {"ats": 1}, {"ats:varbi": 1}, "test bundle")
+        keys = {(p.source, p.external_id) for p in posts}
+        self.assertIn(("ats:workday", "w1"), keys)
+        self.assertNotIn(("ats:workday", "w-expired"), keys)
+        self.assertNotIn(("ats:varbi", "v0"), keys)
+        self.assertTrue(any("ats:workday" in w for w in warnings))
 
 
 if __name__ == "__main__":

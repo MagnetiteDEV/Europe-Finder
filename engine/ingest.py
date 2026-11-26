@@ -201,6 +201,66 @@ def _source_matches_adapter(src: str, adapter_name: str) -> bool:
     return src == adapter_name
 
 
+def _restore_previous_postings(posts: list[FoundPosting], prev_postings: list[dict],
+                               matches, label: str, prev_origin: str,
+                               health_warnings: list[str]) -> int:
+    fnames = {f.name for f in dc_fields(FoundPosting)}
+    have = {p.key() for p in posts}
+    merged = 0
+    for d in prev_postings:
+        if not isinstance(d, dict) or not matches(d.get("source", "")):
+            continue
+        if not _is_not_expired(d):
+            continue
+        fp = FoundPosting(**{k: v for k, v in d.items() if k in fnames})
+        if fp.key() not in have:
+            posts.append(fp)
+            have.add(fp.key())
+            merged += 1
+    if merged:
+        msg = f"منبع {label} امروز ۰ مورد برگرداند — {merged} آگهی منقضی‌نشده از اجرای قبلی حفظ شد"
+        health_warnings.append(msg)
+        print(f"[{label}] WARNING: fetch returned 0 postings; kept "
+              f"{merged} previous postings from {prev_origin}")
+    return merged
+
+
+def _apply_degraded_guards(posts: list[FoundPosting], prev_postings: list[dict],
+                           enabled_adapters: list[str], fetched_counts: dict[str, int],
+                           raw_source_counts: dict[str, int],
+                           prev_origin: str) -> list[str]:
+    """Restore non-expired previous postings for sources that fetched 0.
+
+    ATS also gets subtype-level protection: if ATS partially succeeds
+    (e.g. Varbi returns postings while every Workday tenant is blocked),
+    the missing ats:* subtype is restored instead of silently dropping
+    that whole layer just because the ATS total is non-zero.
+    """
+    health_warnings: list[str] = []
+    if not prev_postings:
+        return health_warnings
+    for name in enabled_adapters:
+        if fetched_counts.get(name, 0) > 0:
+            continue
+        _restore_previous_postings(
+            posts, prev_postings,
+            lambda src, adapter=name: _source_matches_adapter(src, adapter),
+            name, prev_origin, health_warnings)
+    if "ats" in enabled_adapters and fetched_counts.get("ats", 0) > 0:
+        prev_subtypes = sorted({
+            d.get("source", "") for d in prev_postings
+            if isinstance(d, dict) and str(d.get("source", "")).startswith("ats:")
+        })
+        for subtype in prev_subtypes:
+            if raw_source_counts.get(subtype, 0) > 0:
+                continue
+            _restore_previous_postings(
+                posts, prev_postings,
+                lambda src, subtype=subtype: src == subtype,
+                subtype, prev_origin, health_warnings)
+    return health_warnings
+
+
 PROFESSOR_ADAPTERS = {
     "orcid": orcid.search,
     "crossref": crossref.search,
@@ -319,34 +379,14 @@ def main() -> None:
 
     # Universal per-source degraded-run guard: for ANY enabled adapter that
     # returned 0 postings this run, retain non-expired postings from the
-    # previous healthy bundle instead of wiping that source to 0.
-    health_warnings: list[str] = []
-    if prev_postings:
-        fnames = {f.name for f in dc_fields(FoundPosting)}
-        have = {p.key() for p in posts}
-        for name in enabled_adapters:
-            if fetched_counts.get(name, 0) > 0:
-                continue
-            prev_for_src = [
-                d for d in prev_postings
-                if isinstance(d, dict)
-                and _source_matches_adapter(d.get("source", ""), name)
-                and _is_not_expired(d)
-            ]
-            if not prev_for_src:
-                continue
-            merged = 0
-            for d in prev_for_src:
-                fp = FoundPosting(**{k: v for k, v in d.items() if k in fnames})
-                if fp.key() not in have:
-                    posts.append(fp)
-                    have.add(fp.key())
-                    merged += 1
-            if merged:
-                msg = f"منبع {name} امروز ۰ مورد برگرداند — {merged} آگهی منقضی‌نشده از اجرای قبلی حفظ شد"
-                health_warnings.append(msg)
-                print(f"[{name}] WARNING: fetch returned 0 postings; kept "
-                      f"{merged} previous postings from {prev_origin}")
+    # previous healthy bundle instead of wiping that source to 0. ATS
+    # subtypes get the same protection when ATS only partially succeeds.
+    raw_source_counts: dict[str, int] = {}
+    for p in collected:
+        raw_source_counts[p.source] = raw_source_counts.get(p.source, 0) + 1
+    health_warnings = _apply_degraded_guards(
+        posts, prev_postings, enabled_adapters, fetched_counts,
+        raw_source_counts, prev_origin)
 
     posts.sort(key=lambda p: (p.excluded, -p.fit_score, p.deadline or "9999"))
 

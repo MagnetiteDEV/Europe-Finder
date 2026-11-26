@@ -341,11 +341,17 @@ def search(session, cfg: dict) -> list[FoundPosting]:
     delay = float(cfg.get("delay_seconds", 1.5))
     out: list[FoundPosting] = []
     for t in tenants:
+        name = t.get("name") or t.get("ats") or "tenant"
         try:
-            out.extend(FETCHERS[t["ats"]](session, t))
-        except SourceBlocked:
-            break
+            posts = FETCHERS[t["ats"]](session, t)
+        except SourceBlocked as e:
+            # Tenants are independent university hosts: one host asking
+            # us to stop must not silently zero every other tenant.
+            print(f"  [ats] {name}: blocked ({e}); continuing with other tenants")
         except Exception as e:  # one tenant must not kill the run
-            print(f"  [ats] {t.get('name')}: skipped ({e})")
+            print(f"  [ats] {name}: skipped ({e})")
+        else:
+            out.extend(posts)
+            print(f"  [ats] {name}: {len(posts)} postings")
         time.sleep(delay)
     return out

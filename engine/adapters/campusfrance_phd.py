@@ -4,6 +4,12 @@ Source: https://doctorat.campusfrance.org/phd/offers
 Official French doctoral portal listing funded PhD offers (Contrat Doctoral,
 CIFRE, MSCA) across French Écoles Doctorales in art, mode, design,
 histoire de l'art, patrimoine, and humanities.
+
+DISABLED in config (2026-11-25): the listing is a JavaScript-updated,
+session-driven grid with no discoverable public JSON/API endpoint (plain
+GETs to the usual API candidates return HTML), so this adapter returns 0
+and only burns keyword requests. Re-enable only with a session-based or
+browser route; the manual hub link stays.
 """
 from __future__ import annotations
 

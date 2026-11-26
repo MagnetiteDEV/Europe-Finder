@@ -6,9 +6,12 @@
   request from a plain HTTP client times out (even /verify) — the adapter
   would burn ~90s per keyword in polite_get retries and return 0. Re-enable
   only with a browser/API route; the manual hub link stays.
-- KU PhD (employment.ku.dk/phd/): University of Copenhagen official PhD
-  vacancies portal (priority country DK — all Danish PhDs are salaried
-  3-year university employment contracts).
+- KU PhD (employment.ku.dk/all-vacancies/): University of Copenhagen
+  vacancies table (priority country DK — all Danish PhDs are salaried
+  3-year university employment contracts). The /phd/ page carries no job
+  links in its HTML; the server-rendered all-vacancies table does
+  (verified live 2026-11-25), so the adapter reads that page and keeps
+  only genuine PhD titles.
 """
 from __future__ import annotations
 
@@ -28,7 +31,7 @@ from .ats import strip_html
 MYSCIENCE_BASE = "https://www.myscience.ch"
 MYSCIENCE_URL = MYSCIENCE_BASE + "/jobs"
 KU_BASE = "https://employment.ku.dk"
-KU_PHD_URL = KU_BASE + "/phd/"
+KU_PHD_URL = KU_BASE + "/all-vacancies/"
 
 _MYSCI_LINK_RE = re.compile(
     r'<a[^>]+href=["\'](/jobs/id(\d+)[^"\']*)["\'][^>]*>(.*?)</a>',
@@ -132,6 +135,12 @@ def search_myscience(session, cfg: dict) -> list[FoundPosting]:
     return out
 
 
+_KU_PHD_MARKER_RE = re.compile(r"\bph\.?\s*d\.?\b", re.I)
+_KU_NON_PHD_RE = re.compile(
+    r"\b(postdoc|postdoctoral|research assistants?|professors?)\b", re.I)
+_KU_DATE_RE = re.compile(r"\b(\d{2})-(\d{2})-(\d{4})\b")
+
+
 def _parse_ku_phd(html_text: str) -> list[FoundPosting]:
     out: list[FoundPosting] = []
     seen: set[str] = set()
@@ -142,9 +151,25 @@ def _parse_ku_phd(html_text: str) -> list[FoundPosting]:
         title = clean_plain_text(strip_html(unescape(raw_title)))
         if len(title) < 6:
             continue
+        # The all-vacancies table mixes every job type: keep only genuine
+        # PhD titles. This drops e.g. "Research Assistant with opportunity
+        # for PhD-fellowship continuation", which carries a PhD marker but
+        # is not a PhD vacancy.
+        if not _KU_PHD_MARKER_RE.search(title) or _KU_NON_PHD_RE.search(title):
+            continue
         seen.add(jid)
-        snippet = clean_plain_text(strip_html(html_text[m.end():m.end() + 400]))
+        # Bound the snippet at the next row's anchor so the faculty /
+        # location / deadline cells read belong to this row only.
+        nxt = html_text.find("<a", m.end())
+        raw_seg = html_text[m.end():nxt] if nxt != -1 else html_text[m.end():m.end() + 800]
+        snippet = clean_plain_text(strip_html(raw_seg))
         dl = extract_deadline(snippet)
+        if not dl:
+            # Table cells carry a bare DD-MM-YYYY date with no deadline
+            # keyword for extract_deadline to anchor on.
+            dm = _KU_DATE_RE.search(snippet)
+            if dm:
+                dl = f"{dm.group(3)}-{dm.group(2)}-{dm.group(1)}"
         p = FoundPosting(
             source="ku_phd",
             external_id=jid,
