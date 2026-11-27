@@ -560,6 +560,60 @@ class TestCuratedAndPipeline(unittest.TestCase):
         self.assertEqual(len(posts), 1)
         self.assertTrue(any("403 from https://www2.daad.de" in w for w in warnings))
 
+    def test_daad_database_falls_back_to_sibling_host(self):
+        scholarships = ('TAFFY([{"id": 4022, "sapProgid": 10000402, '
+                        '"programmnameEn": "Study Scholarships - Fine Art, Design, Visual Communication and Film", '
+                        '"introduction": {"en": "Postgraduate studies in fine art and design."}}]);')
+        origin = 'TAFFY([{"id": 192, "nameEn": "Iran"}]);'
+        deadlines = 'TAFFY([{"id": 10000402, "countries": {"192": [{"en": "15.10.2099"}]}}]);'
+
+        def fake_get(url, params=None, timeout=None, headers=None):
+            if url.startswith("https://www2.daad.de/deutschland/stipendium/datenbank"):
+                return _FakeResp(status_code=403)
+            if url.startswith("https://www.daad.de/deutschland/stipendium/datenbank"):
+                return _FakeResp(text=(
+                    '<script src="/static/scholarships.js?cb=1"></script>'
+                    '<script src="/static/deadlines.js?cb=1"></script>'
+                    '<script src="/static/origin.js?cb=1"></script>'))
+            if url.endswith("/static/scholarships.js?cb=1"):
+                return _FakeResp(text=scholarships)
+            if url.endswith("/static/deadlines.js?cb=1"):
+                return _FakeResp(text=deadlines)
+            if url.endswith("/static/origin.js?cb=1"):
+                return _FakeResp(text=origin)
+            return _FakeResp(status_code=404)
+
+        sess = mock.MagicMock()
+        sess.get.side_effect = fake_get
+        with mock.patch("time.sleep"):
+            posts = daad.search(sess, {"delay_seconds": 0})
+        self.assertEqual(len(posts), 1)
+        self.assertEqual(posts[0].source, "daad")
+        self.assertEqual(posts[0].deadline, "2099-10-15")
+
+    def test_phdgermany_missing_feed_id_and_html_fallback(self):
+        rss = b"""<?xml version="1.0" encoding="UTF-8"?>
+        <rss version="2.0"><channel><title>PhDGermany</title>
+        <item><title>PhD in Cultural Heritage</title>
+        <link>https://www.daad.de/en/studying-in-germany/phd-studies-research/phd-germany/detail/example-10529/?phd-id=10529</link>
+        <description>Doctoral research in cultural heritage.</description>
+        <pubDate>27. Nov 2026</pubDate><applicationdeadline>04. Jan 2027</applicationdeadline>
+        <location>Dresden</location></item></channel></rss>"""
+        posts = daad._parse_phd_feed_bytes(rss)
+        self.assertEqual(len(posts), 1)
+        self.assertEqual(posts[0].external_id, "10529")
+        self.assertEqual(posts[0].deadline, "2027-01-04")
+
+        html = ('<a href="/en/studying-in-germany/phd-studies-research/phd-germany/detail/example-10530/?phd-id=10530">'
+                'University of Example PhD in Art History</a>'
+                '<p>Type of Promotion: Full PhD</p><p>Application deadline: 15.12.2026</p>'
+                '<p>Location: Berlin</p><p>Last changed: 26.11.2026</p>')
+        html_posts = daad._parse_phd_html(html)
+        self.assertEqual(len(html_posts), 1)
+        self.assertEqual(html_posts[0].external_id, "10530")
+        self.assertEqual(html_posts[0].city, "Berlin")
+        self.assertEqual(html_posts[0].deadline, "2026-12-15")
+
 
 if __name__ == "__main__":
     unittest.main(verbosity=2)
