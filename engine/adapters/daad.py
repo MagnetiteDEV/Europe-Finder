@@ -132,10 +132,11 @@ def _resolve_deadline(rec: dict, iran_id: int) -> str:
 def search(session, cfg: dict) -> list[FoundPosting]:
     out: list[FoundPosting] = []
     delay = float(cfg.get("delay_seconds", 2))
-    try:
-        page = polite_get(session, DB_PAGE)
-    except SourceBlocked:
-        return out
+    # SourceBlocked propagates to ingest, which records the reason in
+    # the bundle health warning — swallowing it here made DAAD's
+    # 26-27 Nov zeros in the GitHub run environment undiagnosable
+    # from outside (the bundle only said "returned 0").
+    page = polite_get(session, DB_PAGE)
     urls: dict[str, str] = {}
     for src in _SCRIPT_RE.findall(page.text):
         for key in ("scholarships", "deadlines", "origin"):
@@ -143,7 +144,8 @@ def search(session, cfg: dict) -> list[FoundPosting]:
                 urls[key] = (DB_HOST + unescape(src) if src.startswith("/")
                              else unescape(src))
     if "scholarships" not in urls:
-        return out
+        raise SourceBlocked(
+            "scholarships.js script not found on DAAD database page")
     data: dict[str, list] = {}
     for key in ("scholarships", "deadlines", "origin"):
         if key not in urls:
@@ -153,10 +155,13 @@ def search(session, cfg: dict) -> list[FoundPosting]:
             r = polite_get(session, urls[key])
             data[key] = _load_taffy(r.text)
         except SourceBlocked:
+            if key == "scholarships":
+                raise
             break
     scholarships = data.get("scholarships", [])
     if not scholarships:
-        return out
+        raise SourceBlocked(
+            "scholarships.js parsed empty (0 programmes)")
     iran_id = 192
     for o in data.get("origin", []):
         if (o.get("nameEn") or "").strip().lower() == "iran":
@@ -235,11 +240,13 @@ def _extract_phd_org(title: str, desc: str, city: str) -> str:
 
 def search_phd(session, cfg: dict) -> list[FoundPosting]:
     out: list[FoundPosting] = []
-    try:
-        r = polite_get(session, PHD_FEED, timeout=30)
-    except SourceBlocked:
-        return out
+    # SourceBlocked propagates (see search()); a malformed feed is
+    # reported the same way instead of silently returning 0.
+    r = polite_get(session, PHD_FEED, timeout=30)
     feed = feedparser.parse(r.content)
+    if not feed.entries and getattr(feed, "bozo", 0):
+        raise SourceBlocked(
+            f"PhDGermany RSS parse failed: {feed.bozo_exception}"[:160])
     for e in feed.entries:
         ext_id = str(e.get("id", "")).strip()
         if not ext_id:

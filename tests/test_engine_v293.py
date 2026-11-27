@@ -541,6 +541,25 @@ class TestCuratedAndPipeline(unittest.TestCase):
         self.assertNotIn(("ats:varbi", "v0"), keys)
         self.assertTrue(any("ats:workday" in w for w in warnings))
 
+    def test_daad_block_reason_reaches_bundle_warning(self):
+        from engine import ingest
+        # DAAD adapters must not swallow SourceBlocked: ingest records
+        # the reason and the degraded guard puts it in the warning.
+        with mock.patch.object(daad, "polite_get",
+                               side_effect=SourceBlocked("403 from https://www2.daad.de")):
+            with self.assertRaises(SourceBlocked):
+                daad.search(mock.MagicMock(), {"delay_seconds": 0})
+            with self.assertRaises(SourceBlocked):
+                daad.search_phd(mock.MagicMock(), {})
+        posts = []
+        prev = [{"source": "daad", "external_id": "d1", "title": "Old DAAD programme",
+                 "organization": "DAAD", "deadline": "2099-01-01"}]
+        warnings = ingest._apply_degraded_guards(
+            posts, prev, ["daad"], {"daad": 0}, {},
+            "test bundle", {"daad": "403 from https://www2.daad.de"})
+        self.assertEqual(len(posts), 1)
+        self.assertTrue(any("403 from https://www2.daad.de" in w for w in warnings))
+
 
 if __name__ == "__main__":
     unittest.main(verbosity=2)

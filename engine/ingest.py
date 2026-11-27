@@ -203,7 +203,8 @@ def _source_matches_adapter(src: str, adapter_name: str) -> bool:
 
 def _restore_previous_postings(posts: list[FoundPosting], prev_postings: list[dict],
                                matches, label: str, prev_origin: str,
-                               health_warnings: list[str]) -> int:
+                               health_warnings: list[str],
+                               reason: str = "") -> int:
     fnames = {f.name for f in dc_fields(FoundPosting)}
     have = {p.key() for p in posts}
     merged = 0
@@ -218,7 +219,11 @@ def _restore_previous_postings(posts: list[FoundPosting], prev_postings: list[di
             have.add(fp.key())
             merged += 1
     if merged:
-        msg = f"منبع {label} امروز ۰ مورد برگرداند — {merged} آگهی منقضی‌نشده از اجرای قبلی حفظ شد"
+        # The failure reason (e.g. "403 from ...") rides in the bundle
+        # warning: GitHub run logs are behind a login, so the warning
+        # is the only externally visible diagnostic trace.
+        why = f" ({reason})" if reason else ""
+        msg = f"منبع {label} امروز ۰ مورد برگرداند{why} — {merged} آگهی منقضی‌نشده از اجرای قبلی حفظ شد"
         health_warnings.append(msg)
         print(f"[{label}] WARNING: fetch returned 0 postings; kept "
               f"{merged} previous postings from {prev_origin}")
@@ -228,7 +233,8 @@ def _restore_previous_postings(posts: list[FoundPosting], prev_postings: list[di
 def _apply_degraded_guards(posts: list[FoundPosting], prev_postings: list[dict],
                            enabled_adapters: list[str], fetched_counts: dict[str, int],
                            raw_source_counts: dict[str, int],
-                           prev_origin: str) -> list[str]:
+                           prev_origin: str,
+                           failure_reasons: dict[str, str] | None = None) -> list[str]:
     """Restore non-expired previous postings for sources that fetched 0.
 
     ATS also gets subtype-level protection: if ATS partially succeeds
@@ -245,7 +251,8 @@ def _apply_degraded_guards(posts: list[FoundPosting], prev_postings: list[dict],
         _restore_previous_postings(
             posts, prev_postings,
             lambda src, adapter=name: _source_matches_adapter(src, adapter),
-            name, prev_origin, health_warnings)
+            name, prev_origin, health_warnings,
+            reason=(failure_reasons or {}).get(name, ""))
     if "ats" in enabled_adapters and fetched_counts.get("ats", 0) > 0:
         prev_subtypes = sorted({
             d.get("source", "") for d in prev_postings
@@ -331,6 +338,7 @@ def main() -> None:
     collected: list[FoundPosting] = []
     enabled_adapters: list[str] = []
     fetched_counts: dict[str, int] = {}
+    failure_reasons: dict[str, str] = {}
 
     for name, fn in ADAPTERS.items():
         scfg = cfg.get("sources", {}).get(name, {})
@@ -343,10 +351,12 @@ def main() -> None:
         except SourceBlocked as e:
             print(f"[{name}] blocked ({e}), skipping rest of source")
             fetched_counts[name] = 0
+            failure_reasons[name] = str(e)[:160]
             continue
         except Exception as e:
             print(f"[{name}] error: {e}")
             fetched_counts[name] = 0
+            failure_reasons[name] = f"{type(e).__name__}: {e}"[:160]
             continue
         fetched_counts[name] = len(posts)
         print(f"[{name}] {len(posts)} raw postings")
@@ -386,7 +396,7 @@ def main() -> None:
         raw_source_counts[p.source] = raw_source_counts.get(p.source, 0) + 1
     health_warnings = _apply_degraded_guards(
         posts, prev_postings, enabled_adapters, fetched_counts,
-        raw_source_counts, prev_origin)
+        raw_source_counts, prev_origin, failure_reasons)
 
     posts.sort(key=lambda p: (p.excluded, -p.fit_score, p.deadline or "9999"))
 
