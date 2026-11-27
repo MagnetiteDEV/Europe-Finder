@@ -368,6 +368,30 @@ class TestNewAndUpgradedAdapters(unittest.TestCase):
         self.assertEqual(posts[0].deadline, "2027-01-15")
         self.assertEqual(posts[0].kind, "phd")
 
+    def test_euraxess_blocked_facet_falls_through_to_safety_net(self):
+        card_html = """
+        <article class="ecl-content-item">
+          <ul class="ecl-content-block__primary-meta-container">
+            <li class="ecl-content-block__primary-meta-item">University of Copenhagen</li>
+            <li class="ecl-content-block__primary-meta-item">Posted on: 20 November 2026</li>
+            <li class="ecl-content-block__secondary-meta-item">Denmark</li>
+          </ul>
+          <a class="ecl-link--standalone" href="/jobs/399998"><span>PhD Fellowship in Fashion Sustainability</span></a>
+          <div class="ecl-content-block__description"><p>Salaried doctoral employment in Copenhagen.</p></div>
+        </article>
+        """
+
+        def fake_get(url, params=None, timeout=None, headers=None):
+            if params:
+                return _FakeResp(status_code=403)
+            return _FakeResp(text=card_html)
+
+        sess = mock.MagicMock()
+        sess.get.side_effect = fake_get
+        posts = euraxess.search(sess, {"delay_seconds": 0, "pages": 1})
+        self.assertEqual(len(posts), 1)
+        self.assertEqual(posts[0].external_id, "399998")
+
     def test_jobs_ac_uk_stem_prereject_and_polite_delay(self):
         self.assertFalse(jobs_ac_uk._title_matches("PhD in Mechanical Engineering", phd_mode=True))
         self.assertFalse(jobs_ac_uk._title_matches("UX Designer", phd_mode=False))

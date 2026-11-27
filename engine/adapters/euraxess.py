@@ -173,7 +173,10 @@ def search(session, cfg: dict) -> list[FoundPosting]:
     queries = cfg.get("phd_queries", DEFAULT_PHD_QUERIES)
 
     # Stage 1: Targeted artistic + R1 PhD queries
+    blocked = False
     for qparams in queries:
+        if blocked:
+            break
         is_r1 = any("job_research_profile:1044" in str(v) for v in qparams.values())
         for page in range(2):
             params = dict(qparams)
@@ -182,7 +185,12 @@ def search(session, cfg: dict) -> list[FoundPosting]:
             try:
                 r = polite_get(session, SEARCH_URL, params=params, timeout=25)
             except SourceBlocked:
-                return out
+                # A blocked facet query must not zero the whole source:
+                # stop Stage 1 and fall through to the unfiltered
+                # safety net below (the bare search page can still
+                # answer 200 when query URLs are refused).
+                blocked = True
+                break
             except (Timeout, ConnectionError):
                 break
             cards = _parse_page(r.text, force_phd=is_r1)
