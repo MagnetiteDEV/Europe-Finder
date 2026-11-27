@@ -60,7 +60,7 @@ PHD_PAGE = "https://www.daad.de/en/studying-in-germany/phd-studies-research/phd-
 
 _TAFFY_RE = re.compile(r"TAFFY\((.*)\)\s*;?\s*$", re.S)
 _SCRIPT_RE = re.compile(r'src="([^"]+)"')
-_DEADLINE_RE = re.compile(r"(\d{1,2})\.(\d{1,2})\.(\d{4})")
+_DEADLINE_RE = re.compile(r"(\d{1,2})[./](\d{1,2})[./](\d{4})")
 _PHD_DATE_RE = re.compile(r"(\d{1,2})\.\s*([A-Za-z]+)\.?\s+(\d{4})")
 _MONTHS = {m: i + 1 for i, m in enumerate(
     ["January", "February", "March", "April", "May", "June", "July",
@@ -375,25 +375,36 @@ def _parse_phd_html(html: str) -> list[FoundPosting]:
         r'<a[^>]+href="([^"]*/phd-germany/detail/[^"]+)"[^>]*>(.*?)</a>',
         re.I | re.S)
     matches = list(anchor_re.finditer(html or ""))
-    for i, m in enumerate(matches):
+    prev_end = 0
+    for m in matches:
         link = urljoin(PHD_PAGE, unescape(m.group(1)))
         ext_m = re.search(r"[?&]phd-id=(\d+)", link) or re.search(
             r"/detail/[^/]*-(\d+)/?$", link)
         ext_id = ext_m.group(1) if ext_m else link
+        # The detail anchor sits at the END of each article ("More
+        # about {institution}"); the institution, <h3> title, deadline
+        # and location are in the block before it.
+        segment = html[prev_end:m.end()]
+        prev_end = m.end()
         if ext_id in seen:
             continue
         seen.add(ext_id)
-        end = matches[i + 1].start() if i + 1 < len(matches) else len(html)
-        block = strip_html(html[m.start():end])
-        title = " ".join(strip_html(m.group(2)).split())
+        block = strip_html(segment)
+        h3 = re.search(r"<h3[^>]*>(.*?)</h3>", segment, re.I | re.S)
+        title = " ".join(strip_html(h3.group(1)).split()) if h3 else ""
         if not title:
-            title = block.split("Type of Promotion")[0].strip()
+            anchor_text = " ".join(strip_html(m.group(2)).split())
+            if anchor_text and not anchor_text.lower().startswith("more about"):
+                title = anchor_text
+        if not title:
+            title = block.split("Deadline:")[0].strip()
         deadline_m = re.search(
-            r"Application deadline:\s*(\d{1,2}\.\d{1,2}\.\d{4})", block)
+            r"(?:Application deadline|Deadline):\s*(\d{1,2}[./]\d{1,2}[./]\d{4})",
+            block)
         location_m = re.search(
-            r"Location:\s*(.+?)(?:Last changed:|$)", block)
+            r"Location:\s*(.+?)(?:Last changed:|More about|$)", block)
         posted_m = re.search(
-            r"Last changed:\s*(\d{1,2}\.\d{1,2}\.\d{4})", block)
+            r"Last changed:\s*(\d{1,2}[./]\d{1,2}[./]\d{4})", block)
         out.append(_phd_post_from_fields(
             ext_id,
             title,

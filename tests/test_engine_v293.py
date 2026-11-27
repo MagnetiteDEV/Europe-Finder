@@ -604,15 +604,18 @@ class TestCuratedAndPipeline(unittest.TestCase):
         self.assertEqual(posts[0].external_id, "10529")
         self.assertEqual(posts[0].deadline, "2027-01-04")
 
-        html = ('<a href="/en/studying-in-germany/phd-studies-research/phd-germany/detail/example-10530/?phd-id=10530">'
-                'University of Example PhD in Art History</a>'
-                '<p>Type of Promotion: Full PhD</p><p>Application deadline: 15.12.2026</p>'
-                '<p>Location: Berlin</p><p>Last changed: 26.11.2026</p>')
+        html = ('<article>University of Example<h3>PhD in Art History</h3>'
+                '<p>Deadline: 15/12/2026</p><p>Location: Berlin</p>'
+                '<p>Last changed: 26/11/2026 (Published: 26/11/2026)</p>'
+                '<a href="/en/studying-in-germany/phd-studies-research/phd-germany/detail/example-10530/?phd-id=10530&phd-offset=0">'
+                'More about University of Example</a></article>')
         html_posts = daad._parse_phd_html(html)
         self.assertEqual(len(html_posts), 1)
         self.assertEqual(html_posts[0].external_id, "10530")
+        self.assertEqual(html_posts[0].title, "PhD in Art History")
         self.assertEqual(html_posts[0].city, "Berlin")
         self.assertEqual(html_posts[0].deadline, "2026-12-15")
+        self.assertEqual(html_posts[0].posted_date, "2026-11-26")
 
 
 if __name__ == "__main__":
