@@ -213,11 +213,11 @@
       "delay_seconds": 10
     },
     "daad": {
-      "enabled": true,
+      "enabled": false,
       "delay_seconds": 2
     },
     "phdgermany": {
-      "enabled": true
+      "enabled": false
     },
     "campusfrance": {
       "enabled": true,

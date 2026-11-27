@@ -312,9 +312,14 @@ class TestNewAndUpgradedAdapters(unittest.TestCase):
         # the source stays disabled until a browser/API route exists.
         # Campus France Doctorat likewise has no public API (session-driven
         # listing, verified 2026-11-25) and stays disabled.
+        # DAAD/PhD Germany return 403 to the GitHub runner on every host
+        # (verified 2026-11-27); automated fetching stays disabled and the
+        # curated DAAD routes + manual PhD-hub link remain the replacement.
         cfg = json.loads((ROOT / "config.json").read_text(encoding="utf-8"))
         self.assertFalse(cfg["sources"]["myscience"]["enabled"])
         self.assertFalse(cfg["sources"]["campusfrance_phd"]["enabled"])
+        self.assertFalse(cfg["sources"]["daad"]["enabled"])
+        self.assertFalse(cfg["sources"]["phdgermany"]["enabled"])
 
     def test_campusfrance_phd_parser(self):
         html = '<div class="card"><a href="/phd/offers/45123">Thèse en histoire de la mode et culture visuelle</a><span>Contrat doctoral — Date limite: 30 mars 2027</span></div>'
